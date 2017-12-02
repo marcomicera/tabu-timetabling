@@ -18,6 +18,11 @@ public class Benchmark {
 	 * Matrix of conflicting exams.
 	 */
 	private boolean[][] EE;
+	/**
+	 * Matrix containing number of students attending exams.
+	 * Rows and columns' indexes represent exams.
+	 */
+	private int[][] N;
 
 	public Benchmark() {
 		super();
@@ -37,6 +42,9 @@ public class Benchmark {
 	}
 	public boolean[][] getEE(){
 		return EE;
+	}
+	public int[][] getN(){
+		return N;
 	}
 
 }

@@ -2,6 +2,7 @@ package it.polito.oma.etp.reader;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.io.BufferedReader;
 
 public class InputReader {
@@ -13,6 +14,7 @@ public class InputReader {
 		int S = extractS(instanceName);
 		int E = extractE(instanceName);
 		int t = extractTmax(instanceName);
+		int[][] n = extractN(instanceName, E);
 		
 		System.out.println("students: " + S + " exams: " + E + " slots: " + t);
 		return null;
@@ -98,5 +100,77 @@ public class InputReader {
 		}
 		
 		return Integer.parseInt(currentLine);
+	}
+	
+	/**
+	 * Extract the N matrix (how much students are attending a couple of exams) from .stu file
+	 * @param iName instance name
+	 */
+	private static int[][] extractN(String iName, int eNum){
+		String currentLine, nextLine;
+		ArrayList<Integer> studentExams = new ArrayList<Integer>();
+		int[][] n = new int[eNum][eNum];
+		
+		try {
+			fr = new FileReader(iName + ".stu");
+			br = new BufferedReader(fr);
+			
+			/* Looping through all valid lines.
+			 * Format of line is sNUM examnum. */
+			while((currentLine = br.readLine()) != null) {
+				if(currentLine.length() != 0) {
+					
+					// Add to studentExams the first exam for that student.
+					studentExams.add(Integer.parseInt(currentLine.split(" ")[1]));
+					
+					// Cycle until the lines have the same sNUM.
+					while((nextLine = br.readLine()) != null && currentLine.split(" ")[0].equals(nextLine.split(" ")[0])) {
+							/*Adding to the support structure studentExams every single exam
+						 	* for that student. */
+							studentExams.add(Integer.parseInt(nextLine.split(" ")[1]));
+							// Mark the buffer position.
+							br.mark(10000);
+							System.out.println("cl: " + currentLine + " nl: " + nextLine);
+					}
+				
+					/* After the last loop, nextLine is the first line of the new student. I don't
+					 * like this because when I will evaluate the condition of the outer loop I will
+					 * move ahead the cursor, not considering the first line of the new student. So I
+					 * will reset the cursor to the last mark which is the last line of the old student.*/
+					br.reset();
+					
+					// Now that I have all the exams for a student x, I update N.
+					updateNMatrix(n, studentExams);
+					
+				}
+			} 
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return n;
+	}
+	
+	/**
+	 * Updates the N Matrix given a list of exams for a particular student.
+	 * @param n the N matrix.
+	 * @param examList ArrayList containing all the exams for a student.
+	 */
+	private static void updateNMatrix(int[][] n, ArrayList<Integer> examList) {
+		/* I have to place in couple every exam in examList and then add 1 to the 
+		 * specific element in the n matrix.
+		 * Here i is used to mark the first element of the couple in the arraylist.*/
+		for(int i = 0; i < examList.size() - 2; i++) {
+			// j is the second element of the couple and always starts one position after i.
+			for(int j = i + 1; j < examList.size() - 1; j++) {
+				
+				// N matrix is symetric.
+				n[examList.get(i)][examList.get(j)]++;
+				n[examList.get(j)][examList.get(i)]++;
+			}
+		}
+		// Prepare the list for the next student.
+		examList.clear();
 	}
 }
