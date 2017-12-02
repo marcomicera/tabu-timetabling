@@ -1,0 +1,15 @@
+package it.polito.oma.etp.solver;
+
+import it.polito.oma.etp.reader.InputReader;
+
+public class ETPsolver_OMAAL_group15 {
+
+	public static String instanceName;
+	
+	public static void main(String[] args) {
+		
+		instanceName = args[0];
+		InputReader.getBenchmark("res\\" + instanceName);
+	}
+
+}
