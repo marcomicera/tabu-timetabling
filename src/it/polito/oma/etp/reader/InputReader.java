@@ -137,7 +137,7 @@ public class InputReader {
 					 * like this because when I will evaluate the condition of the outer loop I will
 					 * move ahead the cursor, not considering the first line of the new student. So I
 					 * will reset the cursor to the last mark which is the last line of the old student.*/
-					br.mark(0);
+					br.mark(10000);
 					br.reset();
 					
 					// Now that I have all the exams for a student x, I update N.
