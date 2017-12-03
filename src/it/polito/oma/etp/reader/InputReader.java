@@ -10,14 +10,30 @@ public class InputReader {
 	private static FileReader fr;
 	private static BufferedReader br;
 
+	/**
+	 * Reads .stu .exm .slo files relatives to a specific instance to get
+	 * a set of params that can be used to solve that problem instance.
+	 * @param instanceName Name of the files to read without extensions
+	 * @return Benchmark object which contains as fields all the needed params
+	 */
 	public static Benchmark getBenchmark(String instanceName) {
 		int S = extractS(instanceName);
 		int E = extractE(instanceName);
 		int t = extractTmax(instanceName);
 		int[][] n = extractN(instanceName, E);
 		
+		
 		System.out.println("students: " + S + " exams: " + E + " slots: " + t);
-		return null;
+		/*
+		for(int i = 0; i < E; i++) {
+			System.out.println(" ");
+			for(int j = 0; j < E; j++) {
+				System.out.print(n[i][j] + ", ");
+			}
+		}
+		*/
+		Benchmark bm = new Benchmark(instanceName, S, E, t, n);
+		return bm;
 	}
 	
 	/**
@@ -108,6 +124,7 @@ public class InputReader {
 	 */
 	private static int[][] extractN(String iName, int eNum){
 		String currentLine, nextLine;
+		boolean b = false;
 		ArrayList<Integer> studentExams = new ArrayList<Integer>();
 		int[][] n = new int[eNum][eNum];
 		
@@ -120,17 +137,21 @@ public class InputReader {
 			while((currentLine = br.readLine()) != null) {
 				if(currentLine.length() != 0) {
 					
+					// Mark the buffer position.
+					if (b == false) br.mark(10000);
+					b = false;
+
 					// Add to studentExams the first exam for that student.
 					studentExams.add(Integer.parseInt(currentLine.split(" ")[1]));
 					
 					// Cycle until the lines have the same sNUM.
 					while((nextLine = br.readLine()) != null && currentLine.split(" ")[0].equals(nextLine.split(" ")[0])) {
+							b = true;
 							/*Adding to the support structure studentExams every single exam
 						 	* for that student. */
 							studentExams.add(Integer.parseInt(nextLine.split(" ")[1]));
 							// Mark the buffer position.
 							br.mark(10000);
-							System.out.println("cl: " + currentLine + " nl: " + nextLine);
 					}
 				
 					/* After the last loop, nextLine is the first line of the new student. I don't
@@ -161,13 +182,13 @@ public class InputReader {
 		/* I have to place in couple every exam in examList and then add 1 to the 
 		 * specific element in the n matrix.
 		 * Here i is used to mark the first element of the couple in the arraylist.*/
-		for(int i = 0; i < examList.size() - 2; i++) {
+		for(int i = 0; i < examList.size(); i++) {
 			// j is the second element of the couple and always starts one position after i.
-			for(int j = i + 1; j < examList.size() - 1; j++) {
+			for(int j = i + 1; j < examList.size(); j++) {
 				
 				// N matrix is symetric.
-				n[examList.get(i)][examList.get(j)]++;
-				n[examList.get(j)][examList.get(i)]++;
+				n[examList.get(i)-1][examList.get(j)-1]++;
+				n[examList.get(j)-1][examList.get(i)-1]++;
 			}
 		}
 		// Prepare the list for the next student.
