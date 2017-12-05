@@ -24,17 +24,15 @@ public class Benchmark {
 	 */
 	private int[][] N;
 
-	public Benchmark() {
-		super();
-	}
+	
 	public Benchmark(String in, int s, int e, int tmax, int[][] n) {
-		super();
 		instanceName = in;
 		S = s;
 		E = e;
 		Tmax = tmax;
 		N = n;
 	}
+	
 	/**
 	 * @return Name of the instance in exam.
 	 */

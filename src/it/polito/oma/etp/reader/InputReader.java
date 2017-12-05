@@ -11,10 +11,10 @@ public class InputReader {
 	private static BufferedReader br;
 
 	/**
-	 * Reads .stu .exm .slo files relatives to a specific instance to get
+	 * Reads .stu .exm .slo files relative to a specific instance to get
 	 * a set of params that can be used to solve that problem instance.
-	 * @param instanceName Name of the files to read without extensions
-	 * @return Benchmark object which contains as fields all the needed params
+	 * @param instanceName	Name of the files to read without extensions
+	 * @return Benchmark	Object containing all needed params
 	 */
 	public static Benchmark getBenchmark(String instanceName) {
 		int S = extractS(instanceName);
@@ -38,7 +38,7 @@ public class InputReader {
 	
 	/**
 	 * Extract cardinality of students from the .stu file 
-	 * @param iName instance name
+	 * @param iName	Instance name
 	 */
 	private static int extractS(String iName) {
 		String currentLine, lastLine = "";
@@ -69,7 +69,7 @@ public class InputReader {
 
 	/**
 	 * Extract cardinality of exams from the .exm file 
-	 * @param iName instance name
+	 * @param iName	Instance name
 	 */
 	private static int extractE(String iName) {
 		String currentLine, lastLine = "";
@@ -100,7 +100,7 @@ public class InputReader {
 	
 	/**
 	 * Extract number of available timeslots from .slo file
-	 * @param iName instance name
+	 * @param iName	Instance name
 	 */
 	private static int extractTmax(String iName) {
 		String currentLine = "";
@@ -119,8 +119,9 @@ public class InputReader {
 	}
 	
 	/**
-	 * Extract the N matrix (how much students are attending a couple of exams) from .stu file
-	 * @param iName instance name
+	 * Extract the N matrix (number of students attending a given
+	 * pair of exams) from the .stu file
+	 * @param iName	Instance name
 	 */
 	private static int[][] extractN(String iName, int eNum){
 		String currentLine, nextLine;
@@ -175,8 +176,8 @@ public class InputReader {
 	
 	/**
 	 * Updates the N Matrix given a list of exams for a particular student.
-	 * @param n the N matrix.
-	 * @param examList ArrayList containing all the exams for a student.
+	 * @param n			The N matrix.
+	 * @param examList	ArrayList containing all the exams for a student.
 	 */
 	private static void updateNMatrix(int[][] n, ArrayList<Integer> examList) {
 		/* I have to place in couple every exam in examList and then add 1 to the 
