@@ -19,7 +19,7 @@ public class Benchmark {
 	 */
 	private int Tmax;
 	/**
-	 * Matrix containing number of students attending exams.
+	 * Matrix containing number of students attending exams
 	 * Rows and columns' indexes represent exams.
 	 */
 	private int[][] N;

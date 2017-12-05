@@ -1,12 +1,11 @@
+/ETPchecker.exe
+/benchmarks.xlsx
 /instance01.exm
 /instance01.slo
 /instance01.stu
 /instance02.exm
 /instance02.slo
 /instance02.stu
-/it/
-/ETPchecker.exe
-/benchmarks.xlsx
 /instance03.exm
 /instance03.slo
 /instance03.stu
@@ -22,6 +21,7 @@
 /instance07.exm
 /instance07.slo
 /instance07.stu
+/it/
 /test.exm
 /test.slo
 /test.stu
