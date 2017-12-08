@@ -8,7 +8,6 @@ public class ETPsolver_OMAAL_group15 {
 	public static String instanceName;
 	public static Benchmark benchmark;
 	
-	//Main prova marco
 	public static void main(String[] args) {
 		if(args.length != 1) {
 			System.err.println(
@@ -19,8 +18,8 @@ public class ETPsolver_OMAAL_group15 {
 		
 		instanceName = args[0];
 		benchmark = InputReader.getBenchmark("res\\" + instanceName);
+		
+		// TEST y matrix
+		//benchmark.printY();
 	}
 }
-
-
-//prova

@@ -1,5 +1,7 @@
 package it.polito.oma.etp.reader;
 
+import it.polito.oma.etp.solver.TabuSearch;
+
 public class Benchmark {
 	
 	/**
@@ -53,15 +55,36 @@ public class Benchmark {
 	 * @param e		Number of exams.
 	 * @param tmax	Number of timeslots.
 	 * @param n		Matrix containing number of students enrolled in every pair of exams.
+	 * @param te	Decision matrix containing the solution: used in results.
 	 */
-	public Benchmark(String in, int s, int e, int tmax, int[][] n) {
+	public Benchmark(String in, int s, int e, int tmax, int[][] n, int[][] te) {
 		instanceName = in;
 		S = s;
 		E = e;
 		Tmax = tmax;
 		N = n;
-		te = new int[Tmax][E];
+		this.te = te;
 		y = new int[K][E][E];
+		//updatePenaltyVariables(); // da chiamare quando te viene fornita in ingresso
+	}
+	
+	/**
+	 * Constructor for an initial feasible solution.
+	 * @param in	Instance name.
+	 * @param s		Number of students.
+	 * @param e		Number of exams.
+	 * @param tmax	Number of timeslots.
+	 * @param n		Matrix containing number of students enrolled in every pair of exams.
+	 */
+	public Benchmark(String in, int s, int e, int tmax, int[][] n) {
+		this(
+			in,
+			s,
+			e,
+			tmax,
+			n,
+			TabuSearch.feasibleSolution()
+		);
 	}
 	
 	/**
@@ -87,7 +110,21 @@ public class Benchmark {
 	 * decision matrix te.
 	 */
 	private void updatePenaltyVariables() {
+		int[] schedule = new int[E];
 		
+		for(int j = 0; j < E; ++j) // for each exam
+			for(int i = 0; i < Tmax; ++i) 
+				if(te[i][j] == 1) {
+					schedule[j] = i;
+					continue;
+				}
+		
+		for(int i = 0; i < E; ++i)
+			for(int j = i + 1; j < E; ++j) {
+				int distance = Math.abs(schedule[i] - schedule[j]);
+				if(distance > 0 && distance <= K && N[i][j] > 0)
+					y[distance - 1][i][j] = y[distance - 1][j][i] = 1; 
+			}
 	}
 	
 	/**
@@ -126,4 +163,19 @@ public class Benchmark {
 		return N;
 	}
 
+	/**
+	 * Boolean decision variables pretty printing
+	 */
+	public void printY() {
+		for(int k = 0; k < K; ++k) {
+			System.out.println("****** Exams distant " + (k + 1) + " timeslots apart ******\n");
+			for(int j = 0; j < E; ++j) {
+				for(int i = 0; i < Tmax; ++i) {
+					System.out.print(te[i][j] + "");
+				}
+				System.out.print("\n");
+			}
+			System.out.print("\n\n");
+		}
+	}
 }
