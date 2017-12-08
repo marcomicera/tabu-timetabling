@@ -4,7 +4,7 @@ public class Benchmark {
 	
 	/**
 	 * Penalty for each couple of conflicting exams scheduled 
-	 * up to K time-slots apart.
+	 * up to K time-slots apart
 	 */
 	private static final int K = 5;
 	
