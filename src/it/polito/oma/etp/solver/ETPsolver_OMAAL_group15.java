@@ -8,7 +8,7 @@ public class ETPsolver_OMAAL_group15 {
 	public static String instanceName;
 	public static Benchmark benchmark;
 	
-	//Main 
+	//Main prova
 	public static void main(String[] args) {
 		if(args.length != 1) {
 			System.err.println(
