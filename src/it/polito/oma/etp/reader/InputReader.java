@@ -187,7 +187,7 @@ public class InputReader {
 			// j is the second element of the couple and always starts one position after i.
 			for(int j = i + 1; j < examList.size(); j++) {
 				
-				// N matrix is symetric.
+				// N matrix is symmetric.
 				n[examList.get(i)-1][examList.get(j)-1]++;
 				n[examList.get(j)-1][examList.get(i)-1]++;
 			}
