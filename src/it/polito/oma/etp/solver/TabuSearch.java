@@ -4,7 +4,11 @@ import it.polito.oma.etp.reader.InstanceData;
 
 public class TabuSearch {
 	
-	private InstanceData idata;
+	private static InstanceData idata;	
+	// private TabuListEntry tlentry;
+	private static int[][] currentSolution;
+	private static int[][] bestSolution;
+	private static int iteration;
 	
 	public static int[][] feasibleSolution() {
 		// TODO implement
@@ -16,16 +20,17 @@ public class TabuSearch {
 	 * value given the decision matrix te.
 	 * @return	The objective function value.
 	 */
+	/*
 	public double fitness() {
-		/*
+		
 		int E = benchmark.getE();
 		int S = benchmark.getS();
 		int K = benchmark.getK();
 		int[][] n = benchmark.getN();
 		int[][][] y = benchmark.getY();
-		 */
+		 
 		double result = 0;
-		/*
+		
 		updatePenaltyVariables();
 		
 		for(int i = 0; i < E; ++i) {
@@ -36,17 +41,18 @@ public class TabuSearch {
 				}
 			}
 		}
-		*/
+		
 		return result;
 	}
 
-	
+	*/
 	/**
 	 * Updates penalty boolean variables y given the current
 	 * decision matrix te.
 	 */
+	/*
 	private void updatePenaltyVariables() {
-		/*
+		
 		int E = benchmark.getE();
 		int tmax = benchmark.getTmax();
 		int K = benchmark.getK();
@@ -67,15 +73,16 @@ public class TabuSearch {
 				if(distance > 0 && distance <= K && n[i][j] > 0)
 					y[distance - 1][i][j] = y[distance - 1][j][i] = 1; 
 			}
-		*/
+		
 	}
-	
+	*/
 
 	/**
 	 * Boolean decision variables pretty printing
 	 */
+	/*
 	public void printY() {
-		/*
+		
 		int E = benchmark.getE();
 		int tmax = benchmark.getTmax();
 		int K = benchmark.getK();
@@ -91,9 +98,45 @@ public class TabuSearch {
 			}
 			System.out.print("\n\n");
 		}
-		*/
+		
 	}
-
+*/
+	
+	
+	/**
+	 * Solves a given instance of the problem.
+	 */
+	public static void solve(InstanceData instancedata){
+		idata = instancedata;
+		initialize();
+		
+		
+		//TODO remember to output solution on file 
+	}
+	
+	/**
+	 * Get the first feasible solution.
+	 */
+	private static void initialize() {
+		
+	}
+	
+	/**
+	 * Checks if current solution is feasible and if it is better than the best one;
+	 * in this case it becomes the new best solution.
+	 */
+	private static void checkSolution() {
+		
+		
+		//updateSolution();
+	}
+	
+	/**
+	 * Updates the best solution with the current one.
+	 */
+	private static void updateSolution() {
+		
+	}
 	
 	
 }

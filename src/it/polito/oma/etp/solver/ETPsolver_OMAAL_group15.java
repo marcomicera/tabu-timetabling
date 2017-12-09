@@ -18,8 +18,7 @@ public class ETPsolver_OMAAL_group15 {
 		
 		instanceName = args[0];
 		idata = InputReader.getData("res\\" + instanceName);
-		
-		// TEST y matrix
-		//benchmark.printY();
-	}
+
+		//TabuSearch.solve(idata);
+		}
 }
