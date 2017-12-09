@@ -16,7 +16,7 @@ public class InputReader {
 	 * @param instanceName	Name of the files to read without extensions
 	 * @return Benchmark	Object containing all needed params
 	 */
-	public static Benchmark getBenchmark(String instanceName) {
+	public static InstanceData getData(String instanceName) {
 		int S = extractS(instanceName);
 		int E = extractE(instanceName);
 		int t = extractTmax(instanceName);
@@ -32,8 +32,8 @@ public class InputReader {
 			}
 		}
 		*/
-		Benchmark bm = new Benchmark(instanceName, S, E, t, n);
-		return bm;
+		InstanceData id = new InstanceData(instanceName, S, E, t, n);
+		return id;
 	}
 	
 	/**

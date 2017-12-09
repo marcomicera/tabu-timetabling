@@ -1,12 +1,12 @@
 package it.polito.oma.etp.solver;
 
-import it.polito.oma.etp.reader.Benchmark;
+import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.reader.InputReader;
 
 public class ETPsolver_OMAAL_group15 {
 
 	public static String instanceName;
-	public static Benchmark benchmark;
+	public static InstanceData idata;
 	
 	public static void main(String[] args) {
 		if(args.length != 1) {
@@ -17,7 +17,7 @@ public class ETPsolver_OMAAL_group15 {
 		}
 		
 		instanceName = args[0];
-		benchmark = InputReader.getBenchmark("res\\" + instanceName);
+		idata = InputReader.getData("res\\" + instanceName);
 		
 		// TEST y matrix
 		//benchmark.printY();
