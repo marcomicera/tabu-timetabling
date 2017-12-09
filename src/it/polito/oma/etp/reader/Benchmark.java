@@ -87,44 +87,8 @@ public class Benchmark {
 		);
 	}
 	
-	/**
-	 * Fitness function computing the objective function
-	 * value given the decision matrix te.
-	 * @return	The objective function value.
-	 */
-	public double fitness() {
-		double result = 0;
-		
-		updatePenaltyVariables();
-		
-		for(int i = 0; i < E; ++i)
-			for(int j = 0; j < E; ++j)
-				for(int k = 1; k <= K; ++k)
-					result += Math.pow(2, K-k) * N[i][j] * 1/S * y[k-1][i][j];
-		
-		return result;
-	}
-	
-	/**
-	 * Updates penalty boolean variables y given the current
-	 * decision matrix te.
-	 */
-	private void updatePenaltyVariables() {
-		int[] schedule = new int[E];
-		
-		for(int j = 0; j < E; ++j) // for each exam
-			for(int i = 0; i < Tmax; ++i) 
-				if(te[i][j] == 1) {
-					schedule[j] = i;
-					continue;
-				}
-		
-		for(int i = 0; i < E; ++i)
-			for(int j = i + 1; j < E; ++j) {
-				int distance = Math.abs(schedule[i] - schedule[j]);
-				if(distance > 0 && distance <= K && N[i][j] > 0)
-					y[distance - 1][i][j] = y[distance - 1][j][i] = 1; 
-			}
+	public int getK() {
+		return K;
 	}
 	
 	/**
@@ -162,20 +126,15 @@ public class Benchmark {
 	public int[][] getN(){
 		return N;
 	}
-
+	
 	/**
-	 * Boolean decision variables pretty printing
+	 * @return Matrix containing a solution
 	 */
-	public void printY() {
-		for(int k = 0; k < K; ++k) {
-			System.out.println("****** Exams distant " + (k + 1) + " timeslots apart ******\n");
-			for(int j = 0; j < E; ++j) {
-				for(int i = 0; i < Tmax; ++i) {
-					System.out.print(te[i][j] + "");
-				}
-				System.out.print("\n");
-			}
-			System.out.print("\n\n");
-		}
+	public int[][] getTe(){
+		return te;
+	}
+	
+	public int[][][] getY(){
+		return y;
 	}
 }
