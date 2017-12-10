@@ -25,6 +25,10 @@ public class Solution {
 	 */
 	private float fitness;
 
+	/**
+	 * Default constructor
+	 * @param te	time-slots exams matrix.
+	 */
 	public Solution(int[][] te) {
 		this.te = te;
 		updateDistanceMatrix();
@@ -38,7 +42,7 @@ public class Solution {
 		int E = instance.getE();
 		int tmax = instance.getTmax();
 		
-		// For each exam, the timeslot number is stored 
+		// For each exam, the timeslot number is scheduled
 		int[] schedule = new int[E];
 		
 		for(int j = 0; j < E; ++j) // for each exam

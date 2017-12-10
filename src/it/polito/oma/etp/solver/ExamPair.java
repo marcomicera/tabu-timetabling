@@ -34,9 +34,10 @@ public class ExamPair {
 		
 		ExamPair otherPair = (ExamPair)o;
 		
-		return	exam1 == otherPair.exam1 && exam2 == otherPair.exam2
+		// Exams order does not matter
+		return	(exam1 == otherPair.exam1 && exam2 == otherPair.exam2)
 					||
-				exam1 == otherPair.exam2 && exam2 == otherPair.exam1;
+				(exam1 == otherPair.exam2 && exam2 == otherPair.exam1);
 	}
 
 	/**

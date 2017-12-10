@@ -1,7 +1,6 @@
 package it.polito.oma.etp.reader;
 
 public class InstanceData {
-	
 	/**
 	 * Penalty for each couple of conflicting exams scheduled 
 	 * up to K time-slots apart
@@ -11,29 +10,29 @@ public class InstanceData {
 	/**
 	 * Name of the instance in exam.
 	 */
-	private String instanceName;
+	private final String instanceName;
 	
 	/**
 	 * Cardinality of students.
 	 */
-	private int S;
+	private final int S;
 	
 	/**
 	 * Cardinality of exams.
 	 */
-	private int E;
+	private final int E;
 	
 	/**
 	 * Number of available timeslots.
 	 */
-	private int Tmax;
+	private final int Tmax;
 	
 	/**
 	 * Matrix containing number of students attending exams
 	 * Rows and columns' indexes represent exams.
 	 * Conflicting exams i and j have N[i][j] > 0.
 	 */
-	private int[][] N;
+	private final int[][] N;
 	
 	/**
 	 * Constructor for an initial feasible solution.
