@@ -1,7 +1,8 @@
 package it.polito.oma.etp.solver;
 
-import java.util.TreeMap;
-import java.util.Map;
+import java.util.HashMap;
+import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Map.Entry;
 
 import it.polito.oma.etp.reader.InstanceData;
@@ -34,14 +35,23 @@ public class Solution {
 	 * (order does not matter).
 	 * The higher, the more they are going to penalize.
 	 */
-	private TreeMap<Float, ExamPair> conflictCoefficients;
+	private HashMap<ExamPair, Float> conflictCoefficients;
+	
+	/**
+	 * Map entry corresponding to the exam that causes the
+	 * highest penalty fee.
+	 */
+	private Entry<ExamPair, Float> mostPenalizingPair;
 
 	/**
 	 * Default constructor
 	 * @param te	time-slots exams matrix.
 	 */
-	public Solution(int[][] te) {
+	public Solution(InstanceData instance, int[][] te) {
+		this.instance = instance;
 		this.te = te;
+		int E = instance.getE();
+		y = new int[E][E];
 		updateDistanceMatrix();
 		updateConflictCoefficients();
 	}
@@ -65,32 +75,47 @@ public class Solution {
 				}
 		
 		for(int i = 0; i < E; ++i)
-			for(int j = i + 1; j < E; ++j) {
+			for(int j = 0; j < E; ++j) {
 				int distance = Math.abs(schedule[i] - schedule[j]);
 				y[i][j] = distance; 
 			}
 	}
 	
 	private void updateConflictCoefficients() {
-		conflictCoefficients = new TreeMap<Float, ExamPair>();
 		int[][] N = instance.getN();
 		int E = instance.getE();
+		
+		conflictCoefficients = new HashMap<ExamPair, Float>();
+		mostPenalizingPair = new AbstractMap.SimpleEntry<ExamPair, Float>(
+			new ExamPair(-1, -2), new Float(-1)
+		);
 		
 		// For each pair of exams (order does not matter)
 		for(int i = 0; i < E; ++i)
 			for(int j = i + 1; j < E; ++j) {
-				
 				// Conflict coefficient is computed only when exams will generate a fee
-				if(arePenalized(i, j))
+				if(arePenalized(i, j)) {
+					Float newCoefficient = new Float(N[i][j]) / getDistance(i, j);
 					
 					// Inserting the conflict coefficient for the corresponding exam pair
 					conflictCoefficients.put(
-						// The conflict coefficient value
-						new Float(N[i][j] / getDistance(i, j)),
-							
 						// The corresponding exam pair acts as a key in this Map
-						new ExamPair(i, j)  
+						new ExamPair(i, j),
+						
+						// The conflict coefficient value
+						newCoefficient
 					);
+					
+					// Replacing the new most penalizing exam if necessary
+					if(newCoefficient > mostPenalizingPair.getValue())
+						mostPenalizingPair = new AbstractMap.SimpleEntry<ExamPair, Float>(
+							// The corresponding exam pair acts as a key in this Map
+							new ExamPair(i, j),
+								
+							// The conflict coefficient value
+							newCoefficient
+						);;
+				}
 			}
 	}
 	
@@ -147,10 +172,36 @@ public class Solution {
 	 * @return	an entry having the conflict coefficient - exam pair of
 	 * 			the most penalizing exam pair 
 	 */
-	public Entry<Float, ExamPair> getMostPenalizingPair() {
+	public Entry<ExamPair, Float> getMostPenalizingPair() {
 		if(conflictCoefficients.isEmpty())
 			return null;
 		
-		return conflictCoefficients.lastEntry();
+		return mostPenalizingPair;
+	}
+
+	@Override
+	public String toString() {
+		return	"************** Printing Te **************\n" + printMatrix(te) +
+				"************** Printing y **************\n" + printMatrix(y) +
+				"************** Printing conflictCoefficients **************\n" + printConflictCoefficients() +
+				"Most penalizing exam pair: " + mostPenalizingPair.getKey() + ", confl. = " + mostPenalizingPair.getValue()
+		;
+	}
+	
+	private String printConflictCoefficients() {
+		String result = "";
+		
+		for(Entry<ExamPair, Float> entry: conflictCoefficients.entrySet()) 
+			result += "[Exams " + entry.getKey() + " coeff. = " + entry.getValue() + " ]\n";
+		
+		return result + "\n";
+	}
+
+	private String printMatrix(int[][] m) {
+		String result = "";
+		for(int[] row: m) {
+			result += Arrays.toString(row) + "\n";
+		}
+		return result + "\n";
 	}
 }

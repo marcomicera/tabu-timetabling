@@ -18,12 +18,24 @@ public class ETPsolver_OMAAL_group15 {
 		
 		instanceName = args[0];
 		
-		for(int i = 1; i <= 7; ++i)
-			//idata = InputReader.getData("res\\" + instanceName);
-			idata = InputReader.getData("res\\instance0" + i);
-			
-		idata = InputReader.getData("res\\test");
-
-		//TabuSearch.solve(idata);
-		}
+		//idata = InputReader.getData("res\\" + instanceName);
+		
+		// *********************** Testing code ***********************
+		// TODO delete
+		InstanceData testInstance = new InstanceData(
+			"test instance",
+			40,	// S
+			5,	// E
+			3, 	// Tmax
+			new int[][]{ // N
+				{0,		0,	15,	0,	0},
+				{0,		0,	0,	5,	25},
+				{15,	0,	0,	0,	0},
+				{0,		5,	0,	0,	25},
+				{0,		25,	0,	25,	0}
+			}
+		);
+		
+		TabuSearch.solve(testInstance);
+	}
 }
