@@ -2,6 +2,7 @@ package it.polito.oma.etp.solver;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -27,6 +28,8 @@ public class TabuSearch {
 	public static void solve(InstanceData instancedata){
 		idata = instancedata;
 		initialize();
+		
+		Entry<Float, ExamPair> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 		
 		//TODO remember to output solution on file 
 	}

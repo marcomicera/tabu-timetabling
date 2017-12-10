@@ -1,7 +1,8 @@
 package it.polito.oma.etp.solver;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -33,7 +34,7 @@ public class Solution {
 	 * (order does not matter).
 	 * The higher, the more they are going to penalize.
 	 */
-	Map<ExamPair, Float> conflictCoefficients;
+	private TreeMap<Float, ExamPair> conflictCoefficients;
 
 	/**
 	 * Default constructor
@@ -71,7 +72,7 @@ public class Solution {
 	}
 	
 	private void updateConflictCoefficients() {
-		conflictCoefficients = new HashMap<ExamPair, Float>();
+		conflictCoefficients = new TreeMap<Float, ExamPair>();
 		int[][] N = instance.getN();
 		int E = instance.getE();
 		
@@ -84,11 +85,11 @@ public class Solution {
 					
 					// Inserting the conflict coefficient for the corresponding exam pair
 					conflictCoefficients.put(
-						// The corresponding exam pair acts as a key in this Map
-						new ExamPair(i, j),  
-						
 						// The conflict coefficient value
-						new Float(N[i][j] / getDistance(i, j))
+						new Float(N[i][j] / getDistance(i, j)),
+							
+						// The corresponding exam pair acts as a key in this Map
+						new ExamPair(i, j)  
 					);
 			}
 	}
@@ -138,5 +139,18 @@ public class Solution {
 	 */
 	public int getDistance(int i, int j) {
 		return y[i][j];
+	}
+	
+	/**
+	 * Getter returning the most penalizing exams pair with its
+	 * corresponding conflict coefficient
+	 * @return	an entry having the conflict coefficient - exam pair of
+	 * 			the most penalizing exam pair 
+	 */
+	public Entry<Float, ExamPair> getMostPenalizingPair() {
+		if(conflictCoefficients.isEmpty())
+			return null;
+		
+		return conflictCoefficients.lastEntry();
 	}
 }
