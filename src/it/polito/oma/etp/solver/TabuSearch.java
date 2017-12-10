@@ -28,27 +28,6 @@ public class TabuSearch {
 		idata = instancedata;
 		initialize();
 		
-		Map<ExamPair, Float> conflictCoefficients = new HashMap<ExamPair, Float>();
-		int[][] N = idata.getN();
-		int E = idata.getE();
-		
-		// For each pair of exams (order does not matter)
-		for(int i = 0; i < E; ++i)
-			for(int j = i + 1; j < E; ++j) {
-				
-				// Conflict coefficient is computed only when exams will generate a fee
-				if(currentSolution.arePenalized(i, j))
-					
-					// Inserting the conflict coefficient for the corresponding exam pair
-					conflictCoefficients.put(
-						// The corresponding exam pair acts as a key in this Map
-						new ExamPair(i, j),  
-						
-						// The conflict coefficient value
-						new Float(N[i][j] / currentSolution.getDistance(i, j))
-					);
-			}
-		
 		//TODO remember to output solution on file 
 	}
 	

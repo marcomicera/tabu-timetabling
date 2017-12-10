@@ -1,5 +1,8 @@
 package it.polito.oma.etp.solver;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import it.polito.oma.etp.reader.InstanceData;
 
 public class Solution {
@@ -24,6 +27,13 @@ public class Solution {
 	 * Objective function value
 	 */
 	private float fitness;
+	
+	/**
+	 * A conflict coefficient is mapped for each pair of exams
+	 * (order does not matter).
+	 * The higher, the more they are going to penalize.
+	 */
+	Map<ExamPair, Float> conflictCoefficients;
 
 	/**
 	 * Default constructor
@@ -32,6 +42,7 @@ public class Solution {
 	public Solution(int[][] te) {
 		this.te = te;
 		updateDistanceMatrix();
+		updateConflictCoefficients();
 	}
 	
 	/**
@@ -56,6 +67,29 @@ public class Solution {
 			for(int j = i + 1; j < E; ++j) {
 				int distance = Math.abs(schedule[i] - schedule[j]);
 				y[i][j] = distance; 
+			}
+	}
+	
+	private void updateConflictCoefficients() {
+		conflictCoefficients = new HashMap<ExamPair, Float>();
+		int[][] N = instance.getN();
+		int E = instance.getE();
+		
+		// For each pair of exams (order does not matter)
+		for(int i = 0; i < E; ++i)
+			for(int j = i + 1; j < E; ++j) {
+				
+				// Conflict coefficient is computed only when exams will generate a fee
+				if(arePenalized(i, j))
+					
+					// Inserting the conflict coefficient for the corresponding exam pair
+					conflictCoefficients.put(
+						// The corresponding exam pair acts as a key in this Map
+						new ExamPair(i, j),  
+						
+						// The conflict coefficient value
+						new Float(N[i][j] / getDistance(i, j))
+					);
 			}
 	}
 	

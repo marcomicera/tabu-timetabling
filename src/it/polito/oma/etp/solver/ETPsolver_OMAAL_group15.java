@@ -17,7 +17,12 @@ public class ETPsolver_OMAAL_group15 {
 		}
 		
 		instanceName = args[0];
-		idata = InputReader.getData("res\\" + instanceName);
+		
+		for(int i = 1; i <= 7; ++i)
+			//idata = InputReader.getData("res\\" + instanceName);
+			idata = InputReader.getData("res\\instance0" + i);
+			
+		idata = InputReader.getData("res\\test");
 
 		//TabuSearch.solve(idata);
 		}
