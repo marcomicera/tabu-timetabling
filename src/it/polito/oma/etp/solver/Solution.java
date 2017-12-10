@@ -20,6 +20,14 @@ public class Solution {
 	private int[][] te;
 	
 	/**
+	 * Alternative 'te' representation.
+	 * For each exam i, schedule[i] contains the timeslot number
+	 * in which exam i has been scheduled.
+	 * This is used for distance calculations.
+	 */
+	private int[] schedule;
+	
+	/**
 	 * Exams distance matrix, having element [i][j] set to a value k
 	 * when exams i and j are scheduled k timeslots apart.
 	 */
@@ -54,6 +62,7 @@ public class Solution {
 		y = new int[E][E];
 		updateDistanceMatrix();
 		updateConflictCoefficients();
+		updateFitness();
 	}
 	
 	/**
@@ -64,8 +73,8 @@ public class Solution {
 		int E = instance.getE();
 		int tmax = instance.getTmax();
 		
-		// For each exam, the timeslot number is scheduled
-		int[] schedule = new int[E];
+		// For each exam, the timeslot number is stored
+		schedule = new int[E];
 		
 		for(int j = 0; j < E; ++j) // for each exam
 			for(int i = 0; i < tmax; ++i) 
@@ -81,6 +90,10 @@ public class Solution {
 			}
 	}
 	
+	/**
+	 * Builds a ranking of most penalizing exams, mapping a 
+	 * conflict coefficient to an exam pair.
+	 */
 	private void updateConflictCoefficients() {
 		int[][] N = instance.getN();
 		int E = instance.getE();
@@ -118,6 +131,90 @@ public class Solution {
 				}
 			}
 	}
+
+	
+	/**
+	 * Updates the current solution objective function value
+	 */
+	private void updateFitness() {
+		int E = instance.getE();
+		int S = instance.getS();
+		int K = instance.getK();
+		int[][] N = instance.getN();
+		 
+		fitness = 0;
+		
+		for(int i = 0; i < E; ++i) {
+			for(int j = i + 1; j < E; ++j) {
+				if(i != j && y[i][j] > 0 && y[i][j] <= K) {
+					fitness += Math.pow(2, K - y[i][j]) * new Float(N[i][j]) / S;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Computes the objective function value in case exam 'movingExam'
+	 * is scheduled in timeslot 'newTimeslot'.
+	 * This corresponds to a neighbor's fitness value. 
+	 * @param movingExam				exam that would be moved across the timetable. 
+	 * @param newTimeslot				timeslot in which it would end. 
+	 * @return							the new fitness value.
+	 * @throws InvalidMoveException		if the new move produces and infeasible result
+	 */
+	public float neighborFitness(int movingExam, int newTimeslot) throws InvalidMoveException {
+		float result = fitness;
+		
+		int E = instance.getE();
+		int S = instance.getS();
+		int K = instance.getK();
+		int[][] N = instance.getN();
+		
+		// Adding new penalties
+		int[] newSchedule = schedule;
+		/*TODO delete*/System.out.println("Old schedule: " + Arrays.toString(schedule));
+		newSchedule[movingExam] = newTimeslot;	// updating the new schedule according to the move
+		/*TODO delete*/System.out.println("new schedule: " + Arrays.toString(newSchedule));
+		for(int otherExam = 0; otherExam < E; ++otherExam) {
+			if(	// Avoids confronting the movingExam with itself
+				otherExam != movingExam &&
+					
+				// If there are students enrolled in both exams (conflicting exams)
+				N[movingExam][otherExam] > 0
+			) {
+				int distance = Math.abs(schedule[movingExam] - schedule[otherExam]);
+				
+				if(distance == 0)
+					throw new InvalidMoveException();
+				
+				/* If exams are scheduled less than K timeslots apart, they do not 
+				 * generate any fee at all */
+				if(distance <= K) {
+					result += Math.pow(2, K - distance) * N[movingExam][otherExam] / S;
+					/*TODO delete*/System.out.println("Distance: " + distance);
+				}
+			}
+		}
+		
+		/*TODO delete*/System.out.println("Intermediate result: " + result);
+		
+		// Removing old penalties
+		for(int otherExam = 0; otherExam < E; ++otherExam)
+			if(	// Avoids confronting the movingExam with itself
+				otherExam != movingExam &&
+				
+				// If there are students enrolled in both exams (conflicting exams)
+				N[movingExam][otherExam] > 0 &&
+				
+				/* If exams are scheduled less than K timeslots apart, they do not 
+				 * generate any fee at all */
+				y[movingExam][otherExam] <= K
+			) {
+				result -= Math.pow(2, K - y[movingExam][otherExam]) * N[movingExam][otherExam] / S;
+			}
+		
+		return result;
+	}
 	
 	/**
 	 * Boolean function indicating if two exams i and j will generate
@@ -132,26 +229,6 @@ public class Solution {
 			return true;
 		
 		return false;
-	}
-	
-	/**
-	 * Updates the current solution objective function value
-	 */
-	private void udpateFitness() {
-		int E = instance.getE();
-		int S = instance.getS();
-		int K = instance.getK();
-		int[][] N = instance.getN();
-		 
-		fitness = 0;
-		
-		for(int i = 0; i < E; ++i) {
-			for(int j = 0; j < E; ++j) {
-				if(i != j && y[i][j] > 0 && y[i][j] <= K) {
-					fitness += Math.pow(2, K - y[i][j]) * N[i][j] / S;
-				}
-			}
-		}
 	}
 	
 	/**
@@ -178,16 +255,29 @@ public class Solution {
 		
 		return mostPenalizingPair;
 	}
-
+	
+	/**
+	 * Overridden method which displays info about this solution.
+	 */
 	@Override
 	public String toString() {
-		return	"************** Printing Te **************\n" + printMatrix(te) +
-				"************** Printing y **************\n" + printMatrix(y) +
-				"************** Printing conflictCoefficients **************\n" + printConflictCoefficients() +
-				"Most penalizing exam pair: " + mostPenalizingPair.getKey() + ", confl. = " + mostPenalizingPair.getValue()
+		return	"Printing S: " + instance.getS() + "\n" +
+				"Printing E: " + instance.getE() + "\n" +
+				"Printing Tmax: " + instance.getTmax() + "\n" +
+				"\nPrinting schedule:\n" + Arrays.toString(schedule) +
+				"\n\nPrinting Te:\n" + printMatrix(te) +
+				"Printing y:\n" + printMatrix(y) +
+				"Printing conflictCoefficients:\n" + printConflictCoefficients() +
+				"Most penalizing exam pair: " + mostPenalizingPair.getKey() + ", confl. = " + mostPenalizingPair.getValue() +
+				"\n\nFitness value: " + fitness
 		;
 	}
 	
+	/**
+	 * Conflict coefficients pretty printing.
+	 * @return	a string representing the map of conflict coefficients
+	 * 			in a readable format.
+	 */
 	private String printConflictCoefficients() {
 		String result = "";
 		
@@ -197,6 +287,11 @@ public class Solution {
 		return result + "\n";
 	}
 
+	/**
+	 * General function which prints a matrix in a readable way.
+	 * @param m		matrix to be printed.
+	 * @return		a string showing the matrix in a readable way.
+	 */
 	private String printMatrix(int[][] m) {
 		String result = "";
 		for(int[] row: m) {

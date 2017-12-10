@@ -15,11 +15,6 @@ public class TabuSearch {
 	private TabuSearch() {
 	}
 	
-	public static int[][] feasibleSolution() {
-		// TODO implement
-		return null;
-	}
-	
 	/**
 	 * Solves a given instance of the problem.
 	 */
@@ -28,18 +23,33 @@ public class TabuSearch {
 		initialize();
 		
 		// Testing TODO delete
+		// This will be useless when initialize() is implemented
 		currentSolution = new Solution(
 				instanceData,
 				new int[][] { // te
 					{0, 0, 1, 0, 1},
 					{1, 0, 0, 1, 0},
-					{0, 1, 0, 0, 0}
+					{0, 1, 0, 0, 0},
+					{0, 0, 0, 0, 0}
 				}
 			);
 		
-		
 		Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 		
+		// Test printing TODO delete
+		System.out.println(currentSolution);
+		
+		// Neighbor fitness testing TODO delete
+		try {
+			int movingExam = 2;
+			int newTimeslot = 4;
+			System.out.println(
+				"Moving e" + movingExam + " in t" + newTimeslot + ". New fitness: " +
+				currentSolution.neighborFitness(movingExam - 1, newTimeslot - 1)
+			);
+		} catch(InvalidMoveException ime) {
+			System.err.println("Invalid move!");
+		}
 		
 		//TODO remember to output solution on file 
 	}

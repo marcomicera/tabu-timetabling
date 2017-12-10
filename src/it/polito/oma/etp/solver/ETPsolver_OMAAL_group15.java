@@ -26,7 +26,7 @@ public class ETPsolver_OMAAL_group15 {
 			"test instance",
 			40,	// S
 			5,	// E
-			3, 	// Tmax
+			4, 	// Tmax
 			new int[][]{ // N
 				{0,		0,	15,	0,	0},
 				{0,		0,	0,	5,	25},
