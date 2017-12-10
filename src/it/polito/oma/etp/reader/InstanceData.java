@@ -31,6 +31,7 @@ public class InstanceData {
 	/**
 	 * Matrix containing number of students attending exams
 	 * Rows and columns' indexes represent exams.
+	 * Conflicting exams i and j have N[i][j] > 0.
 	 */
 	private int[][] N;
 	

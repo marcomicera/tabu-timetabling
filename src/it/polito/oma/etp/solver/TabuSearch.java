@@ -1,81 +1,31 @@
 package it.polito.oma.etp.solver;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import it.polito.oma.etp.reader.InstanceData;
 
 public class TabuSearch {
 	
 	private static InstanceData idata;	
 	// private TabuListEntry tlentry;
-	private static int[][] currentSolution;
-	private static int[][] bestSolution;
+	private static Solution currentSolution;
+	private static Solution bestSolution;
 	private static int iteration;
+	
+	private TabuSearch() {
+	}
 	
 	public static int[][] feasibleSolution() {
 		// TODO implement
 		return null;
 	}
 	
-	/**
-	 * Fitness function computing the objective function
-	 * value given the decision matrix te.
-	 * @return	The objective function value.
-	 */
-	/*
-	public double fitness() {
+	/*private double fitness() {
 		
-		int E = benchmark.getE();
-		int S = benchmark.getS();
-		int K = benchmark.getK();
-		int[][] n = benchmark.getN();
-		int[][][] y = benchmark.getY();
-		 
-		double result = 0;
-		
-		updatePenaltyVariables();
-		
-		for(int i = 0; i < E; ++i) {
-			for(int j = 0; j < E; ++j) {
-				for(int k = 1; k <= K; ++k) {
-					
-					result += Math.pow(2, K-k) * n[i][j] * 1/S * y[k-1][i][j];
-				}
-			}
-		}
-		
-		return result;
-	}
-
-	*/
-	/**
-	 * Updates penalty boolean variables y given the current
-	 * decision matrix te.
-	 */
-	/*
-	private void updatePenaltyVariables() {
-		
-		int E = benchmark.getE();
-		int tmax = benchmark.getTmax();
-		int K = benchmark.getK();
-		int[][] n = benchmark.getN();
-		int[][][] y = benchmark.getY();
-		int[] schedule = new int[E];
-		
-		for(int j = 0; j < E; ++j) // for each exam
-			for(int i = 0; i < tmax; ++i) 
-				if(benchmark.getTe()[i][j] == 1) {
-					schedule[j] = i;
-					continue;
-				}
-		
-		for(int i = 0; i < E; ++i)
-			for(int j = i + 1; j < E; ++j) {
-				int distance = Math.abs(schedule[i] - schedule[j]);
-				if(distance > 0 && distance <= K && n[i][j] > 0)
-					y[distance - 1][i][j] = y[distance - 1][j][i] = 1; 
-			}
-		
-	}
-	*/
+	}*/
+	
+	
 
 	/**
 	 * Boolean decision variables pretty printing
@@ -110,6 +60,20 @@ public class TabuSearch {
 		idata = instancedata;
 		initialize();
 		
+		Map<ExamPair, Float> conflictCoefficients = new HashMap<ExamPair, Float>();
+		int[][] N = idata.getN();
+		int E = idata.getE();
+		
+		for(int i = 0; i < E; ++i)
+			for(int j = i + 1; j < E; ++j) {
+				conflictCoefficients.put(
+					// The corresponding exam pair acts as a key in this Map
+					new ExamPair(i, j),  
+					
+					// The conflict coefficient value
+					new Float(N[i][j] / currentSolution.getDistance(i, j))
+				);
+			}
 		
 		//TODO remember to output solution on file 
 	}
@@ -118,7 +82,9 @@ public class TabuSearch {
 	 * Get the first feasible solution.
 	 */
 	private static void initialize() {
-		
+		/*	TODO insert first feasible solution in both 
+		  	in currentSolution and in bestSolution */
+
 	}
 	
 	/**
