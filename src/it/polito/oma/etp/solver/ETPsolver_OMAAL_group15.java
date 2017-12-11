@@ -1,7 +1,6 @@
 package it.polito.oma.etp.solver;
 
 import it.polito.oma.etp.reader.InstanceData;
-import it.polito.oma.etp.reader.InputReader;
 
 public class ETPsolver_OMAAL_group15 {
 
@@ -28,11 +27,11 @@ public class ETPsolver_OMAAL_group15 {
 			5,	// E
 			4, 	// Tmax
 			new int[][]{ // N
-				{0,		0,	15,	0,	0},
-				{0,		0,	0,	5,	25},
-				{15,	0,	0,	0,	0},
-				{0,		5,	0,	0,	25},
-				{0,		25,	0,	25,	0}
+				{0,		5,	15,	0,	5},
+				{5,		0,	0,	5,	25},
+				{15,	0,	0,	10,	0},
+				{0,		5,	10,	0,	25},
+				{5,		25,	0,	25,	0}
 			}
 		);
 		

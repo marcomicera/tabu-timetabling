@@ -1,7 +1,6 @@
 package it.polito.oma.etp.solver;
 
 import java.util.Map.Entry;
-
 import it.polito.oma.etp.reader.InstanceData;
 
 public class TabuSearch {
@@ -20,19 +19,12 @@ public class TabuSearch {
 	 */
 	public static void solve(InstanceData instanceData){
 		idata = instanceData;
-		initialize();
+		// Get a first rough feasible solution.
+		int[][] te = initializeTE();
 		
-		// Testing TODO delete
-		// This will be useless when initialize() is implemented
-		currentSolution = new Solution(
-				instanceData,
-				new int[][] { // te
-					{0, 0, 1, 0, 1},
-					{1, 0, 0, 1, 0},
-					{0, 1, 0, 0, 0},
-					{0, 0, 0, 0, 0}
-				}
-			);
+		currentSolution = new Solution(instanceData, te);
+		// For now this is our best solution
+		bestSolution = currentSolution;
 		
 		Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 		
@@ -57,9 +49,59 @@ public class TabuSearch {
 	/**
 	 * Get the first feasible solution.
 	 */
-	private static void initialize() {
-		/*	TODO insert first feasible solution in both 
-		  	currentSolution and bestSolution variables */
+	private static int[][] initializeTE() {
+	
+		/*All non-conflicting exams, starting from e1, will be placed in t1;
+		 then the other ones (conflicting with exams in t1) will be placed in t2
+		 and so on. */
+		
+		
+		int examnumber = idata.getE();
+		int N[][] = idata.getN();
+		int te[][] = new int [idata.getTmax()][examnumber];
+		
+		// array that tells me if a given exam was already assigned in a timeslot.
+		int assignedExams[] = new int[examnumber];
+		// first step: put e0 in t0
+		te[0][0] = 1;
+		
+		// cycling through all exams
+		for(int exam = 1; exam < examnumber; exam++) {
+			
+			// cycling through all timeslots
+			for(int timeslot = 0; timeslot < idata.getTmax(); timeslot++) {
+				// Check if this exam was already assigned
+				if (assignedExams[exam] == 1)
+					break;
+					
+				// checking exams in conflict
+				boolean conflict = false;
+				for(int conflictualExam = 0; conflictualExam < examnumber; conflictualExam++) {
+					// are exam and conflictualExam in conflict? If not, search next exam for a conflict.
+					if (N[exam][conflictualExam] != 0) {
+						/* Here we know exam and conflictualExam are in conflict. I'd like to put exam in
+						 * timeslot, but first I check if conflictualExam is already in timeslot.
+						 * If it is there, I need to change timeslot, otherwise i look the next conflictualExam. */
+						if(te[timeslot][conflictualExam] == 1) {
+							conflict = true;
+							break;
+						}						
+					}
+				} // END FOR conflictualExam
+				
+				/* We are here for 2 motivations:
+				 * 1. we checked all conflictualExams and no one is in timeslot (conflict = false) -> write in timeslot.
+				 * 2. we found that a conflictualExam is in timeslot (conflict = true) -> look next timeslot */
+				if(conflict == false) {
+					te[timeslot][exam] = 1;
+					// This exam is assigned, do not assign it again.
+					assignedExams[exam] = 1;
+				}
+		
+			} // END FOR timeslot		
+		} // END FOR exam
+		
+		return te;
 	}
 	
 	/**
