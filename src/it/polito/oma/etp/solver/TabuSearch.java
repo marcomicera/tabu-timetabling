@@ -101,6 +101,13 @@ public class TabuSearch {
 			} // END FOR timeslot		
 		} // END FOR exam
 		
+		// Check if all exams were assigned, if not it means the solution wasn't found
+		for(int i = 0; i < examnumber; i++) {
+			if(assignedExams[i] == 0) {
+				System.err.println("Couldn't find any feasible solution");
+				System.exit(1);
+			}
+		}
 		return te;
 	}
 	
