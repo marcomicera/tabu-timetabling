@@ -24,7 +24,7 @@ public class TabuSearch {
 		
 		currentSolution = new Solution(instanceData, te);
 		// For now this is our best solution
-		bestSolution = currentSolution;
+		bestSolution = new Solution(currentSolution);
 		
 		Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 		

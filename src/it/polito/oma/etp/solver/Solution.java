@@ -64,6 +64,14 @@ public class Solution {
 		updateConflictCoefficients();
 		updateFitness();
 	}
+	/**
+	 * Constructor that creates a copy of a Solution object
+	 * @param s Solution to copy
+	 */
+	public Solution(Solution s) {
+		instance = s.getInstance();
+		te = s.getTE();
+	}
 	
 	/**
 	 * Updates the exams distance matrix given the current
@@ -298,5 +306,13 @@ public class Solution {
 			result += Arrays.toString(row) + "\n";
 		}
 		return result + "\n";
+	}
+	
+	public InstanceData getInstance() {
+		return instance;
+	}
+	
+	public int[][] getTE() {
+		return te;
 	}
 }
