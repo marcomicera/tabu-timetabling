@@ -36,12 +36,12 @@ public class ETPsolver_OMAAL_group15 {
 			}
 		);*/
 		
-		for(int i = 0; i < idata.getE(); i++) {
+		/*for(int i = 0; i < idata.getE(); i++) {
 			for(int j = 0; j < idata.getE(); j++) {
 				System.out.print(idata.getN()[i][j] + "\t");
 			}
 			System.out.println("");
-		}
+		}*/
 		
 		TabuSearch.solve(idata);
 	}
