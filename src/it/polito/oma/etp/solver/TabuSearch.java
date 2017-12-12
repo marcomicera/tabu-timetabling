@@ -1,5 +1,8 @@
 package it.polito.oma.etp.solver;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Map.Entry;
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -129,7 +132,33 @@ public class TabuSearch {
 	/**
 	 * Updates the best solution with the current one.
 	 */
-	private static void updateSolution() {
+	private static void updateSolution(int te[][]) {
+		try
+	     {
+	          FileOutputStream bestSolution = new FileOutputStream("bestSolution.txt");
+	          PrintStream write = new PrintStream(bestSolution);
+	          
+	          for(int j = 0; j < idata.getE()+1; ++j) {
+	        	  if(j == 0)
+	        		  write.print("\t");
+	  			  write.print("E" + j + "\t"); 
+	  		  }
+	          
+	          write.println();
+	          
+	          for(int i = 0; i < idata.getTmax(); ++i) {
+	        	  	write.print("T" + (i+1) + "\t");
+					for(int j = 0; j < idata.getE(); ++j) {
+						write.print(te[i][j] + "\t"); 
+					}
+					write.println();
+	          }
+	      }
+	      catch (IOException e)
+	      {
+	          System.out.println("Errore: " + e);
+	          System.exit(1);
+	      }
 		
 	}
 	
