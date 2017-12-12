@@ -22,9 +22,9 @@ public class InputReader {
 		int t = extractTmax(instanceName);
 		int[][] n = extractN(instanceName, E);
 		
-		
-		System.out.println("students: " + S + " exams: " + E + " slots: " + t);
 		/*
+		System.out.println("students: " + S + " exams: " + E + " slots: " + t);
+		
 		for(int i = 0; i < E; i++) {
 			System.out.println(" ");
 			for(int j = 0; j < E; j++) {

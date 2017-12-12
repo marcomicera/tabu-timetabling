@@ -60,7 +60,7 @@ public class TabuSearch {
 		int N[][] = idata.getN();
 		int te[][] = new int [idata.getTmax()][examnumber];
 		
-		// array that tells me if a given exam was already assigned in a timeslot.
+		// boolean array that tells me if a given exam was already assigned in a timeslot.
 		int assignedExams[] = new int[examnumber];
 		// counter that stores the number of exams assigned
 		int counter = 1;
@@ -86,6 +86,8 @@ public class TabuSearch {
 						 * timeslot, but first I check if conflictualExam is already in timeslot.
 						 * If it is there, I need to change timeslot, otherwise i look the next conflictualExam. */
 						if(te[timeslot][conflictualExam] == 1) {
+							if(exam == examnumber - 1)
+								//System.out.println((exam+1) + " - " + (conflictualExam+1));
 							conflict = true;
 							break;
 						}						
@@ -105,10 +107,11 @@ public class TabuSearch {
 			} // END FOR timeslot		
 		} // END FOR exam
 		
+		//System.out.println(counter);
 		// Check if all exams were assigned, if not it means the solution wasn't found
 		if(counter != examnumber) {
 			System.err.println("Couldn't find any feasible solution");
-			System.exit(1);
+			//System.exit(1);
 		}
 		return te;
 	}

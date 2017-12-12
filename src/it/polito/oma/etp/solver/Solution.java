@@ -269,15 +269,15 @@ public class Solution {
 	 */
 	@Override
 	public String toString() {
-		return	"Printing S: " + instance.getS() + "\n" +
+		return	/*"Printing S: " + instance.getS() + "\n" +
 				"Printing E: " + instance.getE() + "\n" +
 				"Printing Tmax: " + instance.getTmax() + "\n" +
-				"\nPrinting schedule:\n" + Arrays.toString(schedule) +
-				"\n\nPrinting Te:\n" + printMatrix(te) +
+				"\nPrinting schedule:\n" + Arrays.toString(schedule) +*/
+				"\n\nPrinting Te:\n" + printMatrix(te) /*+
 				"Printing y:\n" + printMatrix(y) +
 				"Printing conflictCoefficients:\n" + printConflictCoefficients() +
 				"Most penalizing exam pair: " + mostPenalizingPair.getKey() + ", confl. = " + mostPenalizingPair.getValue() +
-				"\n\nFitness value: " + fitness
+				"\n\nFitness value: " + fitness*/
 		;
 	}
 	
