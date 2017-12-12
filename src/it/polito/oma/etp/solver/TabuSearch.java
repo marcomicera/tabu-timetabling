@@ -62,8 +62,11 @@ public class TabuSearch {
 		
 		// array that tells me if a given exam was already assigned in a timeslot.
 		int assignedExams[] = new int[examnumber];
+		// counter that stores the number of exams assigned
+		int counter = 1;
 		// first step: put e0 in t0
 		te[0][0] = 1;
+		assignedExams[0] = 1;
 		
 		// cycling through all exams
 		for(int exam = 1; exam < examnumber; exam++) {
@@ -96,17 +99,16 @@ public class TabuSearch {
 					te[timeslot][exam] = 1;
 					// This exam is assigned, do not assign it again.
 					assignedExams[exam] = 1;
+					counter++;
 				}
 		
 			} // END FOR timeslot		
 		} // END FOR exam
 		
 		// Check if all exams were assigned, if not it means the solution wasn't found
-		for(int i = 0; i < examnumber; i++) {
-			if(assignedExams[i] == 0) {
-				System.err.println("Couldn't find any feasible solution");
-				System.exit(1);
-			}
+		if(counter != examnumber) {
+			System.err.println("Couldn't find any feasible solution");
+			System.exit(1);
 		}
 		return te;
 	}
