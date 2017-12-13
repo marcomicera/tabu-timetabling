@@ -60,24 +60,31 @@ public class Solution {
 		this.te = te;
 		int E = instance.getE();
 		y = new int[E][E];
+		updateSchedule();
 		updateDistanceMatrix();
 		updateConflictCoefficients();
 		updateFitness();
 	}
+	
 	/**
 	 * Constructor that creates a copy of a Solution object
 	 * @param s Solution to copy
 	 */
 	public Solution(Solution s) {
-		instance = s.getInstance();
-		te = s.getTE();
+		instance = s.instance;
+		te = s.te;
+		schedule = s.schedule;
+		y = s.y;
+		fitness = s.fitness;
+		conflictCoefficients = s.conflictCoefficients;
+		mostPenalizingPair = s.mostPenalizingPair;
 	}
 	
 	/**
-	 * Updates the exams distance matrix given the current
-	 * decision matrix te.
+	 * Updates the schedule data structure, containing, for each
+	 * exam, the timeslot number in which it has been assigned to.
 	 */
-	private void updateDistanceMatrix() {
+	private void updateSchedule() {
 		int E = instance.getE();
 		int tmax = instance.getTmax();
 		
@@ -90,6 +97,14 @@ public class Solution {
 					schedule[j] = i;
 					continue;
 				}
+	}
+	
+	/**
+	 * Updates the exams distance matrix given the current
+	 * decision matrix te.
+	 */
+	private void updateDistanceMatrix() {
+		int E = instance.getE();
 		
 		for(int i = 0; i < E; ++i)
 			for(int j = 0; j < E; ++j) {
@@ -107,7 +122,10 @@ public class Solution {
 		int E = instance.getE();
 		
 		conflictCoefficients = new HashMap<ExamPair, Float>();
-		mostPenalizingPair = new AbstractMap.SimpleEntry<ExamPair, Float>(
+		
+		/*	mostPenalizingPair initialization: the conflict coefficient is set to -1
+		 	so it will be replaced by the first conflicting exam pair as soon as possible */
+		mostPenalizingPair = new AbstractMap.SimpleEntry<ExamPair, Float>( 
 			new ExamPair(-1, -2), new Float(-1)
 		);
 		
@@ -128,6 +146,7 @@ public class Solution {
 					);
 					
 					// Replacing the new most penalizing exam if necessary
+					// TODO what to do in case the most penalizing exam pair cannot be rescheduled?
 					if(newCoefficient > mostPenalizingPair.getValue())
 						mostPenalizingPair = new AbstractMap.SimpleEntry<ExamPair, Float>(
 							// The corresponding exam pair acts as a key in this Map
@@ -135,7 +154,7 @@ public class Solution {
 								
 							// The conflict coefficient value
 							newCoefficient
-						);;
+						);
 				}
 			}
 	}
@@ -162,27 +181,33 @@ public class Solution {
 	}
 	
 	/**
-	 * Computes the objective function value in case exam 'movingExam'
+	 * Computes the objective function value when exam 'movingExam'
 	 * is scheduled in timeslot 'newTimeslot'.
 	 * This corresponds to a neighbor's fitness value. 
 	 * @param movingExam				exam that would be moved across the timetable. 
 	 * @param newTimeslot				timeslot in which it would end. 
-	 * @return							the new fitness value.
+	 * @return							the new fitness value and its corresponding schedule
 	 * @throws InvalidMoveException		if the new move produces and infeasible result
 	 */
-	public float neighborFitness(int movingExam, int newTimeslot) throws InvalidMoveException {
+	public Entry<Float, int[]> neighborFitness(int movingExam, int newTimeslot) throws InvalidMoveException {
+		// This function's result, based on the current fitness value
 		float result = fitness;
 		
+		// Instance variables
 		int E = instance.getE();
 		int S = instance.getS();
 		int K = instance.getK();
 		int[][] N = instance.getN();
 		
-		// Adding new penalties
+		// Updating the new schedule according to the move
 		int[] newSchedule = schedule;
-		/*TODO delete*/System.out.println("Old schedule: " + Arrays.toString(schedule));
-		newSchedule[movingExam] = newTimeslot;	// updating the new schedule according to the move
-		/*TODO delete*/System.out.println("new schedule: " + Arrays.toString(newSchedule));
+		newSchedule[movingExam] = newTimeslot;
+		
+		/* Printing schedules TODO delete */
+		System.out.println("Old schedule: " + Arrays.toString(schedule));
+		System.out.println("new schedule: " + Arrays.toString(newSchedule));
+		
+		// Adding new penalties
 		for(int otherExam = 0; otherExam < E; ++otherExam) {
 			if(	// Avoids confronting the movingExam with itself
 				otherExam != movingExam &&
@@ -193,7 +218,11 @@ public class Solution {
 				int distance = Math.abs(schedule[movingExam] - schedule[otherExam]);
 				
 				if(distance == 0)
-					throw new InvalidMoveException();
+					throw new InvalidMoveException(
+						"exam " + (movingExam + 1) + " cannot be placed in timeslot number " + (newTimeslot + 1) +
+						" since it is in conflict with " + (otherExam + 1) +
+						" for having " + N[movingExam][otherExam] + " students enrolled in both exams."
+					);
 				
 				/* If exams are scheduled less than K timeslots apart, they do not 
 				 * generate any fee at all */
@@ -221,7 +250,7 @@ public class Solution {
 				result -= Math.pow(2, K - y[movingExam][otherExam]) * N[movingExam][otherExam] / S;
 			}
 		
-		return result;
+		return new AbstractMap.SimpleEntry<Float, int[]>(result, newSchedule);
 	}
 	
 	/**
@@ -269,15 +298,15 @@ public class Solution {
 	 */
 	@Override
 	public String toString() {
-		return	/*"Printing S: " + instance.getS() + "\n" +
+		return	"Printing S: " + instance.getS() + "\n" +
 				"Printing E: " + instance.getE() + "\n" +
 				"Printing Tmax: " + instance.getTmax() + "\n" +
-				"\nPrinting schedule:\n" + Arrays.toString(schedule) +*/
-				"\n\nPrinting Te:\n" + printMatrix(te) /*+
-				"Printing y:\n" + printMatrix(y) +
+				//"\nPrinting schedule:\n" + Arrays.toString(schedule) +
+				//"\n\nPrinting Te:\n" + printMatrix(te) +
+				//"Printing y:\n" + printMatrix(y) +
 				"Printing conflictCoefficients:\n" + printConflictCoefficients() +
 				"Most penalizing exam pair: " + mostPenalizingPair.getKey() + ", confl. = " + mostPenalizingPair.getValue() +
-				"\n\nFitness value: " + fitness*/
+				"\n\nFitness value: " + fitness
 		;
 	}
 	
@@ -312,7 +341,29 @@ public class Solution {
 		return instance;
 	}
 	
-	public int[][] getTE() {
+	public int[][] getTe() {
 		return te;
+	}
+	
+	/**
+	 * Returns the timeslot in which the given exam has been scheduled.
+	 * @param exam	exam whose corresponding scheduled timeslot is requested.
+	 * @return		the timeslot in which the given exam is scheduled.
+	 */
+	public int getTimeslot(int exam) {
+		if(exam < 0 || exam >= instance.getE()) {
+			System.err.println("Trying to retrieve a timeslot of an invalid exam.");
+			System.exit(1);
+		}
+			
+		return schedule[exam];
+	}
+
+	public float getFitness() {
+		return fitness;
+	}
+
+	public void setFitness(float fitness) {
+		this.fitness = fitness;
 	}
 }

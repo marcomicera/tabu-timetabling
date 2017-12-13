@@ -15,7 +15,7 @@ public class ExamPair {
 		this.exam1 = exam1;
 		this.exam2 = exam2;
 	}
-	
+
 	/**
 	 * Hashing function used by the java.util.Map's get() function
 	 */
@@ -47,5 +47,13 @@ public class ExamPair {
 	public String toString() {
 		// Using notation from 1 to E
 		return	"<" + (exam1 + 1) + ", " + (exam2 + 1) + ">";
+	}
+	
+	public int getExam1() {
+		return exam1;
+	}
+
+	public int getExam2() {
+		return exam2;
 	}
 }
