@@ -5,25 +5,25 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map.Entry;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Random;
 
 import it.polito.oma.etp.reader.InstanceData;
 
 public class TabuSearch {
-	
-	private static InstanceData instance;	
+	private InstanceData instance;	
 	// private TabuListEntry tlentry;
-	private static Solution currentSolution;
-	private static Solution bestSolution;
-	private static int iteration;
+	private Solution currentSolution;
+	private Solution bestSolution;
+	private int iteration;
 	
-	private TabuSearch() {
+	public TabuSearch() {
 	}
 	
 	/**
 	 * Solves a given instance of the problem.
 	 */
-	public static void solve(InstanceData instanceData) {
+	public void solve(InstanceData instanceData) {
 		instance = instanceData;
 		int[][] te = null;
 		// Get a first rough feasible solution.
@@ -40,11 +40,8 @@ public class TabuSearch {
 		//while(timeout) {
 			Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 			
-			// Test printing TODO delete
-			System.out.println(currentSolution);
-			
-			// Performing the best possible move for the most penalizing exam pair 		
-			// move(findBestMove(mostPenalizingPair.getKey()));
+			// Performing the best possible move for the most penalizing exam pair
+			move(findBestNeighbor(mostPenalizingPair.getKey()));
 		//}
 		
 		//TODO remember to output solution on file 
@@ -55,7 +52,7 @@ public class TabuSearch {
 	 * @return	a feasible solution using a set of random values. Can return null if
 	 * no feasible solution is found with that set of random values.
 	 */
-	private static int[][] initializeTE() {
+	private int[][] initializeTE() {
 		/*All non-conflicting exams, starting from e1, will be placed in t1;
 		 then the other ones (conflicting with exams in t1) will be placed in t2
 		 and so on. */
@@ -176,15 +173,15 @@ public class TabuSearch {
 	/**
 	 * Given a penalizing pair of exams, returns the best possible move to do.
 	 * @param examPair	exam pair to be rescheduled.
-	 * @return			An entry containing:
-	 * 					1)	a two-integer array containing (in order): the exam that should be 
-	 * 						rescheduled and the new timeslot in which the latter should be rescheduled in.
-	 * 					2)	the corresponding fitness value
-	 * 					3)	the corresponding schedule
+	 * @return			A Neighbor object containing:
+	 * 					1)	the exam that should be rescheduled
+	 * 					2)	the new timeslot in which the exam should be rescheduled in
+	 * 					3)	the corresponding fitness value
+	 * 					4)	the corresponding schedule
 	 * 					The last two points are returned to avoid the recalculation of this data when
 	 * 					updating the currentSolution object.
 	 */
-	private Entry<int[], Entry<Float, int[]>> findBestMove(ExamPair examPair) {
+	private Neighbor findBestNeighbor(ExamPair examPair) {
 		/*		Schedule
 		 * 		 ____________________________________________________________________________________
 		 * 		|____.:iXXj:.________________________________________________________________________|
@@ -201,18 +198,22 @@ public class TabuSearch {
 		// Retrieving the timeslots in which the two exams have been scheduled
 		int firstExamSlot = currentSolution.getTimeslot(examPair.getExam1());
 		int secondExamSlot = currentSolution.getTimeslot(examPair.getExam2());
+		/*TODO debug*/System.out.println("firstExamSlot = " + firstExamSlot + "\nsecondExamSlot = " + secondExamSlot);
 		
 		// The exam to be rescheduled will be the one closer to the schedule's center
 		int movingExam = ((Math.abs(firstExamSlot - Tmax/2)) < (Math.abs(secondExamSlot - Tmax/2))) ? 
 							examPair.getExam1() : examPair.getExam2();
+		/*TODO debug*/System.out.println("movingExam's index: " + movingExam);
+		/*TODO debug*/System.out.println("movingExam's timeslot: " + currentSolution.getTimeslot(movingExam));
 		
 		// Computing support variables for excluding timeslots between the two exams 
 		int lowestIndex = (firstExamSlot < secondExamSlot) ? firstExamSlot : secondExamSlot;
 		int highestIndex = (firstExamSlot < secondExamSlot) ? secondExamSlot : firstExamSlot;
+		/*TODO debug*/System.out.println("lowestIndex = " + lowestIndex + "\nhighestIndex = " + highestIndex);
 		
 		/*	Best fitness initialization: it is set to plus infinity so it will be overwritten 
 			during the first comparison */
-		Entry<Float, int[]> bestNeighbor = null;
+		Neighbor bestNeighbor = new Neighbor();
 		float bestNeighborFitness = Float.MAX_VALUE;
 		int bestMove[] = null;
 							
@@ -223,35 +224,39 @@ public class TabuSearch {
 					
 				/*	Skipping timeslots between the two exams: these positions will
 					increase the fitness value for sure */
-				newTimeslot < lowestIndex && newTimeslot > highestIndex
+				newTimeslot < lowestIndex || newTimeslot > highestIndex
 			) {
 				try {
 					// Retrieving the neighbor object, containing its fitness and its corresponding schedule
-					Entry<Float, int[]> neighbor = currentSolution.neighborFitness(movingExam, newTimeslot);
-					float neighborFitness = neighbor.getKey();
+					Neighbor neighbor = currentSolution.getNeighbor(movingExam, newTimeslot);
+					float neighborFitness = neighbor.getFitness();
 					
 					// If a new better neighbor is found
 					if(neighborFitness < bestNeighborFitness) {
-						bestNeighbor = neighbor;
+						bestNeighbor.update(neighbor);
 						bestNeighborFitness = neighborFitness;
 						bestMove = new int[]{movingExam, newTimeslot};
 					}
+					
+					/*TODO debug*/System.out.println(neighbor);
 				} catch(InvalidMoveException e) {
+					/*TODO debug*/System.out.println("conflict!");
 					continue;
 				}
 			}
 		}
 		
-		return new AbstractMap.SimpleEntry<int[], Entry<Float, int[]>>(bestMove, bestNeighbor);
+		/*TODO debug*/System.out.println("\n\nbestNeighbor is = " + bestNeighbor);
+		
+		return bestNeighbor;
 	}
 	
 	/**
 	 * Performs the given move passed as first argument.
-	 * @param move	a two-integer array containing (in order): the exam to be rescheduled and
-	 * 				the new timeslot in which the latter must be rescheduled in.
+	 * @param neighbor	the neighbor to be reached by the Tabu search algorithm
 	 */
-	private void move(int[] move) {
-		if(move == null) {
+	private void move(Neighbor neighbor) {
+		if(neighbor == null) {
 			// TODO think and implement
 			/**
 			 * We have a few options here:
@@ -264,14 +269,26 @@ public class TabuSearch {
 			return;
 		}
 		
+		int movingExam = neighbor.getMovingExam();
+		/*TODO debug*/System.out.println("movingExam's index inside move(): " + movingExam);
 		
+		// Updating the current solution
+		int oldTimeslot = currentSolution.getTimeslot(movingExam);
+		currentSolution.updateTe(movingExam, oldTimeslot, neighbor.getNewTimeslot());
+		currentSolution.setFitness(neighbor.getFitness());
+		currentSolution.updateSchedule();
+		currentSolution.updateDistanceMatrix();
+		
+		/*TODO debug*/System.out.println("oldTimeslot = " + oldTimeslot);
+		/*TODO debug*/currentSolution.updateFitness();
+		/*TODO debug*/System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
 	}
 	
 	/**
 	 * Checks if current solution is feasible and if it is better than the best one;
 	 * in this case it becomes the new best solution.
 	 */
-	private static void checkSolution() {
+	private void checkSolution() {
 		
 		
 		//updateSolution();
@@ -280,7 +297,7 @@ public class TabuSearch {
 	/**
 	 * Updates the best solution with the current one.
 	 */
-	private static void updateSolution(int te[][]) {
+	private void updateSolution(int te[][]) {
 		try
 	     {
 	          FileOutputStream bestSolution = new FileOutputStream("bestSolution.txt");

@@ -46,7 +46,7 @@ public class ExamPair {
 	@Override
 	public String toString() {
 		// Using notation from 1 to E
-		return	"<" + (exam1 + 1) + ", " + (exam2 + 1) + ">";
+		return	"Exam pair: <" + (exam1 + 1) + ", " + (exam2 + 1) + ">";
 	}
 	
 	public int getExam1() {

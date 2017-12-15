@@ -84,7 +84,7 @@ public class Solution {
 	 * Updates the schedule data structure, containing, for each
 	 * exam, the timeslot number in which it has been assigned to.
 	 */
-	private void updateSchedule() {
+	public void updateSchedule() {
 		int E = instance.getE();
 		int tmax = instance.getTmax();
 		
@@ -103,7 +103,7 @@ public class Solution {
 	 * Updates the exams distance matrix given the current
 	 * decision matrix te.
 	 */
-	private void updateDistanceMatrix() {
+	public void updateDistanceMatrix() {
 		int E = instance.getE();
 		
 		for(int i = 0; i < E; ++i)
@@ -163,7 +163,7 @@ public class Solution {
 	/**
 	 * Updates the current solution objective function value
 	 */
-	private void updateFitness() {
+	/*TODO has to be private*/public void updateFitness() {
 		int E = instance.getE();
 		int S = instance.getS();
 		int K = instance.getK();
@@ -171,27 +171,37 @@ public class Solution {
 		 
 		fitness = 0;
 		
-		for(int i = 0; i < E; ++i) {
-			for(int j = i + 1; j < E; ++j) {
-				if(i != j && y[i][j] > 0 && y[i][j] <= K) {
+		for(int i = 0; i < E; ++i)
+			for(int j = i + 1; j < E; ++j)
+				if(i != j && y[i][j] > 0 && y[i][j] <= K)
 					fitness += Math.pow(2, K - y[i][j]) * new Float(N[i][j]) / S;
-				}
-			}
-		}
 	}
 	
 	/**
-	 * Computes the objective function value when exam 'movingExam'
-	 * is scheduled in timeslot 'newTimeslot'.
-	 * This corresponds to a neighbor's fitness value. 
+	 * Updates the te table according to a move.
+	 * @param movingExam	exam to be rescheduled
+	 * @param oldTimeslot	timeslot in which the exam was
+	 * @param newTimeslot	timeslot in which the exam will be
+	 */
+	public void updateTe(int movingExam, int oldTimeslot, int newTimeslot) {
+		te[oldTimeslot][movingExam] = 0;
+		te[newTimeslot][movingExam] = 1;
+	}
+	
+	/**
+	 * Retrieves neighbor information such as its fitness value and its corresponding
+	 * schedule, given a move to be done (i.e., the exam to be rescheduled and the new
+	 * timeslot in which the latter will be moved to).
+	 * 
 	 * @param movingExam				exam that would be moved across the timetable. 
 	 * @param newTimeslot				timeslot in which it would end. 
-	 * @return							the new fitness value and its corresponding schedule
+	 * @return							the corresponding Neighbor object containing the
+	 * 									new fitness value and its corresponding schedule
 	 * @throws InvalidMoveException		if the new move produces and infeasible result
 	 */
-	public Entry<Float, int[]> neighborFitness(int movingExam, int newTimeslot) throws InvalidMoveException {
+	public Neighbor getNeighbor(int movingExam, int newTimeslot) throws InvalidMoveException {
 		// This function's result, based on the current fitness value
-		float result = fitness;
+		float neighborFitnessValue = fitness;
 		
 		// Instance variables
 		int E = instance.getE();
@@ -202,10 +212,6 @@ public class Solution {
 		// Updating the new schedule according to the move
 		int[] newSchedule = schedule;
 		newSchedule[movingExam] = newTimeslot;
-		
-		/* Printing schedules TODO delete */
-		System.out.println("Old schedule: " + Arrays.toString(schedule));
-		System.out.println("new schedule: " + Arrays.toString(newSchedule));
 		
 		// Adding new penalties
 		for(int otherExam = 0; otherExam < E; ++otherExam) {
@@ -226,14 +232,10 @@ public class Solution {
 				
 				/* If exams are scheduled less than K timeslots apart, they do not 
 				 * generate any fee at all */
-				if(distance <= K) {
-					result += Math.pow(2, K - distance) * N[movingExam][otherExam] / S;
-					/*TODO delete*/System.out.println("Distance: " + distance);
-				}
+				if(distance <= K)
+					neighborFitnessValue += Math.pow(2, K - distance) * N[movingExam][otherExam] / S;
 			}
 		}
-		
-		/*TODO delete*/System.out.println("Intermediate result: " + result);
 		
 		// Removing old penalties
 		for(int otherExam = 0; otherExam < E; ++otherExam)
@@ -247,10 +249,10 @@ public class Solution {
 				 * generate any fee at all */
 				y[movingExam][otherExam] <= K
 			) {
-				result -= Math.pow(2, K - y[movingExam][otherExam]) * N[movingExam][otherExam] / S;
+				neighborFitnessValue -= Math.pow(2, K - y[movingExam][otherExam]) * N[movingExam][otherExam] / S;
 			}
 		
-		return new AbstractMap.SimpleEntry<Float, int[]>(result, newSchedule);
+		return new Neighbor(movingExam, newTimeslot, neighborFitnessValue, newSchedule);
 	}
 	
 	/**

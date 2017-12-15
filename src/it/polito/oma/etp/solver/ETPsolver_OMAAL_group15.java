@@ -16,12 +16,13 @@ public class ETPsolver_OMAAL_group15 {
 			System.exit(1);
 		}
 		
+		TabuSearch solver = new TabuSearch();
 		instanceName = args[0];
 		
 		idata = InputReader.getData("res\\" + instanceName);
 		
 		// *********************** Testing code ***********************
-		// TODO delete
+		// TODO delete first little test
 		/*InstanceData testInstance = new InstanceData(
 			"test instance",
 			40,	// S
@@ -43,6 +44,6 @@ public class ETPsolver_OMAAL_group15 {
 			System.out.println("");
 		}*/
 		
-		TabuSearch.solve(idata);
+		solver.solve(idata);
 	}
 }
