@@ -221,7 +221,7 @@ public class Solution {
 				// If there are students enrolled in both exams (conflicting exams)
 				N[movingExam][otherExam] > 0
 			) {
-				int distance = Math.abs(schedule[movingExam] - schedule[otherExam]);
+				int distance = Math.abs(newSchedule[movingExam] - newSchedule[otherExam]);
 				
 				if(distance == 0)
 					throw new InvalidMoveException(
