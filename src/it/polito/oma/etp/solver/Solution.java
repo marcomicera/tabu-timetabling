@@ -210,7 +210,7 @@ public class Solution {
 		int[][] N = instance.getN();
 		
 		// Updating the new schedule according to the move
-		int[] newSchedule = schedule;
+		int[] newSchedule = Arrays.copyOf(schedule, E);
 		newSchedule[movingExam] = newTimeslot;
 		
 		// Adding new penalties
