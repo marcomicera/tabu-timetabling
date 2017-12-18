@@ -5,29 +5,43 @@ import it.polito.oma.etp.reader.InstanceData;
 public class InitializeSolution {
 	
 	private static InstanceData idata;
+	/** Boolean matrix whose elements ij are set to 1 if exam i and exam j
+	 * are conflictual and in the same timeslot */
+	private static int[][] U;
 	
+	/**
+	 * Given a set of data relative to an instance of the problem, it returns back a first
+	 * rough feasible solution obtained using the Tabu Search algorithm.
+	 * @param instanceData instance of the problem
+	 * @return A feasible solution of the instance in the form of the matrix TE
+	 */
 	public static int[][] getFeasibleSolution(InstanceData instanceData){
 		idata = instanceData;
-		generateUnfeasibleTE();
-		return null;
+		int E = idata.getE();
+		U = new int[E][E];
+		int[][] te = generateUnfeasibleTE();
+		//TODO make te feasible.
+		return te;
 	}
 	
 	/**
+	 * An exam will be placed in the timeslot having the most non-conflictual exams in it. So there is a call
+	 * to a function that calculates which is the fullest timeslot. When an exam will not be able to find 
+	 * a timeslot, an unfeasibility is introduced and it is assigned to the timeslot with less conflictual
+	 * exams in it. The field U is updated accordingly.
 	 * @return An unfeasible solution for the given instance (having conflictual exams
 	 * in the same timeslot).
 	 */
 	private static int [][] generateUnfeasibleTE(){
-		/*All non-conflicting exams, starting from e1, will be placed in t1;
-		 then the other ones (conflicting with exams in t1) will be placed in t2
-		 and so on. */
-				
+						
 		int examnumber = idata.getE();
 		int N[][] = idata.getN();
 		int tmax = idata.getTmax();
 		int te[][] = new int [tmax][examnumber];
+		// array that counts how much exams are assigned in every timeslot
 		int texamsCounter[] = new int[tmax];
+		// array that stores which is the timeslot to visit first, according to its assigned exams
 		int timeslotOrder[] = new int[tmax];
-		
 		// boolean array that tells me if a given exam was already assigned in a timeslot.
 		int assignedExams[] = new int[examnumber];
 
@@ -39,12 +53,11 @@ public class InitializeSolution {
 		// cycling through all exams
 		for(int exam = 1; exam < examnumber; exam++) {
 			
-			// IN: texamsCounter, OUT: timeslotOrder
+			/* IN: texamsCounter, OUT: timeslotOrder*
+			 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
 			timeslotOrder = getTimeslotOrder(texamsCounter);
 			
-			/* cycling through all timeslots, starting from a random one until the last one.
-			 * The other timeslots (from 0 to rand-1) will be checked only if a slot will not
-			 * be able to be found in the range rand - Tmax. (This for every exam). */
+			// cycling through all timeslots
 			for(int t = 0; t < tmax; t++) {
 				
 				// Check if this exam was already assigned
@@ -75,25 +88,75 @@ public class InitializeSolution {
 					// This exam is assigned, do not assign it again.
 					assignedExams[exam] = 1;
 					texamsCounter[timeslotOrder[t]]++;
-				}
-		
+				}		
 			} // END FOR timeslot (increasing slots)
-			
-			
-						
-			/* If at the end of the timeslots checking, the exam can't still be assigned, a null-pointer  
-			 * is given to the solution -te- and the program breaks out of the loop (meaning that with that set
-			 * of random values a feasible solution can't be found). The program will be able later to look
-			 * for another solution with a different set of random values. */
+					
+			/* If at the end of the timeslots checking, the exam can't still be assigned, we introuduce infeasibility.
+			 * We assigne exam to the timeslot with less conflictual exams and update U accordingly. */
 			if (assignedExams[exam] == 0) {
-				System.out.println("e" + exam /*+ " - " + ++failCounter*/);
-				//updateSolution(te);
-				System.exit(1);
-				te = null;
-				break;
-			}
+				/*TODO debug*/System.out.println("This exam couldn't find a timeslot: e" + exam /*+ " - " + ++failCounter*/);
+				
+				// number of conflicts for each timeslot
+				int[] numberOfConflicts = new int[tmax];
+				
+				// cycling timeslots, counting the number of conflicts
+				for(int t = 0; t < tmax; t++) {
+					numberOfConflicts[t] = 0;
+					
+					for(int confExam = 0; confExam < examnumber; confExam++) {
+						
+						// are exam and confExam in conflict?
+						if(N[exam][confExam] != 0) {
+							// yes; is confExam in timeslot t? Increase the number of conflicts for that timeslot
+							if(te[t][confExam] == 1) {
+								numberOfConflicts[t]++;
+							}		
+						}
+					}// end FOR confExam
+					
+				}// end FOR timeslots
+				
+				int minConflicts = examnumber;
+				int myTimeslot = 0;
+				// searching for the timeslot with the minimum of conflict for the given exam
+				for(int t = 0; t < numberOfConflicts.length; t++) {
+					if(numberOfConflicts[t] < minConflicts) {
+						minConflicts = numberOfConflicts[t];
+						myTimeslot = t;
+					}
+				}
+				/*TODO debug*/System.out.println("The timeslot with less conflicts for exam e" + exam + " is t" + myTimeslot
+												 + " with " + minConflicts + " conflictual exams. \n");
+				
+				/* Now the exam is placed in the timeslot myTimeslot and the relative U elements are set at 1, remembering it is
+				 * introducing an unfeasibility in the solution.*/
+				te[myTimeslot][exam] = 1;
+				assignedExams[exam] = 1;
+				texamsCounter[myTimeslot]++;
+				// cycling through exams in myTimeslot
+				for(int e = 0; e < examnumber; e++) {
+					// looks only allocated exams
+					if(te[myTimeslot][e] == 1) {
+						// and check if they are conflictual with exam
+						if(N[exam][e] != 0) {
+							U[exam][e] = 1;
+							U[e][exam] = 1;
+						}
+					}
+				}
+				
+			}// end IF exam cannot be placed
 			
 		} // END FOR exam
+		
+		/*TODO debug*/System.out.println("Unfeasibility matrix:");
+		for(int i = 0; i < examnumber; i++) {
+			for(int j = i + 1; j < examnumber; j++) {
+				if(U[i][j] == 1)
+					System.out.println("Unfeasibility between exam e" + i + " and e" + j);
+			}	
+		}
+		System.out.println();
 		
 		return te;
 	}
@@ -110,10 +173,6 @@ public class InitializeSolution {
 	private static int[] getTimeslotOrder(int[] TEcounter) {
 		
 		int tec[] = TEcounter.clone();
-		//System.out.print("Number of exams in timeslot i:  ");
-		/*for(int i = 0; i < idata.getTmax(); i++)
-			System.out.print(tec[i] + ", ");
-		System.out.println("");*/
 		int orderTec[] = new int[idata.getTmax()];
 		int max = -1;
 		int ind = 0;
@@ -133,12 +192,6 @@ public class InitializeSolution {
 			orderTec[x] = ind;
 			
 		}
-		/*System.out.print("OUTPUT:  ");
-		for(int i = 0; i < idata.getTmax(); i++)
-			System.out.print(orderTec[i] + ", ");
-		
-		System.out.println("\n");*/
-		
 		return orderTec;
 	}
 

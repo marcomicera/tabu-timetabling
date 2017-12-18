@@ -25,12 +25,15 @@ public class TabuSearch {
 	 */
 	public void solve(InstanceData instanceData) {
 		instance = instanceData;
-		int[][] te = null;
+		
 		// Get a first rough feasible solution.
+		int[][] te = InitializeSolution.getFeasibleSolution(instanceData);
+		
+		/*
 		do {
 			te = initializeTE();
 		} while(te == null);
-		
+		*/
 		currentSolution = new Solution(instanceData, te);
 		
 		// For now this is our best solution
