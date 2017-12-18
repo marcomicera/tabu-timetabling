@@ -7,7 +7,8 @@ public class Neighbor {
 	private int newTimeslot;
 	private float fitness;
 	private int[] schedule;
-	
+	private int[][] te;
+ 	
 	public Neighbor() {
 	}
 	
@@ -16,6 +17,13 @@ public class Neighbor {
 		this.newTimeslot = newTimeslot;
 		this.fitness = fitness;
 		this.schedule = schedule;
+	}
+	
+	public Neighbor(int movingExam, int newTimeslot, float fitness, int[][] tematrix) {
+		this.movingExam = movingExam;
+		this.newTimeslot = newTimeslot;
+		this.fitness = fitness;
+		te = tematrix;
 	}
 	
 	public void update(Neighbor neighbor) {

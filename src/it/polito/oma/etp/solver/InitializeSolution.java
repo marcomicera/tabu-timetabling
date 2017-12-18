@@ -8,6 +8,9 @@ public class InitializeSolution {
 	/** Boolean matrix whose elements ij are set to 1 if exam i and exam j
 	 * are conflictual and in the same timeslot */
 	private static int[][] U;
+	/** Sum of all the conflictual couple of exams assigned to the same timeslot */
+	private static int fitness;
+	private static int[][] te;
 	
 	/**
 	 * Given a set of data relative to an instance of the problem, it returns back a first
@@ -19,7 +22,15 @@ public class InitializeSolution {
 		idata = instanceData;
 		int E = idata.getE();
 		U = new int[E][E];
-		int[][] te = generateUnfeasibleTE();
+		te = generateUnfeasibleTE();
+		
+		fitness = updateFitness(U);
+		// get the exam pair to edit		
+		ExamPair unfeaseablePair = getUnfeaseblePair();		
+		
+		// find best neighbor for the pair
+		Neighbor bestNeighbor = getNeighbor(unfeaseablePair);
+		
 		//TODO make te feasible.
 		return te;
 	}
@@ -193,6 +204,106 @@ public class InitializeSolution {
 			
 		}
 		return orderTec;
+	}
+	
+	/**
+	 * @return The first pair of conflictual exams that are assigned to the same tmieslot 
+	 */
+	private static ExamPair getUnfeaseblePair() {
+		ExamPair pair = null;
+		
+		for(int i = 0; i < idata.getTmax(); i++) {
+			for(int j = 0; j < idata.getE(); j++) {
+				if(U[i][j] == 1) {
+					pair = new ExamPair(i, j);
+					break;
+				}				
+			}	
+			if(pair != null)
+				break;
+		}
+		
+		return pair;
+	}
+	
+	/**
+	 * @param unfeasbilityM the unfeasibility matrix used for the calculation
+	 * @return the updated value of the fitness
+	 */
+	private static int updateFitness(int[][] unfeasbilityM) {
+		int fitnessV = 0;
+		int E = idata.getE();
+		for(int i = 0; i < E; i++) {
+			for(int j = i + 1; j < E; j++) {
+				fitnessV += unfeasbilityM[i][j];
+			}
+		}
+		/*TODO debug*/System.out.println("Fitness: " + fitnessV);
+		return fitnessV;
+	}
+	
+	private static Neighbor getNeighbor(ExamPair exPair) {
+		int E = idata.getE();
+		int tmax = idata.getTmax();
+		int[][] N = idata.getN();
+		int exam1 = exPair.getExam1();
+		int exam2 = exPair.getExam2();
+		
+		int t_old = 0;
+		// looking for the timeslot where exam1 is placed now
+		for(int ts = 0; ts < tmax; ts++) {
+			if(te[ts][exam1] == 1)
+				t_old = ts;
+		}
+		int fitness_copy = 0;
+		
+		
+		int fitness_min = Integer.MAX_VALUE;
+		int timeslot_min = 0;
+		int[][] U_min = new int[E][E];
+		
+		for(int t = 0; t < tmax; t++) {
+			int[][] te_copy = te.clone();
+			int[][] U_copy = U.clone();
+			
+			// I put exam1 in t
+			U_copy[exam1][exam2] = 0; 
+			U_copy[exam2][exam1] = 0;
+			
+			te_copy[t_old][exam1] = 0;
+			te_copy[t][exam1] = 1;
+			for(int e = 0; e < E; e++) {
+				// if exam1 and e are conflictual and e is in t
+				if(N[exam1][e] != 0 && te_copy[t][e] == 1) {
+						U_copy[e][exam1] = 1;
+						U_copy[exam1][e] = 1;
+				}
+			}
+			
+			fitness_copy = updateFitness(U_copy);
+			/*TODO debug*/System.out.println("Moving e" + exam1 + " in t" + t);
+			System.out.println("New fitness value: " + fitness_copy);
+			
+			if(fitness_min > fitness_copy) {
+				fitness_min = fitness_copy;
+				timeslot_min = t;
+				U_min = U_copy.clone();
+			}
+		}// end FOR timeslots
+		
+		if(fitness_min < fitness) {
+			fitness = fitness_min;
+			te[t_old][exam1] = 0;
+			te[timeslot_min][exam1] = 1;
+			U = U_min.clone();
+		}
+		
+		Neighbor neighbor = new Neighbor(exam1, timeslot_min, fitness, te);
+		/*TODO controllorale che la fitness non venga calcolata per gli esami conflittuali che si stanno valutando
+		 * Controllare che nel neighbor non ci sia lo stesso esame conflittuale
+		 * -  */
+		
+		return neighbor;		
 	}
 
 }
