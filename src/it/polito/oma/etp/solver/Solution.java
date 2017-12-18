@@ -249,6 +249,9 @@ public class Solution {
 				 * generate any fee at all */
 				y[movingExam][otherExam] <= K
 			) {
+				if(y[movingExam][otherExam] == 0)
+					throw new AssertionError("Previous solution is unfeasible");
+				
 				neighborFitnessValue -= Math.pow(2, K - y[movingExam][otherExam]) * N[movingExam][otherExam] / S;
 			}
 		
@@ -271,16 +274,18 @@ public class Solution {
 	}
 	
 	/**
-	 * Returns the distance in terms of timeslots between
-	 * exams i and j according to the solution that this
-	 * object represents.
-	 * @param i	first exam index.
-	 * @param j	second exam index.
-	 * @return	distance between the two exams i and j
+	 * Checks whether this solution is feasible or not.
 	 */
-	public int getDistance(int i, int j) {
-		return y[i][j];
-	}
+	public void checkFeasibility() {
+	    int E = instance.getE();
+	    int[][] N = instance.getN();
+	    
+	    for(int t = 0; t < instance.getTmax(); ++t)
+	      for(int esame1 = 0; esame1 < E; ++esame1)
+	        for(int esame2 = esame1+1; esame2 < E; ++esame2)
+	          if(N[esame1][esame2]>0 && te[t][esame1]==1 && te[t][esame2]==1)
+	            System.out.println("conflictual exams "+esame1+" and "+esame2+" are in the same TM");
+	  }
 	
 	/**
 	 * Getter returning the most penalizing exams pair with its
@@ -359,6 +364,18 @@ public class Solution {
 		}
 			
 		return schedule[exam];
+	}
+	
+	/**
+	 * Returns the distance in terms of timeslots between
+	 * exams i and j according to the solution that this
+	 * object represents.
+	 * @param i	first exam index.
+	 * @param j	second exam index.
+	 * @return	distance between the two exams i and j
+	 */
+	public int getDistance(int i, int j) {
+		return y[i][j];
 	}
 
 	public float getFitness() {

@@ -246,7 +246,7 @@ public class TabuSearch {
 			}
 		}
 		
-		/*TODO debug*/System.out.println("\n\nbestNeighbor is = " + bestNeighbor);
+		/*TODO debug*/System.out.println("\n\n" + bestNeighbor);
 		
 		return bestNeighbor;
 	}
@@ -271,6 +271,7 @@ public class TabuSearch {
 		
 		int movingExam = neighbor.getMovingExam();
 		/*TODO debug*/System.out.println("movingExam's index inside move(): " + movingExam);
+		/*TODO debug*/System.out.println("old fitness = " + currentSolution.getFitness());
 		
 		// Updating the current solution
 		int oldTimeslot = currentSolution.getTimeslot(movingExam);
