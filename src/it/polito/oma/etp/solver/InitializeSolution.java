@@ -35,17 +35,24 @@ public class InitializeSolution {
 		do {
 			/*TODO debug*/System.out.println("visitedExams: " + visitedExams[counter-1] + " , counter: " + counter);
 			// get the exam pair to edit		
+			
 			ExamPair unfeaseablePair = getUnfeaseblePair(visitedExams, counter);
 			// find best neighbor for the pair
+			
+		
+			if(unfeaseablePair!=null) {
 			bestNeighbor = getNeighbor(unfeaseablePair);
 			visitedExams[counter-1] = bestNeighbor.getMovingExam();
 			visitedExams[counter] = bestNeighbor.getMovingExam();
 			counter++;
 			if(counter == 16)
 				System.exit(1);
+			}
+			// TODO debug
+			else
+				System.out.println("the solution is already feasible without applying the heuristic");
 		}
 		while(fitness > 0);
-		
 		//TODO make te feasible.
 		return te;
 	}
