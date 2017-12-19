@@ -41,12 +41,12 @@ public class InitializeSolution {
 			
 		
 			if(unfeaseablePair!=null) {
-			bestNeighbor = getNeighbor(unfeaseablePair);
-			visitedExams[counter-1] = bestNeighbor.getMovingExam();
-			visitedExams[counter] = bestNeighbor.getMovingExam();
-			counter++;
-			if(counter == 16)
-				System.exit(1);
+				bestNeighbor = getNeighbor(unfeaseablePair);
+				visitedExams[counter-1] = bestNeighbor.getMovingExam();
+				visitedExams[counter] = bestNeighbor.getMovingExam();
+				counter++;
+				if(counter == 16)
+					System.exit(1);
 			}
 			// TODO debug
 			else
@@ -344,7 +344,7 @@ public class InitializeSolution {
 		}
 		/*TODO debug*/System.out.println("\nThe best fitness found is: " + fitness);
 		
-		Neighbor neighbor = new Neighbor(exam1, timeslot_min, fitness, te);
+		Neighbor neighbor = new Neighbor(exam1, timeslot_min, fitness/*, te*/);
 		/*TODO controllorale che la fitness non venga calcolata per gli esami conflittuali che si stanno valutando
 		 * Controllare che nel neighbor non ci sia lo stesso esame conflittuale
 		 * -  */

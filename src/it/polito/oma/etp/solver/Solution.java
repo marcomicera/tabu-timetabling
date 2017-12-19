@@ -100,6 +100,16 @@ public class Solution {
 	}
 	
 	/**
+	 * Updates the schedule according to the move corresponding
+	 * to the neighbor specified as the first argument.
+	 * @param neighbor	move according to which the schedule
+	 * 					will be updated.
+	 */
+	public void updateSchedule(Neighbor neighbor) {
+		schedule[neighbor.getMovingExam()] = neighbor.getNewTimeslot();
+	}
+	
+	/**
 	 * Updates the exams distance matrix given the current
 	 * decision matrix te.
 	 */
@@ -255,7 +265,7 @@ public class Solution {
 				neighborFitnessValue -= Math.pow(2, K - y[movingExam][otherExam]) * N[movingExam][otherExam] / S;
 			}
 		
-		return new Neighbor(movingExam, newTimeslot, neighborFitnessValue, newSchedule);
+		return new Neighbor(movingExam, newTimeslot, neighborFitnessValue);
 	}
 	
 	/**

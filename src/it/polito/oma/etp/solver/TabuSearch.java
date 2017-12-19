@@ -16,6 +16,7 @@ public class TabuSearch {
 	private Solution currentSolution;
 	private Solution bestSolution;
 	private int iteration;
+	private TabuList tabuList;
 	
 	public TabuSearch() {
 	}
@@ -44,7 +45,11 @@ public class TabuSearch {
 			Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 			
 			// Performing the best possible move for the most penalizing exam pair
-			move(findBestNeighbor(mostPenalizingPair.getKey()));
+			try {
+				move(findBestNeighbor(mostPenalizingPair.getKey()));
+			} catch (InvalidMoveException e) {
+				// TODO try... figure out what
+			}
 		//}
 		
 		//TODO remember to output solution on file 
@@ -256,9 +261,10 @@ public class TabuSearch {
 	
 	/**
 	 * Performs the given move passed as first argument.
-	 * @param neighbor	the neighbor to be reached by the Tabu search algorithm
+	 * @param neighbor					the neighbor to be reached by the Tabu search algorithm
+	 * @throws InvalidMoveException 	if the move is invalid for some reason.
 	 */
-	private void move(Neighbor neighbor) {
+	private void move(Neighbor neighbor) throws InvalidMoveException {
 		if(neighbor == null) {
 			// TODO think and implement
 			/**
@@ -270,18 +276,41 @@ public class TabuSearch {
 			 */
 			
 			return;
+		} else {
+			// This move is in the Tabu List
+			if(tabuList.find(neighbor) != -1) {
+				// TODO aspiration criteria
+				
+				/**
+				 * TODO findBestNeighbor shouldn't return this neighbor during the next iteration.
+				 * This could be done by letting the findBestNeighbor function return a list
+				 * of Neighbor objects (the 'neighborhood') and trying all of them if necessary. 
+				 */
+				
+				throw new InvalidMoveException("Move in Tabu List");
+			}
 		}
 		
+		// Retrieving current solution's infos before performing the move
 		int movingExam = neighbor.getMovingExam();
+		int oldTimeslot = currentSolution.getTimeslot(movingExam);
 		/*TODO debug*/System.out.println("movingExam's index inside move(): " + movingExam);
 		/*TODO debug*/System.out.println("old fitness = " + currentSolution.getFitness());
 		
+		// Inserting this move in the Tabu List
+		tabuList.add(
+			new Neighbor(
+				movingExam,
+				oldTimeslot,
+				currentSolution.getFitness() // TODO what should we put here?
+			)
+		);
+		
 		// Updating the current solution
-		int oldTimeslot = currentSolution.getTimeslot(movingExam);
 		currentSolution.updateTe(movingExam, oldTimeslot, neighbor.getNewTimeslot());
 		currentSolution.setFitness(neighbor.getFitness());
-		currentSolution.updateSchedule();
-		currentSolution.updateDistanceMatrix();
+		currentSolution.updateSchedule(neighbor); 
+		currentSolution.updateDistanceMatrix(); // TODO update only involved row and column
 		
 		/*TODO debug*/System.out.println("oldTimeslot = " + oldTimeslot);
 		/*TODO debug*/currentSolution.updateFitness();
@@ -299,9 +328,9 @@ public class TabuSearch {
 	}
 	
 	/**
-	 * Updates the best solution with the current one.
+	 * Prints the solution into a file.
 	 */
-	private void updateSolution(int te[][]) {
+	private void printSolution(int te[][]) {
 		try
 	     {
 	          FileOutputStream bestSolution = new FileOutputStream("bestSolution.txt");
