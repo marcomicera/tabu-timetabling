@@ -1,7 +1,5 @@
 package it.polito.oma.etp.solver;
 
-import java.util.Arrays;
-
 public class Neighbor implements Comparable<Neighbor> {
 	private int movingExam;
 	private int newTimeslot;
@@ -24,15 +22,7 @@ public class Neighbor implements Comparable<Neighbor> {
 	
 	@Override
 	public int compareTo(Neighbor otherNeighbor) {
-		if(	this == otherNeighbor 
-				|| 
-			(movingExam == otherNeighbor.movingExam 
-				&& 
-			newTimeslot == otherNeighbor.newTimeslot)
-		)
-			return 0;
-		
-		return -1;
+		return (int)(fitness - otherNeighbor.fitness);
 	}
 	
 	@Override
