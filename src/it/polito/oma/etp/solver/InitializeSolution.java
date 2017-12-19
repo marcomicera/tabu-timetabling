@@ -25,11 +25,26 @@ public class InitializeSolution {
 		te = generateUnfeasibleTE();
 		
 		fitness = updateFitness(U);
-		// get the exam pair to edit		
-		ExamPair unfeaseablePair = getUnfeaseblePair();		
-		
-		// find best neighbor for the pair
-		Neighbor bestNeighbor = getNeighbor(unfeaseablePair);
+		/*TODO debug*/ System.out.println("\n");
+
+		/*TODO check to not take always the same pair of exams*/
+		Neighbor bestNeighbor = new Neighbor();
+		int[] visitedExams = new int[E];
+		visitedExams[0] = -1;
+		int counter = 1;
+		do {
+			/*TODO debug*/System.out.println("visitedExams: " + visitedExams[counter-1] + " , counter: " + counter);
+			// get the exam pair to edit		
+			ExamPair unfeaseablePair = getUnfeaseblePair(visitedExams, counter);
+			// find best neighbor for the pair
+			bestNeighbor = getNeighbor(unfeaseablePair);
+			visitedExams[counter-1] = bestNeighbor.getMovingExam();
+			visitedExams[counter] = bestNeighbor.getMovingExam();
+			counter++;
+			if(counter == 16)
+				System.exit(1);
+		}
+		while(fitness > 0);
 		
 		//TODO make te feasible.
 		return te;
@@ -209,15 +224,16 @@ public class InitializeSolution {
 	/**
 	 * @return The first pair of conflictual exams that are assigned to the same tmieslot 
 	 */
-	private static ExamPair getUnfeaseblePair() {
+	private static ExamPair getUnfeaseblePair(int[] previousExam, int c) {
 		ExamPair pair = null;
-		
-		for(int i = 0; i < idata.getTmax(); i++) {
-			for(int j = 0; j < idata.getE(); j++) {
+		/*TODO check to not take always the same pair of exams*/
+		for(int i = 0; i < idata.getE(); i++) {
+			for(int j = i + 1; j < idata.getE(); j++) {
+				
 				if(U[i][j] == 1) {
 					pair = new ExamPair(i, j);
 					break;
-				}				
+				}	
 			}	
 			if(pair != null)
 				break;
@@ -236,9 +252,11 @@ public class InitializeSolution {
 		for(int i = 0; i < E; i++) {
 			for(int j = i + 1; j < E; j++) {
 				fitnessV += unfeasbilityM[i][j];
+				/*TODO debug if(unfeasbilityM[i][j] == 1)*/
+				/*TODO debug System.out.println("unfeasbilityM[i][j] = " + unfeasbilityM[i][j] + " i, j = " + i + ", " + j);*/
 			}
 		}
-		/*TODO debug*/System.out.println("Fitness: " + fitnessV);
+		/*TODO debug*/System.out.println("final fitnessV: " + fitnessV);
 		return fitnessV;
 	}
 	
@@ -255,23 +273,42 @@ public class InitializeSolution {
 			if(te[ts][exam1] == 1)
 				t_old = ts;
 		}
+		int[][] te_copy = new int[E][E];
+		int[][] U_copy = new int[E][E];
 		int fitness_copy = 0;
-		
-		
 		int fitness_min = Integer.MAX_VALUE;
 		int timeslot_min = 0;
 		int[][] U_min = new int[E][E];
 		
+		
+		// cycling timeslots
 		for(int t = 0; t < tmax; t++) {
-			int[][] te_copy = te.clone();
-			int[][] U_copy = U.clone();
+			
+			for(int i = 0; i < tmax; i++) {
+				for(int j = 0; j < E; j++) {
+					te_copy[i][j] = te[i][j];
+				}
+			}
+			
+			for(int i = 0; i < E; i++) {
+				for(int j = 0; j < E; j++) {
+					U_copy[i][j] = U[i][j];
+				}
+			}
+			
+			for(int i = 0; i < E; i++) {
+				for(int j = i + 1; j < E; j++) {
+					/*TODO debug if(U[i][j] == 1)*/
+					/*TODO debug System.out.println("\tU[i][j] = " + U[i][j] + " i, j = " + i + ", " + j);*/
+				}
+			}
 			
 			// I put exam1 in t
 			U_copy[exam1][exam2] = 0; 
 			U_copy[exam2][exam1] = 0;
-			
 			te_copy[t_old][exam1] = 0;
 			te_copy[t][exam1] = 1;
+			
 			for(int e = 0; e < E; e++) {
 				// if exam1 and e are conflictual and e is in t
 				if(N[exam1][e] != 0 && te_copy[t][e] == 1) {
@@ -281,8 +318,9 @@ public class InitializeSolution {
 			}
 			
 			fitness_copy = updateFitness(U_copy);
+			
 			/*TODO debug*/System.out.println("Moving e" + exam1 + " in t" + t);
-			System.out.println("New fitness value: " + fitness_copy);
+			System.out.println("\t\t\tNew fitness value: " + fitness_copy + "\n");
 			
 			if(fitness_min > fitness_copy) {
 				fitness_min = fitness_copy;
@@ -297,6 +335,7 @@ public class InitializeSolution {
 			te[timeslot_min][exam1] = 1;
 			U = U_min.clone();
 		}
+		/*TODO debug*/System.out.println("\nThe best fitness found is: " + fitness);
 		
 		Neighbor neighbor = new Neighbor(exam1, timeslot_min, fitness, te);
 		/*TODO controllorale che la fitness non venga calcolata per gli esami conflittuali che si stanno valutando
