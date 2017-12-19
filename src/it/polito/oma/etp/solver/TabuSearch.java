@@ -43,7 +43,7 @@ public class TabuSearch {
 		// TODO timeout that expires in the given available times
 		//while(timeout) {
 		
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 30; i++) {
 			
 			Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 			
@@ -55,10 +55,7 @@ public class TabuSearch {
 				// TODO try... figure out what
 			}
 		}
-			
-			
-			
-			
+		
 		//}
 		
 		//TODO remember to output solution on file 
@@ -230,7 +227,7 @@ public class TabuSearch {
 		
 		/*	Best fitness initialization: it is set to plus infinity so it will be overwritten 
 			during the first comparison */
-		Neighbor bestNeighbor = new Neighbor();
+		Neighbor bestNeighbor = null;
 		float bestNeighborFitness = Float.MAX_VALUE;
 		int bestMove[] = null;
 							
@@ -250,6 +247,8 @@ public class TabuSearch {
 					
 					// If a new better neighbor is found
 					if(neighborFitness < bestNeighborFitness) {
+						if(bestNeighbor == null)
+							bestNeighbor = new Neighbor();
 						bestNeighbor.update(neighbor);
 						bestNeighborFitness = neighborFitness;
 						bestMove = new int[]{movingExam, newTimeslot};
