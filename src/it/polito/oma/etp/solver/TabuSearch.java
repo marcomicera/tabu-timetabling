@@ -15,8 +15,8 @@ public class TabuSearch {
 	// private TabuListEntry tlentry;
 	private Solution currentSolution;
 	private Solution bestSolution;
-	private int iteration;
-	private TabuList tabuList;
+	private int iteration = 0;
+	private TabuList tabuList = new TabuList();
 	
 	public TabuSearch() {
 	}
@@ -42,14 +42,23 @@ public class TabuSearch {
 		
 		// TODO timeout that expires in the given available times
 		//while(timeout) {
+		
+		for (int i = 0; i < 1; i++) {
+			
 			Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
 			
 			// Performing the best possible move for the most penalizing exam pair
 			try {
 				move(findBestNeighbor(mostPenalizingPair.getKey()));
+				iteration += 1;
 			} catch (InvalidMoveException e) {
 				// TODO try... figure out what
 			}
+		}
+			
+			
+			
+			
 		//}
 		
 		//TODO remember to output solution on file 
@@ -277,7 +286,7 @@ public class TabuSearch {
 			
 			return;
 		} else {
-			// This move is in the Tabu List
+			// This move is in the Tabu List?
 			if(tabuList.find(neighbor) != -1) {
 				// TODO aspiration criteria
 				
@@ -306,15 +315,32 @@ public class TabuSearch {
 			)
 		);
 		
+		//TODO debug
+		System.out.print("the tabu list is "+tabuList.toString());
+		
+		updateSolution(movingExam, oldTimeslot, neighbor);
+	}
+	
+	/**
+	 * update the current solution with the chosen move
+	 * @param int						the exam to be moved
+	 * @param oldTimeSlod				the time-slot where the exam is moved
+	 * @param neighbor					the neighbor chosen by the algorithm
+	 */
+	private void updateSolution(int movingExam, int oldTimeslot, Neighbor neighbor) {
+		
 		// Updating the current solution
 		currentSolution.updateTe(movingExam, oldTimeslot, neighbor.getNewTimeslot());
 		currentSolution.setFitness(neighbor.getFitness());
 		currentSolution.updateSchedule(neighbor); 
 		currentSolution.updateDistanceMatrix(); // TODO update only involved row and column
-		
-		/*TODO debug*/System.out.println("oldTimeslot = " + oldTimeslot);
+				
+		/*TODO debug*/ //System.out.println("oldTimeslot = " + oldTimeslot);
 		/*TODO debug*/currentSolution.updateFitness();
 		/*TODO debug*/System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
+
+		// TODO implement: check if the current solution is better then the optimal one
+		
 	}
 	
 	/**
