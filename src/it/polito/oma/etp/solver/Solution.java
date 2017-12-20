@@ -2,6 +2,7 @@ package it.polito.oma.etp.solver;
 
 import java.util.HashMap;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
@@ -43,13 +44,13 @@ public class Solution {
 	 * (order does not matter).
 	 * The higher, the more they are going to penalize.
 	 */
-	private HashMap<ExamPair, Float> conflictCoefficients;
+	private ArrayList<ExamPair> conflictCoefficients;
 	
 	/**
 	 * Map entry corresponding to the exam that causes the
 	 * highest penalty fee.
 	 */
-	private Entry<ExamPair, Float> mostPenalizingPair;
+	private ExamPair mostPenalizingPair;
 
 	/**
 	 * Default constructor
@@ -131,13 +132,11 @@ public class Solution {
 		int[][] N = instance.getN();
 		int E = instance.getE();
 		
-		conflictCoefficients = new HashMap<ExamPair, Float>();
+		conflictCoefficients = new ArrayList<ExamPair>();
 		
 		/*	mostPenalizingPair initialization: the conflict coefficient is set to -1
 		 	so it will be replaced by the first conflicting exam pair as soon as possible */
-		mostPenalizingPair = new AbstractMap.SimpleEntry<ExamPair, Float>( 
-			new ExamPair(-1, -2), new Float(-1)
-		);
+		mostPenalizingPair = new ExamPair(-1, -2, -1);
 		
 		// For each pair of exams (order does not matter)
 		for(int i = 0; i < E; ++i)
@@ -147,24 +146,16 @@ public class Solution {
 					Float newCoefficient = new Float(N[i][j]) / getDistance(i, j);
 					
 					// Inserting the conflict coefficient for the corresponding exam pair
-					conflictCoefficients.put(
-						// The corresponding exam pair acts as a key in this Map
-						new ExamPair(i, j),
-						
-						// The conflict coefficient value
-						newCoefficient
+					conflictCoefficients.add(
+						// The corresponding exam pair with its conflict coefficient 
+						new ExamPair(i, j, newCoefficient)
 					);
 					
 					// Replacing the new most penalizing exam if necessary
 					// TODO what to do in case the most penalizing exam pair cannot be rescheduled?
-					if(newCoefficient > mostPenalizingPair.getValue())
-						mostPenalizingPair = new AbstractMap.SimpleEntry<ExamPair, Float>(
-							// The corresponding exam pair acts as a key in this Map
-							new ExamPair(i, j),
-								
-							// The conflict coefficient value
-							newCoefficient
-						);
+					if(newCoefficient > mostPenalizingPair.getConflictCoefficient())
+						// The corresponding exam pair with its conflict coefficient
+						mostPenalizingPair = new ExamPair(i, j, newCoefficient);
 				}
 			}
 	}
@@ -303,7 +294,7 @@ public class Solution {
 	 * @return	an entry having the conflict coefficient - exam pair of
 	 * 			the most penalizing exam pair 
 	 */
-	public Entry<ExamPair, Float> getMostPenalizingPair() {
+	public ExamPair getMostPenalizingPair() {
 		if(conflictCoefficients.isEmpty())
 			return null;
 		
@@ -322,7 +313,7 @@ public class Solution {
 				//"\n\nPrinting Te:\n" + printMatrix(te) +
 				//"Printing y:\n" + printMatrix(y) +
 				"Printing conflictCoefficients:\n" + printConflictCoefficients() +
-				"Most penalizing exam pair: " + mostPenalizingPair.getKey() + ", confl. = " + mostPenalizingPair.getValue() +
+				"Most penalizing exam pair: " + mostPenalizingPair +
 				"\n\nFitness value: " + fitness
 		;
 	}
@@ -333,12 +324,12 @@ public class Solution {
 	 * 			in a readable format.
 	 */
 	private String printConflictCoefficients() {
-		String result = "";
+		String result = "[";
 		
-		for(Entry<ExamPair, Float> entry: conflictCoefficients.entrySet()) 
-			result += "[Exams " + entry.getKey() + " coeff. = " + entry.getValue() + " ]\n";
+		for(ExamPair entry: conflictCoefficients) 
+			result += entry.toString();
 		
-		return result + "\n";
+		return result + "]\n";
 	}
 
 	/**
@@ -394,5 +385,9 @@ public class Solution {
 
 	public void setFitness(float fitness) {
 		this.fitness = fitness;
+	}
+
+	public ArrayList<ExamPair> getConflictCoefficients() {
+		return conflictCoefficients;
 	}
 }

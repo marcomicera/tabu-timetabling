@@ -3,7 +3,7 @@ package it.polito.oma.etp.solver;
 public class Neighbor implements Comparable<Neighbor> {
 	private int movingExam;
 	private int newTimeslot;
-	private float fitness;
+	private Float fitness;
  	
 	public Neighbor() {
 	}
@@ -11,6 +11,7 @@ public class Neighbor implements Comparable<Neighbor> {
 	public Neighbor(int movingExam, int newTimeslot, float fitness) {
 		this.movingExam = movingExam;
 		this.newTimeslot = newTimeslot;
+		
 		this.fitness = fitness;
 	}
 	
@@ -22,7 +23,7 @@ public class Neighbor implements Comparable<Neighbor> {
 	
 	@Override
 	public int compareTo(Neighbor otherNeighbor) {
-		return (int)(fitness - otherNeighbor.fitness);
+		return fitness.compareTo(Float.valueOf(otherNeighbor.fitness));
 	}
 	
 	@Override

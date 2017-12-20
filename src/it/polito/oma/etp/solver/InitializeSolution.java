@@ -229,7 +229,7 @@ public class InitializeSolution {
 	}
 	
 	/**
-	 * @return The first pair of conflictual exams that are assigned to the same tmieslot 
+	 * @return The first pair of conflictual exams that are assigned to the same timeslot 
 	 */
 	private static ExamPair getUnfeaseblePair(int[] previousExam, int c) {
 		ExamPair pair = null;

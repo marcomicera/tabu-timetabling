@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
 
 import it.polito.oma.etp.reader.InstanceData;
@@ -45,11 +46,23 @@ public class TabuSearch {
 		
 		for (int i = 0; i < 30; i++) {
 			
-			Entry<ExamPair, Float> mostPenalizingPair = currentSolution.getMostPenalizingPair();
+			ExamPair mostPenalizingPair = currentSolution.getMostPenalizingPair();
 			
 			// Performing the best possible move for the most penalizing exam pair
 			try {
-				move(getNeighborhood(mostPenalizingPair.getKey()));
+				ArrayList<Neighbor> neighborhood = getNeighborhood(mostPenalizingPair);
+				
+				if(!neighborhood.isEmpty())
+					move(neighborhood);
+				else {
+					ArrayList<ExamPair> penalizingPairs = currentSolution.getConflictCoefficients();
+					
+					Collections.sort(penalizingPairs);
+					
+					/*TODO debug*/System.out.println(penalizingPairs);
+				}
+				
+				
 				/*TODO debug*/System.out.println("\n");
 				
 				iteration += 1;
