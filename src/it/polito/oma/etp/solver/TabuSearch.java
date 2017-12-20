@@ -38,39 +38,43 @@ public class TabuSearch {
 		*/
 		currentSolution = new Solution(instanceData, te);
 		
-		// For now this is our best solution
+		// Until now this is our best solution
 		bestSolution = new Solution(currentSolution);
 		
 		// TODO timeout that expires in the given available times
 		//while(timeout) {
-		
 		for (int i = 0; i < 30; i++) {
+			
+			/*TODO debug*/System.out.println("\n***** Iteration " + i + " *****");
 			
 			ExamPair mostPenalizingPair = currentSolution.getMostPenalizingPair();
 			
-			// Performing the best possible move for the most penalizing exam pair
-			try {
-				ArrayList<Neighbor> neighborhood = getNeighborhood(mostPenalizingPair);
+			ArrayList<Neighbor> neighborhood = getNeighborhood(mostPenalizingPair);
+			
+			Neighbor validNeighbor = checkTabuList(neighborhood);
+			
+			if(validNeighbor == null) {
+				/*TODO debug*/System.out.println("The most penalizing exam pair has no valid neighbor");
+				ArrayList<ExamPair> penalizingPairs = currentSolution.getConflictCoefficients();
+				Collections.sort(penalizingPairs);
 				
-				if(!neighborhood.isEmpty())
-					move(neighborhood);
-				else {
-					ArrayList<ExamPair> penalizingPairs = currentSolution.getConflictCoefficients();
-					
-					Collections.sort(penalizingPairs);
-					
-					/*TODO debug*/System.out.println(penalizingPairs);
+				int counter = 1;
+				ExamPair nextPair;
+				while(validNeighbor == null) {
+					nextPair = penalizingPairs.get(counter++);
+					neighborhood = getNeighborhood(nextPair);
+					validNeighbor = checkTabuList(neighborhood);
 				}
-				
-				
-				/*TODO debug*/System.out.println("\n");
-				
-				iteration += 1;
-			} catch (InvalidMoveException e) {
-				// TODO try... figure out what
 			}
+			
+			if(validNeighbor != null)
+				move(validNeighbor);
+			else {
+				/*TODO debug*/System.err.println("No valid neighbors found for any exam pair: should we reset the Tabu list?");
+			}
+			
+			/*TODO debug*/System.out.println("\n");
 		}
-		
 		//}
 		
 		//TODO remember to output solution on file 
@@ -262,18 +266,16 @@ public class TabuSearch {
 		// Retrieving the timeslots in which the two exams have been scheduled
 		int firstExamSlot = currentSolution.getTimeslot(examPair.getExam1());
 		int secondExamSlot = currentSolution.getTimeslot(examPair.getExam2());
-		/*TODO debug*/System.out.println("firstExamSlot = " + firstExamSlot + "\nsecondExamSlot = " + secondExamSlot);
+		/*TODO debug*/ //System.out.println("firstExamSlot = " + firstExamSlot + "\nsecondExamSlot = " + secondExamSlot);
 		
 		// The exam to be rescheduled will be the one closer to the schedule's center
 		int firstMovingExamChoice = ((Math.abs(firstExamSlot - Tmax/2)) < (Math.abs(secondExamSlot - Tmax/2))) ? 
 										examPair.getExam1() : examPair.getExam2();
-		/*TODO debug*/System.out.println("movingExam's index: " + firstMovingExamChoice);
-		/*TODO debug*/System.out.println("movingExam's timeslot: " + currentSolution.getTimeslot(firstMovingExamChoice));
 		
 		// Computing support variables for excluding timeslots between the two exams 
 		int lowestIndex = (firstExamSlot < secondExamSlot) ? firstExamSlot : secondExamSlot;
 		int highestIndex = (firstExamSlot < secondExamSlot) ? secondExamSlot : firstExamSlot;
-		/*TODO debug*/System.out.println("lowestIndex = " + lowestIndex + "\nhighestIndex = " + highestIndex);
+		/*TODO debug*///System.out.println("lowestIndex = " + lowestIndex + "\nhighestIndex = " + highestIndex);
 		
 		// Retrieving the neighborhood corresponding to the first moving exam choice
 		ArrayList<Neighbor> neighborhood = examNeighborhood(firstMovingExamChoice, lowestIndex, highestIndex);
@@ -292,64 +294,67 @@ public class TabuSearch {
 			// Ordering the neighborhood by increasing fitness value
 			Collections.sort(neighborhood);
 		
-		/*TODO debug*/System.out.println(neighborhood);
+		/*TODO debug*/System.out.println("Neighborhood: " + neighborhood);
 		
 		return neighborhood;
 	}
 	
 	/**
-	 * Tries to perform the best move among the given neighborhood passed as first argument, if possible.
-	 * @param neighborhood				the neighborhood to be explored by the Tabu search algorithm
-	 * @throws InvalidMoveException 	// TODO when?
+	 * Determines whether all neighbors belonging to the neighborhood passed
+	 * as argument can be used for the next move or not. 
+	 * @param neighborhood	the neighborhood to be checked with respected to
+	 * 						the Tabu list.
+	 * @return				the first acceptable neighbor that can be used 
+	 * 						for the next move according to the Tabu list or
+	 * 						null if no valid neighbor was found.
 	 */
-	private void move(ArrayList<Neighbor> neighborhood) throws InvalidMoveException {
-		if(neighborhood.isEmpty()) {
-			/*TODO debug*/System.out.println("Empty neighborhood");
-			
-			/**
-			 * We have a few options here:
-			 * 
-			 * 1) Trying to move the second most penalizing exam pair, changing all our data structures about that
-			 * 2) Resetting the whole Tabu list
-			 */
-			
-			return;
-		} else {
-			Neighbor bestNeighbor = neighborhood.get(0);
-			
-			// This move is in the Tabu List?
-			if(tabuList.find(bestNeighbor) != -1) {
+	private Neighbor checkTabuList(ArrayList<Neighbor> neighborhood) {
+		if(neighborhood == null || neighborhood.isEmpty())
+			return null;
+		
+		Neighbor validNeighbor = null;
+		for(Neighbor neighbor: neighborhood) {
+			// Is this move in the Tabu list?
+			if(tabuList.find(neighbor) != -1) {
 				// TODO aspiration criteria
 				
-				/**
-				 * TODO findBestNeighbor shouldn't return this neighbor during the next iteration.
-				 * This could be done by letting the findBestNeighbor function return a list
-				 * of Neighbor objects (the 'neighborhood') and trying all of them if necessary. 
-				 */
-				
-				throw new InvalidMoveException("Move in Tabu List");
+				continue;
 			}
-			
-			// Retrieving current solution's infos before performing the move
-			int movingExam = bestNeighbor.getMovingExam();
-			int oldTimeslot = currentSolution.getTimeslot(movingExam);
-			/*TODO debug*/System.out.println("movingExam's index inside move(): " + movingExam);
-			/*TODO debug*/System.out.println("old fitness = " + currentSolution.getFitness());
-			
-			// Inserting this move in the Tabu List
-			tabuList.add(
-				new Neighbor(
-					movingExam,
-					oldTimeslot,
-					currentSolution.getFitness() // TODO what should we put here?
-				)
-			);
-			
-			//TODO debug
-			System.out.print("the tabu list is "+ tabuList.toString());
-			
-			updateSolution(movingExam, oldTimeslot, bestNeighbor);
+			else {
+				validNeighbor = neighbor;
+				break;
+			}
 		}
+			
+		return validNeighbor;
+	}
+	
+	/**
+	 * TODO missing JavaDoc
+	 * @param neighbor
+	 */
+	private void move(Neighbor neighbor) {
+		/*TODO debug*/System.out.println("Move: <e" + neighbor.getMovingExam() + ", from t" + currentSolution.getTimeslot(neighbor.getMovingExam()) + " to t" + neighbor.getNewTimeslot() + ">");
+		
+		// Retrieving current solution's infos before performing the move
+		int movingExam = neighbor.getMovingExam();
+		int oldTimeslot = currentSolution.getTimeslot(movingExam);
+		/*TODO debug*/ //System.out.println("movingExam's index inside move(): " + movingExam);
+		/*TODO debug*/ //System.out.println("old fitness = " + currentSolution.getFitness());
+		
+		// Inserting this move in the Tabu List
+		tabuList.add(
+			new Neighbor(
+				movingExam,
+				oldTimeslot,
+				currentSolution.getFitness() // TODO what should we put here?
+			)
+		);
+		
+		//TODO debug
+		System.out.print("Tabu list: "+ tabuList);
+		
+		updateSolution(movingExam, oldTimeslot, neighbor);
 	}
 	
 	/**

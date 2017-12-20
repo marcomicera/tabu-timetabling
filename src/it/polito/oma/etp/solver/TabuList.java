@@ -22,7 +22,7 @@ public class TabuList {
 	}
 	
 	public int find(Neighbor neighbor) {
-			return tabuList.indexOf(neighbor);
+		return tabuList.indexOf(neighbor);
 	}
 	
 	private boolean isFull() {
@@ -30,7 +30,7 @@ public class TabuList {
 	}
 	
 	private boolean isEmpty() {
-			return tabuList.size() == 0;
+		return tabuList.size() == 0;
 	}
 	
 	public static int getMAX_SIZE() {

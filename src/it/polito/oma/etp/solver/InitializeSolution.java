@@ -263,7 +263,7 @@ public class InitializeSolution {
 				/*TODO debug System.out.println("unfeasbilityM[i][j] = " + unfeasbilityM[i][j] + " i, j = " + i + ", " + j);*/
 			}
 		}
-		/*TODO debug*/System.out.println("final fitnessV: " + fitnessV);
+		/*TODO debug*/ //System.out.println("final fitness: " + fitnessV);
 		return fitnessV;
 	}
 	
@@ -326,7 +326,7 @@ public class InitializeSolution {
 			
 			fitness_copy = updateFitness(U_copy);
 			
-			/*TODO debug*/System.out.println("Moving e" + exam1 + " in t" + t);
+			/*TODO debug*/ //System.out.println("Moving e" + exam1 + " in t" + t);
 			System.out.println("\t\t\tNew fitness value: " + fitness_copy + "\n");
 			
 			if(fitness_min > fitness_copy) {
@@ -342,7 +342,7 @@ public class InitializeSolution {
 			te[timeslot_min][exam1] = 1;
 			U = U_min.clone();
 		}
-		/*TODO debug*/System.out.println("\nThe best fitness found is: " + fitness);
+		/*TODO debug*/ //System.out.println("\nThe best fitness found is: " + fitness);
 		
 		Neighbor neighbor = new Neighbor(exam1, timeslot_min, fitness/*, te*/);
 		/*TODO controllorale che la fitness non venga calcolata per gli esami conflittuali che si stanno valutando

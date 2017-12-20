@@ -21,6 +21,20 @@ public class Neighbor implements Comparable<Neighbor> {
 		fitness = neighbor.fitness;
 	}
 	
+	// Searching in Lists
+	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(!(o instanceof Neighbor)) return false;
+		
+		Neighbor otherNeighbor = (Neighbor)o;
+		
+		return	movingExam == otherNeighbor.movingExam
+					&&
+				newTimeslot == otherNeighbor.newTimeslot;
+	}
+
+	// Ordering
 	@Override
 	public int compareTo(Neighbor otherNeighbor) {
 		return fitness.compareTo(Float.valueOf(otherNeighbor.fitness));
@@ -28,9 +42,9 @@ public class Neighbor implements Comparable<Neighbor> {
 	
 	@Override
 	public String toString() {
-		return	"[Neighbor] movingExam = " + movingExam +
-				"; newTimeslot = " + newTimeslot +
-				"; fitness = " + fitness;
+		return	"<movingExam = " + movingExam +
+				", newTimeslot = " + newTimeslot +
+				", fitness = " + fitness + ">";
 	}
 	
 	public float getFitness() {
