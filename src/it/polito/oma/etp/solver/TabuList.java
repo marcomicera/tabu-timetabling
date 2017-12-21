@@ -1,6 +1,7 @@
 package it.polito.oma.etp.solver;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class TabuList {
@@ -31,6 +32,20 @@ public class TabuList {
 	
 	private boolean isEmpty() {
 		return tabuList.size() == 0;
+	}
+	
+	public boolean contains(int exam, int t) {
+		boolean b = false;
+		
+		Iterator<Neighbor> i;
+		Neighbor n;
+		for(i = tabuList.iterator(); i.hasNext();) {
+			n = i.next();
+			if(n.getMovingExam() == exam && n.getNewTimeslot() == t)
+				b = true;
+		}
+		
+		return b;		
 	}
 	
 	public static int getMAX_SIZE() {
