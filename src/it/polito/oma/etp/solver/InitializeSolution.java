@@ -14,6 +14,7 @@ public class InitializeSolution {
 	private static int[][] te;
 	/** Counter to scan the neighborhood without choosing the same neighbor twice */
 	private static int check;
+	private static boolean moved;
 	
 	/**
 	 * Given a set of data relative to an instance of the problem, it returns back a first
@@ -22,11 +23,12 @@ public class InitializeSolution {
 	 * @return A feasible solution of the instance in the form of the matrix TE
 	 */
 	public static int[][] getFeasibleSolution(InstanceData instanceData){
+		long startTime = System.currentTimeMillis();
 		idata = instanceData;
 		int E = idata.getE();
 		U = new int[E][E];
 		te = generateUnfeasibleTE();
-		
+		moved = false;
 		tabulist = new TabuList();
 		
 		fitness = updateFitness(U);
@@ -36,27 +38,37 @@ public class InitializeSolution {
 		UnfeasibilityNeighbor bestNeighbor = null;
 		check = 0;
 		do {	
-			if (check == E) check = 0;
+			if (check == E) {
+				check = 0;
+				if(!moved) {
+					System.out.println("\t\t\tMove: "+ bestNeighbor);
+					move(bestNeighbor, 1);
+					
+				}
+				moved = false;
+			} 
 			// get the exam pair to edit
 			ExamPair unfeaseablePair = getUnfeaseblePair(check);
 			// find best neighbor for the pair
-			/*TODO Debug*/System.out.println(unfeaseablePair);
-		
 			if(unfeaseablePair!=null) {
 				bestNeighbor = getNeighbor(unfeaseablePair);
-				move(bestNeighbor);
+				move(bestNeighbor, 0);
 			}
 			// TODO debug
 			else {
 				
-				System.out.println("the solution is already feasible without applying the heuristic");
+				//System.out.println("the solution is already feasible without applying the heuristic");
 				//System.exit(1);
 			}
 			check++;
-			System.out.println(tabulist);
+			
 		}
 		while(fitness > 0);
-		//TODO make te feasible.
+		long stopTime = System.currentTimeMillis();
+		/*TODO debug*/System.out.println("\n" + instanceData.getInstanceName() + ": ");
+		/*TODO debug*/System.out.println("elapsed time to make the first solution feasible: " + (stopTime - startTime)/1000 + " seconds");
+		/*TODO debug*/System.out.println("Tabu list size: " + tabulist.getMAX_SIZE() + " elements");
+		System.exit(1);
 		return te;
 	}
 	
@@ -130,7 +142,7 @@ public class InitializeSolution {
 			/* If at the end of the timeslots checking, the exam can't still be assigned, we introuduce infeasibility.
 			 * We assigne exam to the timeslot with less conflictual exams and update U accordingly. */
 			if (assignedExams[exam] == 0) {
-				/*TODO debug*/System.out.println("This exam couldn't find a timeslot: e" + exam /*+ " - " + ++failCounter*/);
+				/*TODO debug*///System.out.println("This exam couldn't find a timeslot: e" + exam /*+ " - " + ++failCounter*/);
 				
 				// number of conflicts for each timeslot
 				int[] numberOfConflicts = new int[tmax];
@@ -161,9 +173,9 @@ public class InitializeSolution {
 						myTimeslot = t;
 					}
 				}
-				/*TODO debug*/System.out.println("The timeslot with less conflicts for exam e" + exam + " is t" + myTimeslot
+				/*TODO debug System.out.println("The timeslot with less conflicts for exam e" + exam + " is t" + myTimeslot
 												 + " with " + minConflicts + " conflictual exams. \n");
-				
+				*/
 				/* Now the exam is placed in the timeslot myTimeslot and the relative U elements are set at 1, remembering it is
 				 * introducing an unfeasibility in the solution.*/
 				te[myTimeslot][exam] = 1;
@@ -185,7 +197,8 @@ public class InitializeSolution {
 			
 		} // END FOR exam
 		
-		/*TODO debug*/System.out.println("Unfeasibility matrix:");
+		
+		/*TODO debug System.out.println("Unfeasibility matrix:");
 		for(int i = 0; i < examnumber; i++) {
 			for(int j = i + 1; j < examnumber; j++) {
 				if(U[i][j] == 1)
@@ -193,7 +206,7 @@ public class InitializeSolution {
 			}	
 		}
 		System.out.println();
-		
+		*/
 		return te;
 	}
 	
@@ -240,9 +253,9 @@ public class InitializeSolution {
 		ExamPair pair = null;
 		/*TODO check to not take always the same pair of exams*/
 		for(int i = c; i < idata.getE(); i++) {
-			for(int j = i + 1; j < idata.getE(); j++) {
+			for(int j = 0; j < idata.getE(); j++) {
 				if(U[i][j] == 1) {
-					System.out.println("Unfeasibility between exam e" + i + " and e" + j);
+					//System.out.println("Unfeasibility between exam e" + i + " and e" + j);
 
 					pair = new ExamPair(i, j);
 					check = i;
@@ -285,6 +298,7 @@ public class InitializeSolution {
 		int[][] N = idata.getN();
 		int exam1 = exPair.getExam1();
 		int exam2 = exPair.getExam2();
+				
 		// timeslot where are now assigned exam1 and exam2
 		int t_old = 0;
 		// looking for the timeslot where exam1 is placed now
@@ -304,7 +318,7 @@ public class InitializeSolution {
 		// cycling timeslots
 		for(int t = 0; t < tmax; t++) {
 			
-			if(!tabulist.contains(exam1, t)) {
+			if(!tabulist.contains(exam1, t) && t != t_old) {
 				te_copy = Utility.cloneMatrix(te);
 				U_copy = Utility.cloneMatrix(U);
 				
@@ -324,8 +338,8 @@ public class InitializeSolution {
 				
 				fitness_copy = updateFitness(U_copy);
 				
-				/*TODO debug*/System.out.println("\t\t\tNew fitness value: " + fitness_copy + "\n");
-				
+				/*TODO debug System.out.println("\t\t\tNew fitness value: " + fitness_copy + "\n");
+				*/
 				if(fitness_min >= fitness_copy) {
 					fitness_min = fitness_copy;
 					timeslot_min = t;
@@ -343,17 +357,19 @@ public class InitializeSolution {
 	 * Move the exam selected by the getNeighbor method
 	 * @param n neighbor
 	 */
-	private static void move(UnfeasibilityNeighbor n) {
-		if(n.getFitness() <= fitness) {
+	private static void move(UnfeasibilityNeighbor n, int must) {
+		if(n.getFitness() <= fitness || must == 1) {
 			
 			int exam = n.getMovingExam();
-			
+			moved = true;
 			fitness = (int)n.getFitness();
 			te[n.getOldTimeslot()][exam] = 0;
 			te[n.getNewTimeslot()][exam] = 1;
 			U = Utility.cloneMatrix(n.getU());
 			
 			tabulist.add(new Neighbor(exam, n.getOldTimeslot(), fitness)); // TODO what should we put in the last arg?
+			
+			System.out.println(tabulist.getLastEntry());
 		}
 	}
 }

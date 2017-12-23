@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class TabuList {
-	private static int MAX_SIZE = 10;
+	private static int MAX_SIZE = 50;
 	
 	private LinkedList<Neighbor> tabuList;
 	
@@ -54,6 +54,10 @@ public class TabuList {
 
 	public static void setMAX_SIZE(int mAX_SIZE) {
 		MAX_SIZE = mAX_SIZE;
+	}
+	
+	public Neighbor getLastEntry() {
+		return tabuList.getLast();
 	}
 	
 	public String toString() {
