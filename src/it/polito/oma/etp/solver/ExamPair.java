@@ -17,11 +17,16 @@ public class ExamPair implements Comparable<ExamPair> {
 		this.exam2 = exam2;
 		this.conflictCoefficient = conflictCoefficient;
 	}
-	
+
+	/**
+	 * Constructor useful whenever the conflict coefficient makes
+	 * no sense.
+	 * @param exam1	First exam belonging to this pair.
+	 * @param exam2	Second exam belonging to this pair.
+	 */
 	public ExamPair(int exam1, int exam2) {
 		this(exam1, exam2, -1);
 	}
-
 
 	@Override
 	public int compareTo(ExamPair otherExamPair) {

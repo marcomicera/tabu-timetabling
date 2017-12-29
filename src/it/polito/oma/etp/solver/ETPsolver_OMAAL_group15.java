@@ -4,9 +4,8 @@ import it.polito.oma.etp.reader.InputReader;
 import it.polito.oma.etp.reader.InstanceData;
 
 public class ETPsolver_OMAAL_group15 {
-
 	public static String instanceName;
-	public static InstanceData idata;
+	public static InstanceData instanceData;
 	
 	public static void main(String[] args) {
 		if(args.length != 1) {
@@ -16,34 +15,24 @@ public class ETPsolver_OMAAL_group15 {
 			System.exit(1);
 		}
 		
-		TabuSearch solver = new TabuSearch();
+		// TODO starting timer thread
+		
+		// Instance data
 		instanceName = args[0];
+		instanceData = InputReader.getData("res\\" + instanceName);
 		
-		idata = InputReader.getData("res\\" + instanceName);
+		// TODO first infeasible solution
+		InitializationSolution initialInfeasibleSolution = null;
 		
-		// *********************** Testing code ***********************
-		// TODO delete first little test
-		/*InstanceData testInstance = new InstanceData(
-			"test instance",
-			40,	// S
-			5,	// E
-			4, 	// Tmax
-			new int[][]{ // N
-				{0,		5,	15,	0,	5},
-				{5,		0,	0,	5,	25},
-				{15,	0,	0,	10,	0},
-				{0,		5,	10,	0,	25},
-				{5,		25,	0,	25,	0}
-			}
-		);*/
+		// Computing the first feasible solution
+		TabuSearch feasibleSolutionGenerator = new TabuInitialization(initialInfeasibleSolution);
+		feasibleSolutionGenerator.solve(instanceData); // TODO stopping condition: fitness = 0 (finite execution time)
+		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.getSolution();
 		
-		/*for(int i = 0; i < idata.getE(); i++) {
-			for(int j = 0; j < idata.getE(); j++) {
-				System.out.print(idata.getN()[i][j] + "\t");
-			}
-			System.out.println("");
-		}*/
+		// Computing the timetabling solution
+		TabuSearch solutionGenerator = new TabuOptimization(initialFeasibleSolution);
+		solutionGenerator.solve(instanceData); // infinite loop, interrupted by the timer thread
 		
-		solver.solve(idata);
+		OptimizationSolution solution = (OptimizationSolution)solutionGenerator.getSolution();
 	}
 }

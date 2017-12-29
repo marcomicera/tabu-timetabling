@@ -28,7 +28,7 @@ public class InitializeSolution {
 		int E = idata.getE();
 		U = new int[E][E];
 		
-		MySolution currentSolution = generateUnfeasibleTE();
+		InitializationSolution currentSolution = generateUnfeasibleTE();
 		
 		//te = generateUnfeasibleTE();
 		moved = false;
@@ -102,7 +102,7 @@ public class InitializeSolution {
 	 * @return An unfeasible solution for the given instance (having conflictual exams
 	 * in the same timeslot).
 	 */
-	private static MySolution generateUnfeasibleTE(){
+	private static InitializationSolution generateUnfeasibleTE(){
 						
 		int examnumber = idata.getE();
 		int N[][] = idata.getN();
@@ -218,7 +218,7 @@ public class InitializeSolution {
 			
 		} // END FOR exam
 		
-		return new MySolution(idata, te, U);
+		return new InitializationSolution(idata, te, U);
 	}
 	
 	/**
@@ -260,7 +260,7 @@ public class InitializeSolution {
 	/**
 	 * @return The first pair of conflictual exams that are assigned to the same timeslot 
 	 */
-	private static ExamPair getUnfeaseblePair(int c, MySolution s) {
+	private static ExamPair getUnfeaseblePair(int c, InitializationSolution s) {
 		ExamPair pair = null;
 		InstanceData idata = s.getInstanceData();
 		int[][] U = Utility.cloneMatrix(s.getU());
@@ -304,7 +304,7 @@ public class InitializeSolution {
 	 * @param exPair
 	 * @return
 	 */
-	private static UnfeasibilityNeighbor getNeighbor(MySolution s, ExamPair exPair) {
+	private static UnfeasibilityNeighbor getNeighbor(InitializationSolution s, ExamPair exPair) {
 		int E = s.getInstanceData().getE();
 		int tmax = s.getInstanceData().getTmax();
 		int[][] N = s.getInstanceData().getN();
@@ -374,7 +374,7 @@ public class InitializeSolution {
 	 * Move the exam selected by the getNeighbor method
 	 * @param n neighbor
 	 */
-	private static MySolution move(MySolution currentS, UnfeasibilityNeighbor n) {
+	private static InitializationSolution move(InitializationSolution currentS, UnfeasibilityNeighbor n) {
 		int exam = n.getMovingExam();
 		int[][] te = Utility.cloneMatrix(currentS.getTE());	
 		int[][] U = Utility.cloneMatrix(n.getU());
@@ -383,7 +383,7 @@ public class InitializeSolution {
 		te[n.getNewTimeslot()][exam] = 1;
 		
 	
-		MySolution s = new MySolution(currentS.getInstanceData(), te, U);
+		InitializationSolution s = new InitializationSolution(currentS.getInstanceData(), te, U);
 		System.out.println(s.getFitness());
 		//int exam = n.getMovingExam();
 		//moved = true;
