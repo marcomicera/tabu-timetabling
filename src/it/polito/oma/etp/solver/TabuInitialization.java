@@ -9,10 +9,8 @@ public class TabuInitialization extends TabuSearch {
 	public TabuInitialization(InstanceData instanceData) {
 		super(instanceData);
 		
-		InitializationSolution infeasibleSolution = generateUnfeasibleSolution();
-		
 		// Initially, the current solution is the initial one
-		currentSolution = new InitializationSolution(infeasibleSolution);
+		currentSolution = generateUnfeasibleSolution();
 		
 		// By now this is our best solution
 		bestSolution = new InitializationSolution(currentSolution);
@@ -198,7 +196,12 @@ public class TabuInitialization extends TabuSearch {
 	
 	@Override
 	protected ExamPair getNextPair(int nextPairIndex) throws IndexOutOfBoundsException {
-		return currentSolution.getPenalizingPairs().get(nextPairIndex);
+		//return currentSolution.getPenalizingPairs().get(nextPairIndex);
+		
+		// Randomly is way more better
+		return currentSolution.getPenalizingPairs().get(
+			java.util.concurrent.ThreadLocalRandom.current().nextInt(0, currentSolution.getPenalizingPairs().size() + 1)
+		);  
 	}
 	
 	@Override

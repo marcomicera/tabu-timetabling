@@ -44,11 +44,13 @@ public class OptimizationSolution extends Solution {
 	public OptimizationSolution(InitializationSolution s) {
 		super(s);
 		
+		// New data structure needed in this type of solution
+		int E = instance.getE();
+		distanceMatrix = new int[E][E];
+		initializeDistanceMatrix();
+		
 		// From number of infeasibilities to penalizing fee
 		initializeFitness();
-		
-		// New data structure needed in this type of solution
-		initializeDistanceMatrix();
 		
 		/**
 		 * From exam pairs generating infeasibilities to

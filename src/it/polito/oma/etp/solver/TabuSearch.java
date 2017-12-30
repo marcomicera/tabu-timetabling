@@ -47,6 +47,7 @@ public abstract class TabuSearch {
 					
 					/*TODO debug*/System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
 					/*TODO debug*/System.out.println("Neighborhood: " + neighborhood);
+					/*TODO debug*/System.out.println("Neighborhood size: " + neighborhood.size());
 					
 					validNeighbor = selectBestValidNeighbor(neighborhood);
 					++nextPairIndex;
@@ -146,7 +147,7 @@ public abstract class TabuSearch {
 		for(Neighbor neighbor: neighborhood) {
 			
 			// This move is in the Tabu List
-			if(tabuList.find(neighbor) != -1)
+			if(tabuList.find(neighbor) != -1) {
 				/*TODO debug*/System.out.println("Neighbor " + neighbor + " has been found in the Tabu List");
 				
 				// Aspiration criteria satisfied
@@ -154,6 +155,7 @@ public abstract class TabuSearch {
 					validNeighbor = neighbor;
 					break;
 				}
+			}
 			// This move is not in the Tabu List
 			else {
 				validNeighbor = neighbor;

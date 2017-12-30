@@ -132,12 +132,13 @@ public class InitializationSolution extends Solution {
 				// If there are students enrolled in both exams (conflicting exams)
 				N[movingExam][otherExam] > 0
 			) 
-				// Removing old conflicts
+				// Removing old infeasibilities
 				if(	// If both exams have been scheduled in the same timeslot
 					te[oldTimeslot][otherExam] == 1
 				)
 					--neighborFitnessValue;
 				
+				// Adding new infeasibilities
 				else if(// If there will be new exams in the same timeslot
 						te[newTimeslot][otherExam] == 1
 				)
