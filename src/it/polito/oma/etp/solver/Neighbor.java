@@ -8,18 +8,22 @@ public class Neighbor implements Comparable<Neighbor> {
 	public Neighbor() {
 	}
 	
-	public Neighbor(int movingExam, int newTimeslot, float fitness) {
+	public Neighbor(int movingExam, int newTimeslot, Float fitness) {
 		this.movingExam = movingExam;
 		this.newTimeslot = newTimeslot;
 		
 		this.fitness = fitness;
 	}
 	
-	public void update(Neighbor neighbor) {
+	public Neighbor(int movingExam, int newTimeslot) {
+		this(movingExam, newTimeslot, null);
+	}
+	
+	/*public void update(Neighbor neighbor) {
 		movingExam = neighbor.movingExam;
 		newTimeslot = neighbor.newTimeslot;
 		fitness = neighbor.fitness;
-	}
+	}*/
 	
 	// Searching in Lists
 	@Override

@@ -21,17 +21,14 @@ public class ETPsolver_OMAAL_group15 {
 		instanceName = args[0];
 		instanceData = InputReader.getData("res\\" + instanceName);
 		
-		// TODO first infeasible solution
-		InitializationSolution initialInfeasibleSolution = null;
-		
 		// Computing the first feasible solution
-		TabuSearch feasibleSolutionGenerator = new TabuInitialization(initialInfeasibleSolution);
-		feasibleSolutionGenerator.solve(instanceData); // TODO stopping condition: fitness = 0 (finite execution time)
+		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData);
+		feasibleSolutionGenerator.solve(); // TODO stopping condition: fitness = 0 (finite execution time)
 		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.getSolution();
 		
 		// Computing the timetabling solution
-		TabuSearch solutionGenerator = new TabuOptimization(initialFeasibleSolution);
-		solutionGenerator.solve(instanceData); // infinite loop, interrupted by the timer thread
+		TabuSearch solutionGenerator = new TabuOptimization(instanceData, initialFeasibleSolution);
+		solutionGenerator.solve(); // infinite loop, interrupted by the timer thread
 		
 		OptimizationSolution solution = (OptimizationSolution)solutionGenerator.getSolution();
 	}

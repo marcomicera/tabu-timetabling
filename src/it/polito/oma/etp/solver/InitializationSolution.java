@@ -1,16 +1,8 @@
 package it.polito.oma.etp.solver;
 
-import java.util.ArrayList;
-
 import it.polito.oma.etp.reader.InstanceData;
 
 public class InitializationSolution extends Solution {
-	/**
-	 * List containing exam pairs causing this solution to
-	 * be infeasible.
-	 */
-	private ArrayList<ExamPair> unfeasiblePairs;
-	
 	protected InitializationSolution(InstanceData instance, int[][] te) {
 		super(instance, te);
 	}
@@ -20,17 +12,16 @@ public class InitializationSolution extends Solution {
 	}
 
 	@Override
-	/*TODO has to be private*/public void updateFitness() {
-		updateUnfeasiblePairs();
-		
-		fitness = unfeasiblePairs.size();
+	/*TODO has to be private*/public void initializeFitness() {
+		fitness = penalizingPairs.size();
 	}
 	
 	/**
 	 * Computes the array containing all exam pairs causing
 	 * this solution to be infeasible. 
 	 */
-	private void updateUnfeasiblePairs() {
+	@Override
+	protected void initializePenalizingPairs() {
 		// Instance data
 		int E = instance.getE();
 		int[][] N = instance.getN();
@@ -43,9 +34,32 @@ public class InitializationSolution extends Solution {
 					// If both exams have more than one student enrolled in both exams
 					N[exam1][exam2] > 0
 				)
-					unfeasiblePairs.add(
+					penalizingPairs.add(
 						new ExamPair(exam1, exam2)
 					);
+	}
+	
+	@Override
+	protected void updatePenalizingPairs(Neighbor neighbor) {
+		int movingExam = neighbor.getMovingExam();
+		
+		// Removing old exam pairs
+		for(ExamPair examPair: penalizingPairs)
+			if(examPair.getExam1() == movingExam || examPair.getExam2() == movingExam)
+				penalizingPairs.remove(examPair);
+		
+		// Adding new exam pairs
+		for(int otherExam = 0; otherExam < instance.getE(); ++otherExam) {
+			if(	// If both exams have been scheduled in the same timeslot (conflicting)
+				schedule[movingExam] == schedule[otherExam] && 
+				
+				// If both exams have more than one student enrolled in both exams
+				instance.getN()[movingExam][otherExam] > 0
+			)
+				penalizingPairs.add(
+					new ExamPair(movingExam, otherExam)
+				);
+		}
 	}
 	
 	@Override
@@ -108,9 +122,13 @@ public class InitializationSolution extends Solution {
 		return new Neighbor(movingExam, newTimeslot, neighborFitnessValue);
 	}
 
+	// TODO to delete
 	@Override
 	protected ExamPair getNeighborhoodGeneratingPair() {
+		if(penalizingPairs.isEmpty())
+			return null;
+		
 		// Randomly, no ordering needed
-		return unfeasiblePairs.get(0);
+		return penalizingPairs.get(0);
 	}
 }

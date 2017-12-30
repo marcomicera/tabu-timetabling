@@ -13,42 +13,55 @@ public class OptimizationSolution extends Solution {
 	private int[][] distanceMatrix;
 	
 	/**
-	 * A conflict coefficient is mapped for each pair of exams
-	 * (order does not matter).
-	 * The higher, the more they are going to penalize.
+	 * The most penalizing exam pair is stored outside
+	 * Solution.penalizingPairs to avoid sorting all exam pairs
+	 * in case this one has a valid non-empty neighborhood.
 	 */
-	protected ArrayList<ExamPair> conflictCoefficients;
-
+	private ExamPair mostPenalizingPair;
+	
 	public OptimizationSolution(InstanceData instance, int[][] te) {
 		super(instance, te);
 		
 		int E = instance.getE();
 		distanceMatrix = new int[E][E];
 				
-		updateDistanceMatrix();
-		updateConflictCoefficients();
+		initializeDistanceMatrix();
 	}
 	
 	public OptimizationSolution(OptimizationSolution s) {
 		super(s);
 		
 		distanceMatrix = s.distanceMatrix;
-		conflictCoefficients = s.conflictCoefficients;
+		mostPenalizingPair = new ExamPair(s.mostPenalizingPair);
 	}
 	
+	/**
+	 * Conversion constructor used to transform the first
+	 * feasible solution obtained by the Tabu Search to
+	 * another specific type.
+	 * @param s		The solution to be converted.
+	 */
 	public OptimizationSolution(InitializationSolution s) {
 		super(s);
 		
-		updateFitness();
-		updateDistanceMatrix();
-		updateConflictCoefficients();
+		// From number of infeasibilities to penalizing fee
+		initializeFitness();
+		
+		// New data structure needed in this type of solution
+		initializeDistanceMatrix();
+		
+		/**
+		 * From exam pairs generating infeasibilities to
+		 * exam pairs causing penalties
+		 */
+		initializePenalizingPairs();
 	}
 
 	/**
-	 * Updates the exams distance matrix given the current
+	 * Computes the exams distance matrix given the current
 	 * decision matrix te.
 	 */
-	public void updateDistanceMatrix() {
+	public void initializeDistanceMatrix() {
 		int E = instance.getE();
 		
 		for(int i = 0; i < E; ++i)
@@ -61,16 +74,17 @@ public class OptimizationSolution extends Solution {
 	/**
 	 * Builds a ranking of most penalizing exams, mapping a 
 	 * conflict coefficient to an exam pair.
+	 * The higher, the more they are going to penalize.
 	 */
-	private void updateConflictCoefficients() {
+	protected void initializePenalizingPairs() {
 		int[][] N = instance.getN();
 		int E = instance.getE();
 		
-		conflictCoefficients = new ArrayList<ExamPair>();
+		penalizingPairs = new ArrayList<ExamPair>();
 		
 		/*	neighborhoodGeneratingPair initialization: the conflict coefficient is set to -1
 		 	so it will be replaced by the first conflicting exam pair as soon as possible */
-		neighborhoodGeneratingPair = new ExamPair(-1, -2, -1);
+		mostPenalizingPair = new ExamPair(-1, -2, -1);
 		
 		// For each pair of exams (order does not matter)
 		for(int i = 0; i < E; ++i)
@@ -80,22 +94,28 @@ public class OptimizationSolution extends Solution {
 					Float newCoefficient = new Float(N[i][j]) / getDistance(i, j);
 					
 					// Inserting the conflict coefficient for the corresponding exam pair
-					conflictCoefficients.add(
+					penalizingPairs.add(
 						// The corresponding exam pair with its conflict coefficient 
 						new ExamPair(i, j, newCoefficient)
 					);
 					
 					// Replacing the new most penalizing exam if necessary
 					// TODO what to do in case the most penalizing exam pair cannot be rescheduled?
-					if(newCoefficient > neighborhoodGeneratingPair.getConflictCoefficient())
+					if(newCoefficient > mostPenalizingPair.getConflictCoefficient())
 						// The corresponding exam pair with its conflict coefficient
-						neighborhoodGeneratingPair = new ExamPair(i, j, newCoefficient);
+						mostPenalizingPair = new ExamPair(i, j, newCoefficient);
 				}
 			}
 	}
+
+	@Override
+	protected void updatePenalizingPairs(Neighbor neighbor) {
+		// TODO to improve eventually
+		initializePenalizingPairs();
+	}
 	
 	@Override
-	/*TODO has to be private*/public void updateFitness() {
+	/*TODO has to be private*/public void initializeFitness() {
 		int E = instance.getE();
 		int S = instance.getS();
 		int K = instance.getK();
@@ -117,10 +137,10 @@ public class OptimizationSolution extends Solution {
 	 */
 	@Override
 	protected ExamPair getNeighborhoodGeneratingPair() {
-		if(conflictCoefficients.isEmpty())
+		if(penalizingPairs.isEmpty())
 			return null;
 		
-		return neighborhoodGeneratingPair;
+		return mostPenalizingPair;
 	}
 	
 	@Override
@@ -202,7 +222,10 @@ public class OptimizationSolution extends Solution {
 	
 	@Override
 	public String toString() {
-		return super.toString() + "\nPrinting conflictCoefficients:\n" + printConflictCoefficients();
+		return	super.toString() + 
+				"\nPrinting conflictCoefficients:\n" + printConflictCoefficients() +
+				"\nMost penalizing exam pair: " + mostPenalizingPair
+		;
 	}
 
 	/**
@@ -213,7 +236,7 @@ public class OptimizationSolution extends Solution {
 	private String printConflictCoefficients() {
 		String result = "[";
 		
-		for(ExamPair entry: conflictCoefficients) 
+		for(ExamPair entry: penalizingPairs) 
 			result += entry.toString();
 		
 		return result + "]\n";
@@ -232,6 +255,10 @@ public class OptimizationSolution extends Solution {
 	}
 	
 	public ArrayList<ExamPair> getConflictCoefficients() {
-		return conflictCoefficients;
+		return penalizingPairs;
+	}
+
+	public ExamPair getMostPenalizingPair() {
+		return mostPenalizingPair;
 	}
 }

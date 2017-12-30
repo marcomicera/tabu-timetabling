@@ -27,7 +27,32 @@ public class ExamPair implements Comparable<ExamPair> {
 	public ExamPair(int exam1, int exam2) {
 		this(exam1, exam2, -1);
 	}
-
+	
+	/**
+	 * Copy constructor.
+	 * @param otherPair	Exam pair to be copied.
+	 */
+	public ExamPair(ExamPair otherPair) {
+		exam1 = otherPair.exam1;
+		exam2 = otherPair.exam2;
+		conflictCoefficient = otherPair.conflictCoefficient;
+	}
+	
+//	// Searching in Lists
+//	@Override
+//	public boolean equals(Object o) {
+//		if(this == o) return true;
+//		if(!(o instanceof ExamPair)) return false;
+//		
+//		ExamPair otherPair = (ExamPair)o;
+//		
+//		// Exams order does not matter
+//		return	(exam1 == otherPair.exam1 && exam2 == otherPair.exam2)
+//					||
+//				(exam1 == otherPair.exam2 && exam2 == otherPair.exam1);
+//	}
+	
+	// Ordering
 	@Override
 	public int compareTo(ExamPair otherExamPair) {
 		return Float.valueOf(otherExamPair.conflictCoefficient).compareTo(conflictCoefficient);
@@ -41,21 +66,6 @@ public class ExamPair implements Comparable<ExamPair> {
 //		return exam1 + exam2;
 //	}
 //
-//	/**
-//	 * Equality check function used by the java.util.Map's get() function
-//	 */
-//	@Override
-//	public boolean equals(Object o) {
-//		if(this == o) return true;
-//		if(!(o instanceof ExamPair)) return false;
-//		
-//		ExamPair otherPair = (ExamPair)o;
-//		
-//		// Exams order does not matter
-//		return	(exam1 == otherPair.exam1 && exam2 == otherPair.exam2)
-//					||
-//				(exam1 == otherPair.exam2 && exam2 == otherPair.exam1);
-//	}
 
 	/**
 	 * Pretty-printing

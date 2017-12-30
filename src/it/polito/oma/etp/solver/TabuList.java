@@ -56,6 +56,7 @@ public class TabuList {
 		return tabuList.getLast();
 	}
 	
+	@Override
 	public String toString() {
 		return Arrays.toString(tabuList.toArray());
 	}

@@ -3,12 +3,8 @@ package it.polito.oma.etp.solver;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Map.Entry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Random;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -19,7 +15,8 @@ public abstract class TabuSearch {
 	protected int iteration = 0;
 	protected TabuList tabuList = new TabuList();
 	
-	public TabuSearch() {
+	public TabuSearch(InstanceData instanceData) {
+		this.instance = instanceData;
 	}
 	
 	/**
@@ -29,52 +26,45 @@ public abstract class TabuSearch {
 	 * @param initialSolution	initial solution from which the Tabu Search
 	 * 							algorithm starts.
 	 */
-	public void solve(InstanceData instanceData) {
-		instance = instanceData;
-		
-		int iteration = 1;
+	public void solve() {
+		int iteration = 0;
 		
 		while(true) {
+			int nextPairIndex = 0;
+			
 			/*TODO debug*/System.out.println("\n***** Iteration " + iteration + " *****");
 			
-			// TODO implement it on InitializationSolution.java
-			ExamPair mostPenalizingPair = currentSolution.getNeighborhoodGeneratingPair();
+			Neighbor validNeighbor = null;
 			
-			ArrayList<Neighbor> neighborhood = getNeighborhood(mostPenalizingPair);
-			
-			Neighbor validNeighbor = checkTabuList(neighborhood);
-			
-			if(validNeighbor == null) {
-				/*TODO debug*/System.out.println("The most penalizing exam pair has no valid neighbor");
-				ArrayList<ExamPair> penalizingPairs = currentSolution.getConflictCoefficients();
-				Collections.sort(penalizingPairs);
-				
-				int counter = 1;
-				ExamPair nextPair;
-				while(validNeighbor == null) {
-					nextPair = penalizingPairs.get(counter++);
-					neighborhood = getNeighborhood(nextPair);
-					validNeighbor = checkTabuList(neighborhood);
+			// No valid neighbor in the neighborhood
+			while(validNeighbor == null) {
+				try {
+					ExamPair neighborhoodGeneratingPair = getNextPair(nextPairIndex);
+					ArrayList<Neighbor> neighborhood = getNeighborhood(neighborhoodGeneratingPair);
+					validNeighbor = selectBestValidNeighbor(neighborhood);
+					++nextPairIndex;
+				} catch(IndexOutOfBoundsException e) {
+					// TODO what happens here? (empty Tabu List?)
+					// There's no valid neighborhood for every exam pair
 				}
 			}
 			
 			if(validNeighbor != null)
 				move(validNeighbor);
-			else {
-				/*TODO debug*/System.err.println("No valid neighbors found for any exam pair: should we reset the Tabu list?");
-			}
 			
 			/*TODO debug*/System.out.println("\n");
+			
+			++iteration;
 		}
 		
 		//TODO remember to output solution on file 
 	}
 	
 	/**
-	 * Given a penalizing pair of exams, returns the corresponding neighborhood, i.e. the
-	 * set of all possible feasible moves.
+	 * Given a penalizing pair of exams, returns the corresponding neighborhood
+	 * (i.e., the set of all possible feasible moves.) ordered by ascending fitness value. 
 	 * @param examPair	exam pair to be rescheduled.
-	 * @return			A list of Neighbor objects containing:
+	 * @return			A list of Neighbor objects ordered by ascending fitnss value containing:
 	 * 					1)	the exam that should be rescheduled
 	 * 					2)	the new timeslot in which the exam should be rescheduled in
 	 * 					3)	the corresponding fitness value
@@ -124,25 +114,31 @@ public abstract class TabuSearch {
 	
 	/**
 	 * Determines whether all neighbors belonging to the neighborhood passed
-	 * as argument can be used for the next move or not. 
-	 * @param neighborhood	the neighborhood to be checked with respected to
-	 * 						the Tabu list.
-	 * @return				the first acceptable neighbor that can be used 
+	 * as argument (ordered by ascending fitness value) can be used for the 
+	 * next move or not. 
+	 * @param neighborhood	the neighborhood (ordered by ascending fitness value) 
+	 * 						to be checked with respected to the Tabu list.
+	 * @return				the first acceptable neighbor (that will be the best
+	 * 						one: this assumes that the neighborhood is already
+	 * 						ordered by ascending fitness value) that can be used 
 	 * 						for the next move according to the Tabu list or
 	 * 						null if no valid neighbor was found.
 	 */
-	private Neighbor checkTabuList(ArrayList<Neighbor> neighborhood) {
+	private Neighbor selectBestValidNeighbor(ArrayList<Neighbor> neighborhood) {
 		if(neighborhood == null || neighborhood.isEmpty())
 			return null;
 		
 		Neighbor validNeighbor = null;
 		for(Neighbor neighbor: neighborhood) {
-			// Is this move in the Tabu list?
-			if(tabuList.find(neighbor) != -1) {
-				// TODO aspiration criteria
-				
-				continue;
-			}
+			
+			// This move is in the Tabu List
+			if(tabuList.find(neighbor) != -1)
+				// Aspiration criteria satisfied
+				if(neighbor.getFitness() < bestSolution.getFitness()) {
+					validNeighbor = neighbor;
+					break;
+				}
+			// This move is not in the Tabu List
 			else {
 				validNeighbor = neighbor;
 				break;
@@ -153,7 +149,21 @@ public abstract class TabuSearch {
 	}
 	
 	/**
-	 * TODO missing JavaDoc
+	 * Returns the next exam pair belonging to the penalizingPairs list.
+	 * This is used when an exam pair has an empty valid neighborhood, hence
+	 * requiring searching for another neighborhood.
+	 * @param nextPairIndex					Next exam pair index to be retrieved.		
+	 * @return								The exam pair that will be used to generate
+	 * 										another neighborhood to be explored by the Tabu
+	 * 										Search algorithm.
+	 * @throws IndexOutOfBoundsException	If the exam pair index is out of bound, meaning
+	 * 										that there are no more exam pairs having a
+	 * 										valid non-empty neighborhood.
+	 */
+	protected abstract ExamPair getNextPair(int nextPairIndex) throws IndexOutOfBoundsException;
+	
+	/**
+	 * 
 	 * @param neighbor
 	 */
 	private void move(Neighbor neighbor) {
@@ -166,16 +176,9 @@ public abstract class TabuSearch {
 		/*TODO debug*/ //System.out.println("old fitness = " + currentSolution.getFitness());
 		
 		// Inserting this move in the Tabu List
-		tabuList.add(
-			new Neighbor(
-				movingExam,
-				oldTimeslot,
-				currentSolution.getFitness() // TODO what should we put here?
-			)
-		);
+		tabuList.add(new Neighbor(movingExam, oldTimeslot));
 		
-		//TODO debug
-		System.out.print("Tabu list: "+ tabuList);
+		/*TODO debug*/System.out.print("Tabu list: "+ tabuList);
 		
 		updateSolution(movingExam, oldTimeslot, neighbor);
 	}
@@ -189,28 +192,26 @@ public abstract class TabuSearch {
 	private void updateSolution(int movingExam, int oldTimeslot, Neighbor neighbor) {		
 		// Updating the current solution
 		currentSolution.updateTe(movingExam, oldTimeslot, neighbor.getNewTimeslot());
-		currentSolution.setFitness(neighbor.getFitness());
 		currentSolution.updateSchedule(neighbor); 
-		currentSolution.updateDistanceMatrix(); // TODO update only involved row and column
+		currentSolution.setFitness(neighbor.getFitness());
+		currentSolution.updatePenalizingPairs(neighbor);
+		
+		if(currentSolution instanceof OptimizationSolution)
+			((OptimizationSolution)currentSolution).initializeDistanceMatrix();
 				
 		/*TODO debug*/ //System.out.println("oldTimeslot = " + oldTimeslot);
-		/*TODO debug*/currentSolution.updateFitness();
+		/*TODO debug*/currentSolution.initializeFitness();
 		/*TODO debug*/System.out.println("\nCalculating the fitness from scratch: " + currentSolution.getFitness());
 
-		// TODO implement: check if the current solution is better then the optimal one
-		
-		currentSolution.updateConflictCoefficients();
+		// Updating bestSolution if necessary
+		updateBestSolution();
 	}
 	
 	/**
-	 * Checks if current solution is feasible and if it is better than the best one;
-	 * in this case it becomes the new best solution.
+	 * Updates the best solution with the current one
+	 * if necessary
 	 */
-	private void checkSolution() {
-		
-		
-		//updateSolution();
-	}
+	protected abstract void updateBestSolution();
 	
 	/**
 	 * Prints the solution into a file.
@@ -244,6 +245,11 @@ public abstract class TabuSearch {
 	      }
 	}
 	
+	/**
+	 * Returns the proper solution corresponding to this
+	 * Tabu Search implementation.
+	 * @return	the Tabu Search solution.
+	 */
 	public Solution getSolution() {
 		return bestSolution;
 	}

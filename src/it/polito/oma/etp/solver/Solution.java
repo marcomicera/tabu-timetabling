@@ -1,6 +1,6 @@
 package it.polito.oma.etp.solver;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -30,11 +30,11 @@ public abstract class Solution {
 	protected float fitness;
 	
 	/**
-	 * ExamPair object used to generate the neighborhood
-	 * during each Tabu Search iteration.
+	 * Exam pairs causing a penalty or an infeasibility,
+	 * depending on the Solution implementation.
 	 */
-	protected ExamPair neighborhoodGeneratingPair;
-
+	protected ArrayList<ExamPair> penalizingPairs;
+	
 	/**
 	 * Default constructor
 	 * @param te	time-slots exams matrix.
@@ -42,8 +42,9 @@ public abstract class Solution {
 	protected Solution(InstanceData instance, int[][] te) {
 		this.instance = instance;
 		this.te = te;
-		updateSchedule();
-		updateFitness();
+		initializeSchedule();
+		initializePenalizingPairs();
+		initializeFitness();
 	}
 	
 	/**
@@ -51,18 +52,20 @@ public abstract class Solution {
 	 * @param s	Solution to be copied.
 	 */
 	protected Solution(Solution s) {
-		instance = s.instance;
-		te = s.te;
-		schedule = s.schedule;
+		// Read-only object, no copying needed
+		instance = s.instance; 
+		
+		te = Utility.cloneMatrix(s.te);
+		schedule = Utility.cloneArray(s.schedule);
 		fitness = s.fitness;
-		neighborhoodGeneratingPair = s.neighborhoodGeneratingPair;
+		penalizingPairs = new ArrayList<>(s.penalizingPairs);
 	}
 	
 	/**
-	 * Updates the schedule data structure, containing, for each
-	 * exam, the timeslot number in which it has been assigned to.
+	 * Computes the schedule data structure from scratch, containing, 
+	 * for each exam, the timeslot number in which it has been assigned to.
 	 */
-	public void updateSchedule() {
+	public void initializeSchedule() {
 		int E = instance.getE();
 		int tmax = instance.getTmax();
 		
@@ -78,6 +81,22 @@ public abstract class Solution {
 	}
 	
 	/**
+	 * Computes the data structure containing exam pairs from 
+	 * scratch causing a penalty or an infeasibility depending 
+	 * on the Solution implementation.
+	 */
+	protected abstract void initializePenalizingPairs();
+	
+	/**
+	 * Updates the the data structure containing exam pairs starting
+	 * from the modifications brought by the neighbor passed
+	 * as argument, causing a penalty or an infeasibility depending 
+	 * on the Solution implementation.
+	 * @param neighbor
+	 */
+	protected abstract void updatePenalizingPairs(Neighbor neighbor);
+	
+	/**
 	 * Updates the schedule according to the move corresponding
 	 * to the neighbor specified as the first argument.
 	 * @param neighbor	move according to which the schedule
@@ -88,9 +107,10 @@ public abstract class Solution {
 	}
 	
 	/**
-	 * Updates the current solution objective function value
+	 * Computes the current solution objective function value
+	 * from scratch.
 	 */
-	protected abstract void updateFitness();
+	protected abstract void initializeFitness();
 	
 	/**
 	 * Updates the te table according to a move.
@@ -146,24 +166,10 @@ public abstract class Solution {
 				"Printing E: " + instance.getE() + "\n" +
 				"Printing Tmax: " + instance.getTmax() + "\n" +
 				//"\nPrinting schedule:\n" + Arrays.toString(schedule) +
-				//"\n\nPrinting Te:\n" + printMatrix(te) +
-				//"Printing y:\n" + printMatrix(y) +
-				"Most penalizing exam pair: " + neighborhoodGeneratingPair +
+				//"\n\nPrinting Te:\n" + Utility.printMatrix(te) +
+				//"Printing y:\n" + Utility.printMatrix(y) +
 				"\n\nFitness value: " + fitness
 		;
-	}
-	
-	/**
-	 * General function which prints a matrix in a readable way.
-	 * @param m		matrix to be printed.
-	 * @return		a string showing the matrix in a readable way.
-	 */
-	private String printMatrix(int[][] m) {
-		String result = "";
-		for(int[] row: m) {
-			result += Arrays.toString(row) + "\n";
-		}
-		return result + "\n";
 	}
 	
 	public InstanceData getInstance() {
@@ -194,5 +200,9 @@ public abstract class Solution {
 
 	public void setFitness(float fitness) {
 		this.fitness = fitness;
+	}
+
+	public ArrayList<ExamPair> getPenalizingPairs() {
+		return penalizingPairs;
 	}
 }
