@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class TabuList {
-	private static int MAX_SIZE = 7;
+	private static int MAX_SIZE = 3;
 	
 	private LinkedList<Neighbor> tabuList;
 	

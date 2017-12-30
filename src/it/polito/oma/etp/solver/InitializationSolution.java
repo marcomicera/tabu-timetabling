@@ -1,5 +1,8 @@
 package it.polito.oma.etp.solver;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import it.polito.oma.etp.reader.InstanceData;
 
 public class InitializationSolution extends Solution {
@@ -9,6 +12,19 @@ public class InitializationSolution extends Solution {
 	
 	public InitializationSolution(Solution s) {
 		super(s);
+	}
+	
+	/**
+	 * Constructor used for the first infeasible solution.
+	 * @param instance
+	 * @param te
+	 * @param schedule
+	 * @param fitness
+	 * @param penalizingPairs
+	 */
+	public InitializationSolution(InstanceData instance, int[][] te, int[] schedule, float fitness,
+			ArrayList<ExamPair> penalizingPairs) {
+		super(instance, te, schedule, fitness, penalizingPairs);
 	}
 
 	@Override
@@ -44,9 +60,17 @@ public class InitializationSolution extends Solution {
 		int movingExam = neighbor.getMovingExam();
 		
 		// Removing old exam pairs
-		for(ExamPair examPair: penalizingPairs)
+		Iterator<ExamPair> iterator = penalizingPairs.iterator();
+		while(iterator.hasNext()) {
+			ExamPair examPair = iterator.next();
+			
 			if(examPair.getExam1() == movingExam || examPair.getExam2() == movingExam)
-				penalizingPairs.remove(examPair);
+				iterator.remove();
+		}
+		/*for(ExamPair examPair: penalizingPairs)
+			if(examPair.getExam1() == movingExam || examPair.getExam2() == movingExam)
+				penalizingPairs.remove(examPair);*/
+		
 		
 		// Adding new exam pairs
 		for(int otherExam = 0; otherExam < instance.getE(); ++otherExam) {
@@ -120,15 +144,5 @@ public class InitializationSolution extends Solution {
 					++neighborFitnessValue;
 				
 		return new Neighbor(movingExam, newTimeslot, neighborFitnessValue);
-	}
-
-	// TODO to delete
-	@Override
-	protected ExamPair getNeighborhoodGeneratingPair() {
-		if(penalizingPairs.isEmpty())
-			return null;
-		
-		// Randomly, no ordering needed
-		return penalizingPairs.get(0);
 	}
 }

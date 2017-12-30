@@ -1,5 +1,8 @@
 package it.polito.oma.etp.solver;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import it.polito.oma.etp.reader.InstanceData;
 
 public class TabuInitialization extends TabuSearch {
@@ -16,32 +19,43 @@ public class TabuInitialization extends TabuSearch {
 	}
 
 	private InitializationSolution generateUnfeasibleSolution() {
-		int examNumber = instance.getE();
-		int N[][] = instance.getN();
-		int tmax = instance.getTmax();
-		int te[][] = new int [tmax][examNumber];
+		/*TODO debug*/System.out.println("Generating infeasible solution...");
 		
-		// array that counts how much exams are assigned in every timeslot
-		int texamsCounter[] = new int[tmax];
-		// array that stores which is the timeslot to visit first, according to its assigned exams
-		int timeslotOrder[] = new int[tmax];
-		// boolean array that tells me if a given exam was already assigned in a timeslot.
-		int assignedExams[] = new int[examNumber];
+		// Instance data
+		int E = instance.getE();
+		int N[][] = instance.getN();
+		int Tmax = instance.getTmax();
+		
+		// Infeasible solution fields
+		int te[][] = new int[Tmax][E];
+		int schedule[] = new int[E];
+		float fitness = 0;
+		ArrayList<ExamPair> penalizingPairs = new ArrayList<ExamPair>();
+		
+		// Array that counts how much exams are assigned in every timeslot
+		int texamsCounter[] = new int[Tmax];
+		
+		// Array that stores which is the timeslot to visit first, according to its assigned exams
+		int timeslotOrder[] = new int[Tmax];
+		
+		// Boolean array that tells me if a given exam was already assigned in a timeslot.
+		int assignedExams[] = new int[E];
 
 		// first step: put e0 in t0
 		te[0][0] = 1;
+		schedule[0] = 0;
 		assignedExams[0] = 1;
 		texamsCounter[0]++;
 		
 		// cycling through all exams
-		for(int exam = 1; exam < examNumber; exam++) {
+		for(int exam = 1; exam < E; exam++) {
 			
 			/* IN: texamsCounter, OUT: timeslotOrder*
 			 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
 			timeslotOrder = getTimeslotOrder(texamsCounter);
 			
 			// cycling through all timeslots
-			for(int t = 0; t < tmax; t++) {
+			for(int t = 0; t < Tmax; t++) {
 				
 				// Check if this exam was already assigned
 				if (assignedExams[exam] == 1)
@@ -50,7 +64,7 @@ public class TabuInitialization extends TabuSearch {
 				// checking exams in conflict
 				boolean conflict = false;
 				
-				for(int conflictualExam = 0; conflictualExam < examNumber; conflictualExam++) {
+				for(int conflictualExam = 0; conflictualExam < E; conflictualExam++) {
 					// are exam and conflictualExam in conflict? If not, search next exam for a conflict.
 					if (N[exam][conflictualExam] != 0) {
 						/* Here we know exam and conflictualExam are in conflict. I'd like to put exam in
@@ -68,6 +82,7 @@ public class TabuInitialization extends TabuSearch {
 				 * 2. we found that a conflictualExam is in timeslot (conflict = true) -> look next timeslot */
 				if(conflict == false) {
 					te[timeslotOrder[t]][exam] = 1;
+					schedule[exam] = timeslotOrder[t];
 					// This exam is assigned, do not assign it again.
 					assignedExams[exam] = 1;
 					texamsCounter[timeslotOrder[t]]++;
@@ -79,16 +94,16 @@ public class TabuInitialization extends TabuSearch {
 			if (assignedExams[exam] == 0) {
 				
 				// number of conflicts for each timeslot
-				int[] numberOfConflicts = new int[tmax];
+				int[] numberOfConflicts = new int[Tmax];
 				
 				// cycling timeslots, counting the number of conflicts
-				for(int t = 0; t < tmax; t++) {
+				for(int t = 0; t < Tmax; t++) {
 					numberOfConflicts[t] = 0;
 					
-					for(int confExam = 0; confExam < examNumber; confExam++) {
+					for(int confExam = 0; confExam < E; confExam++) {
 						
 						// are exam and confExam in conflict?
-						if(N[exam][confExam] != 0) {
+						if(N[exam][confExam] > 0) {
 							// yes; is confExam in timeslot t? Increase the number of conflicts for that timeslot
 							if(te[t][confExam] == 1) {
 								numberOfConflicts[t]++;
@@ -98,7 +113,7 @@ public class TabuInitialization extends TabuSearch {
 					
 				}// end FOR timeslots
 				
-				int minConflicts = examNumber;
+				int minConflicts = E;
 				int myTimeslot = 0;
 				// searching for the timeslot with the minimum of conflict for the given exam
 				for(int t = 0; t < numberOfConflicts.length; t++) {
@@ -108,19 +123,20 @@ public class TabuInitialization extends TabuSearch {
 					}
 				}
 				
-				/* Now the exam is placed in the timeslot myTimeslot and the relative U elements are set at 1, remembering it is
-				 * introducing an unfeasibility in the solution.*/
+				/* Now the exam is placed in the timeslot myTimeslot and the relative U elements are set at 1,
+				 * remembering it is introducing an unfeasibility in the solution.*/
 				te[myTimeslot][exam] = 1;
+				schedule[exam] = myTimeslot;
 				assignedExams[exam] = 1;
 				texamsCounter[myTimeslot]++;
 				// cycling through exams in myTimeslot
-				for(int e = 0; e < examNumber; e++) {
+				for(int e = 0; e < E; e++) {
 					// looks only allocated exams
 					if(te[myTimeslot][e] == 1) {
 						// and check if they are conflictual with exam
 						if(N[exam][e] != 0) {
-							U[exam][e] = 1;
-							U[e][exam] = 1;
+							penalizingPairs.add(new ExamPair(e, exam));
+							++fitness;
 						}
 					}
 				}
@@ -129,7 +145,19 @@ public class TabuInitialization extends TabuSearch {
 			
 		} // END FOR exam
 		
-		return new InitializationSolution(instance, te, U);
+		/*TODO debug*/
+		System.out.println(
+				"Returning infeasible solution\npenalizingPairs" + Arrays.toString(penalizingPairs.toArray()) + 
+				"\nfitness: " + fitness
+		);
+		
+		return new InitializationSolution(
+			instance, 
+			te,
+			schedule,
+			fitness,
+			penalizingPairs
+		);
 	}
 	
 	/**

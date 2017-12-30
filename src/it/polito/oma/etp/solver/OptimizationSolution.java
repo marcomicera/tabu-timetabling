@@ -129,20 +129,6 @@ public class OptimizationSolution extends Solution {
 					fitness += Math.pow(2, K - distanceMatrix[i][j]) * new Float(N[i][j]) / S;
 	}
 	
-	/**
-	 * Getter returning the most penalizing exams pair with its
-	 * corresponding conflict coefficient
-	 * @return	an entry having the conflict coefficient - exam pair of
-	 * 			the most penalizing exam pair 
-	 */
-	@Override
-	protected ExamPair getNeighborhoodGeneratingPair() {
-		if(penalizingPairs.isEmpty())
-			return null;
-		
-		return mostPenalizingPair;
-	}
-	
 	@Override
 	public Neighbor getNeighbor(int movingExam, int newTimeslot) throws InvalidMoveException {
 		// This function's result, based on the current fitness value

@@ -13,10 +13,11 @@ public abstract class TabuSearch {
 	protected Solution currentSolution;
 	protected Solution bestSolution;
 	protected int iteration = 0;
-	protected TabuList tabuList = new TabuList();
+	protected TabuList tabuList;
 	
 	public TabuSearch(InstanceData instanceData) {
 		this.instance = instanceData;
+		tabuList = new TabuList();
 	}
 	
 	/**
@@ -29,7 +30,8 @@ public abstract class TabuSearch {
 	public void solve() {
 		int iteration = 0;
 		
-		while(true) {
+		//while(true) {
+		/*TODO debug*/while(bestSolution.getFitness() > 0) {
 			int nextPairIndex = 0;
 			
 			/*TODO debug*/System.out.println("\n***** Iteration " + iteration + " *****");
@@ -39,8 +41,13 @@ public abstract class TabuSearch {
 			// No valid neighbor in the neighborhood
 			while(validNeighbor == null) {
 				try {
+					/*TODO debug*/System.out.println("nextPairIndex: " + nextPairIndex);
 					ExamPair neighborhoodGeneratingPair = getNextPair(nextPairIndex);
 					ArrayList<Neighbor> neighborhood = getNeighborhood(neighborhoodGeneratingPair);
+					
+					/*TODO debug*/System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
+					/*TODO debug*/System.out.println("Neighborhood: " + neighborhood);
+					
 					validNeighbor = selectBestValidNeighbor(neighborhood);
 					++nextPairIndex;
 				} catch(IndexOutOfBoundsException e) {
@@ -55,6 +62,13 @@ public abstract class TabuSearch {
 			/*TODO debug*/System.out.println("\n");
 			
 			++iteration;
+			
+//			try {
+//				Thread.sleep(30);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}
 		
 		//TODO remember to output solution on file 
@@ -107,8 +121,6 @@ public abstract class TabuSearch {
 			// Ordering the neighborhood by increasing fitness value
 			Collections.sort(neighborhood);
 		
-		/*TODO debug*/System.out.println("Neighborhood: " + neighborhood);
-		
 		return neighborhood;
 	}
 	
@@ -128,11 +140,15 @@ public abstract class TabuSearch {
 		if(neighborhood == null || neighborhood.isEmpty())
 			return null;
 		
+		/*TODO debug*/System.out.println("Tabu List: " + tabuList);
+		
 		Neighbor validNeighbor = null;
 		for(Neighbor neighbor: neighborhood) {
 			
 			// This move is in the Tabu List
 			if(tabuList.find(neighbor) != -1)
+				/*TODO debug*/System.out.println("Neighbor " + neighbor + " has been found in the Tabu List");
+				
 				// Aspiration criteria satisfied
 				if(neighbor.getFitness() < bestSolution.getFitness()) {
 					validNeighbor = neighbor;
@@ -201,7 +217,7 @@ public abstract class TabuSearch {
 				
 		/*TODO debug*/ //System.out.println("oldTimeslot = " + oldTimeslot);
 		/*TODO debug*/currentSolution.initializeFitness();
-		/*TODO debug*/System.out.println("\nCalculating the fitness from scratch: " + currentSolution.getFitness());
+		/*TODO debug*/System.out.println("\nFitness: " + currentSolution.getFitness() + "\nCalculating the fitness from scratch: " + currentSolution.getFitness());
 
 		// Updating bestSolution if necessary
 		updateBestSolution();

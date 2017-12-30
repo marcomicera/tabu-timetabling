@@ -1,6 +1,7 @@
 package it.polito.oma.etp.solver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -59,6 +60,26 @@ public abstract class Solution {
 		schedule = Utility.cloneArray(s.schedule);
 		fitness = s.fitness;
 		penalizingPairs = new ArrayList<>(s.penalizingPairs);
+	}
+	
+	/**
+	 * Constructor used for the first infeasible solution.
+	 * Every single field is computed while obtaining the
+	 * first infeasible solution. 
+	 * @param instance
+	 * @param te
+	 * @param schedule
+	 * @param fitness
+	 * @param penalizingPairs
+	 */
+	public Solution(InstanceData instance, int[][] te, int[] schedule, float fitness,
+			ArrayList<ExamPair> penalizingPairs) {
+		super();
+		this.instance = instance;
+		this.te = te;
+		this.schedule = schedule;
+		this.fitness = fitness;
+		this.penalizingPairs = penalizingPairs;
 	}
 	
 	/**
@@ -147,28 +168,19 @@ public abstract class Solution {
 	    	for(int exam1 = 0; exam1 < E; ++exam1)
 	    		for(int exam2 = exam1+1; exam2 < E; ++exam2)
 	    			if(N[exam1][exam2]>0 && te[t][exam1]==1 && te[t][exam2]==1)
-	    				System.out.println("conflictual exams "+exam1+" and "+exam2+" are in the same TM");
+	    				System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
 	  }
-	
-	/**
-	 * Returns the exam pair used to generate the neighborhood,
-	 * chosen by a a different criteria for each Solution implementation.
-	 * @return	the exam pair used to create the neighborhood.
-	 */
-	protected abstract ExamPair getNeighborhoodGeneratingPair();
 	
 	/**
 	 * Overridden method which displays info about this solution.
 	 */
 	@Override
 	public String toString() {
-		return	"Printing S: " + instance.getS() + "\n" +
-				"Printing E: " + instance.getE() + "\n" +
-				"Printing Tmax: " + instance.getTmax() + "\n" +
-				//"\nPrinting schedule:\n" + Arrays.toString(schedule) +
+		return	"fitness = " + fitness +
+				"\nSchedule: " + Arrays.toString(schedule)
 				//"\n\nPrinting Te:\n" + Utility.printMatrix(te) +
 				//"Printing y:\n" + Utility.printMatrix(y) +
-				"\n\nFitness value: " + fitness
+				
 		;
 	}
 	
