@@ -30,10 +30,7 @@ public abstract class TabuSearch {
 	public void solve() {
 		int iteration = 0;
 		
-		//while(true) {
-		/*TODO debug*/while(bestSolution.getFitness() > 0) {
-			int nextPairIndex = 0;
-			
+		while(bestSolution.getFitness() > 0) {
 			/*TODO debug*/System.out.println("\n***** Iteration " + iteration + " *****");
 			
 			Neighbor validNeighbor = null;
@@ -41,16 +38,13 @@ public abstract class TabuSearch {
 			// No valid neighbor in the neighborhood
 			while(validNeighbor == null) {
 				try {
-					/*TODO debug*/System.out.println("nextPairIndex: " + nextPairIndex);
-					ExamPair neighborhoodGeneratingPair = getNextPair(nextPairIndex);
-					ArrayList<Neighbor> neighborhood = getNeighborhood(neighborhoodGeneratingPair);
+					ArrayList<Neighbor> neighborhood = getNeighborhood(currentSolution.getPenalizingPairs());
 					
 					/*TODO debug*/System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
 					/*TODO debug*/System.out.println("Neighborhood: " + neighborhood);
 					/*TODO debug*/System.out.println("Neighborhood size: " + neighborhood.size());
 					
 					validNeighbor = selectBestValidNeighbor(neighborhood);
-					++nextPairIndex;
 				} catch(IndexOutOfBoundsException e) {
 					// TODO what happens here? (empty Tabu List?)
 					// There's no valid neighborhood for every exam pair
@@ -76,44 +70,46 @@ public abstract class TabuSearch {
 	}
 	
 	/**
-	 * Given a penalizing pair of exams, returns the corresponding neighborhood
+	 * Given all exam pairs, returns the corresponding neighborhood
 	 * (i.e., the set of all possible feasible moves.) ordered by ascending fitness value. 
-	 * @param examPair	exam pair to be rescheduled.
+	 * @param examPair	exam pairs used for neighborhood generation.
 	 * @return			A list of Neighbor objects ordered by ascending fitnss value containing:
 	 * 					1)	the exam that should be rescheduled
 	 * 					2)	the new timeslot in which the exam should be rescheduled in
 	 * 					3)	the corresponding fitness value
 	 * 					Return null if no feasible neighbor is found.
 	 */
-	private ArrayList<Neighbor> getNeighborhood(ExamPair examPair) {
-		// Retrieving the timeslots in which the two exams have been scheduled
-		int firstExamSlot = currentSolution.getTimeslot(examPair.getExam1());
-		int secondExamSlot = currentSolution.getTimeslot(examPair.getExam2());
-		/*TODO debug*/ //System.out.println("firstExamSlot = " + firstExamSlot + "\nsecondExamSlot = " + secondExamSlot);
-		
-		// Computing support variables for excluding timeslots between the two exams 
-		int lowestIndex = (firstExamSlot < secondExamSlot) ? firstExamSlot : secondExamSlot;
-		int highestIndex = (firstExamSlot < secondExamSlot) ? secondExamSlot : firstExamSlot;
-		/*TODO debug*/ //System.out.println("lowestIndex = " + lowestIndex + "\nhighestIndex = " + highestIndex);
-		
-		// Neighborhood corresponding to both exams
+	private ArrayList<Neighbor> getNeighborhood(ArrayList<ExamPair> penalizingPairs) {
+		// Neighborhood corresponding all exam pairs
 		ArrayList<Neighbor> neighborhood = new ArrayList<Neighbor>();
 		
-		// For all possible timeslots
-		for(int newTimeslot = 0; newTimeslot < instance.getTmax(); ++newTimeslot) {
-			if(	/*	Skipping timeslots between the two exams: these positions will
-					increase the fitness value for sure */
-				newTimeslot < lowestIndex || newTimeslot > highestIndex
-			) {
-				try {
-					/**
-					 *  Retrieving neighbor objects, containing its fitness and its corresponding schedule
-					 *  and adding them to the neighborhood set
-					 */
-					neighborhood.add(currentSolution.getNeighbor(examPair.getExam1(), newTimeslot));
-					neighborhood.add(currentSolution.getNeighbor(examPair.getExam2(), newTimeslot));
-				} catch(InvalidMoveException e) {
-					continue;
+		for(ExamPair examPair: penalizingPairs) {
+			// Retrieving the timeslots in which the two exams have been scheduled
+			int firstExamSlot = currentSolution.getTimeslot(examPair.getExam1());
+			int secondExamSlot = currentSolution.getTimeslot(examPair.getExam2());
+			/*TODO debug*/ //System.out.println("firstExamSlot = " + firstExamSlot + "\nsecondExamSlot = " + secondExamSlot);
+			
+			// Computing support variables for excluding timeslots between the two exams 
+			int lowestIndex = (firstExamSlot < secondExamSlot) ? firstExamSlot : secondExamSlot;
+			int highestIndex = (firstExamSlot < secondExamSlot) ? secondExamSlot : firstExamSlot;
+			/*TODO debug*/ //System.out.println("lowestIndex = " + lowestIndex + "\nhighestIndex = " + highestIndex);
+			
+			// For all possible timeslots
+			for(int newTimeslot = 0; newTimeslot < instance.getTmax(); ++newTimeslot) {
+				if(	/*	Skipping timeslots between the two exams: these positions will
+						increase the fitness value for sure */
+					newTimeslot < lowestIndex || newTimeslot > highestIndex
+				) {
+					try {
+						/**
+						 *  Retrieving neighbor objects, containing its fitness and its corresponding schedule
+						 *  and adding them to the neighborhood set
+						 */
+						neighborhood.add(currentSolution.getNeighbor(examPair.getExam1(), newTimeslot));
+						neighborhood.add(currentSolution.getNeighbor(examPair.getExam2(), newTimeslot));
+					} catch(InvalidMoveException e) {
+						continue;
+					}
 				}
 			}
 		}
@@ -142,6 +138,7 @@ public abstract class TabuSearch {
 			return null;
 		
 		/*TODO debug*/System.out.println("Tabu List: " + tabuList);
+		/*TODO debug*/System.out.println("Tabu List size: " + tabuList.getMAX_SIZE());
 		
 		Neighbor validNeighbor = null;
 		for(Neighbor neighbor: neighborhood) {
