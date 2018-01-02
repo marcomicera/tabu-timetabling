@@ -11,7 +11,8 @@ public class Settings {
 	/**
 	 * Percentage of exam pairs to be used for the neighborhood generation.
 	 * Admitted values: from 0 to 1.
-	 * The highest, the better.
+	 * The highest, the less number of iterations.
+	 * The lowest, the faster iterations.
 	 */
 	protected double neighborhoodGeneratingPairsPercentage;
 	

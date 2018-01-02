@@ -128,7 +128,7 @@ public class OptimizationSolution extends Solution {
 		for(int i = 0; i < E; ++i)
 			for(int j = i + 1; j < E; ++j)
 				if(i != j && distanceMatrix[i][j] > 0 && distanceMatrix[i][j] <= K)
-					fitness += Math.pow(2, K - distanceMatrix[i][j]) * new Float(N[i][j]) / S;
+					fitness += Math.pow(2, K - distanceMatrix[i][j]) * N[i][j] / S;
 	}
 	
 	@Override
@@ -206,14 +206,6 @@ public class OptimizationSolution extends Solution {
 			return true;
 		
 		return false;
-	}
-	
-	@Override
-	public String toString() {
-		return	super.toString() + 
-				"\nPrinting conflictCoefficients:\n" + printConflictCoefficients() +
-				"\nMost penalizing exam pair: " + mostPenalizingPair
-		;
 	}
 
 	/**

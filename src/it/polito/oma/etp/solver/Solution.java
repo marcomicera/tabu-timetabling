@@ -158,29 +158,34 @@ public abstract class Solution {
 	protected abstract Neighbor getNeighbor(int movingExam, int newTimeslot) throws InvalidMoveException;
 	
 	/**
-	 * Checks whether this solution is feasible or not.
+	 * Returns whether the solution represented by this object
+	 * is feasible or not.
+	 * @return	true if this solution is feasible.
 	 */
-	public void checkFeasibility() {
+	public boolean isFeasible() {
 	    int E = instance.getE();
 	    int[][] N = instance.getN();
+	    
+	    boolean isFeasible = true;
 	    
 	    for(int t = 0; t < instance.getTmax(); ++t)
 	    	for(int exam1 = 0; exam1 < E; ++exam1)
 	    		for(int exam2 = exam1+1; exam2 < E; ++exam2)
-	    			if(N[exam1][exam2]>0 && te[t][exam1]==1 && te[t][exam2]==1)
-	    				System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
-	  }
+	    			if(N[exam1][exam2]>0 && te[t][exam1]==1 && te[t][exam2]==1) {
+	    				isFeasible = false;
+	    				/*TODO debug*/System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
+	    			}
+	    
+	    return isFeasible;
+	}
 	
 	/**
 	 * Overridden method which displays info about this solution.
 	 */
 	@Override
 	public String toString() {
-		return	"fitness = " + fitness +
-				"\nSchedule: " + Arrays.toString(schedule)
-				//"\n\nPrinting Te:\n" + Utility.printMatrix(te) +
-				//"Printing y:\n" + Utility.printMatrix(y) +
-				
+		return	"<fitness: " + fitness +
+				", " + ((!isFeasible()) ? "not " : "") + "feasible>"
 		;
 	}
 	

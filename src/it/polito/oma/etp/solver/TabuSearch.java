@@ -15,6 +15,7 @@ public abstract class TabuSearch {
 	protected Solution bestSolution;
 	protected int iteration = 0;
 	protected TabuList tabuList;
+	private static boolean TIMER_EXPIRED = false;
 	
 	public TabuSearch(InstanceData instanceData, Settings settings) {
 		this.instance = instanceData;
@@ -28,11 +29,13 @@ public abstract class TabuSearch {
 	 * @param instanceData		data describing the problem instance.
 	 * @param initialSolution	initial solution from which the Tabu Search
 	 * 							algorithm starts.
+	 * @return					the best solution found so far.
 	 */
-	public void solve() {
+	public Solution solve() {
+		
 		int iteration = 0;
 		
-		while(bestSolution.getFitness() > 0) {
+		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
 			
 			Neighbor validNeighbor = null;
@@ -62,16 +65,11 @@ public abstract class TabuSearch {
 			/*TODO debug*/System.out.println("\n");
 			
 			++iteration;
-			
-//			try {
-//				Thread.sleep(30);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 		}
 		
-		//TODO remember to output solution on file 
+		//TODO remember to output solution on file
+		
+		return bestSolution;
 	}
 	
 	/**
@@ -135,12 +133,22 @@ public abstract class TabuSearch {
 					}
 				}
 			else {
-				// Random timeslot index generation
-				int randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
+				// Random timeslot index generation for both exams belonging to the exam pair
+				int randomTimeslot1, randomTimeslot2;
+				
+				do {
+					randomTimeslot1 = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
+				} while(currentSolution.getTimeslot(examPair.getExam1()) == randomTimeslot1);
+				/*TODO debug*/ System.out.println("Random chosen timeslot for exam1: " + randomTimeslot1);
+				
+				do {
+					randomTimeslot2 = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
+				} while(currentSolution.getTimeslot(examPair.getExam2()) == randomTimeslot2);
+				/*TODO debug*/ System.out.println("Random chosen timeslot for exam1: " + randomTimeslot2);
 				
 				try {
-					neighborhood.add(currentSolution.getNeighbor(examPair.getExam1(), randomTimeslot));
-					neighborhood.add(currentSolution.getNeighbor(examPair.getExam2(), randomTimeslot));
+					neighborhood.add(currentSolution.getNeighbor(examPair.getExam1(), randomTimeslot1));
+					neighborhood.add(currentSolution.getNeighbor(examPair.getExam2(), randomTimeslot2));
 				} catch(InvalidMoveException e) { }
 			}
 						
@@ -253,10 +261,10 @@ public abstract class TabuSearch {
 		/*TODO debug (fitness)*/ System.out.println("\nFitness: " + currentSolution.getFitness());
 		/*TODO debug*/ currentSolution.initializeFitness();
 		/*TODO debug*/float testFitnessFromScratch = currentSolution.getFitness();
-		/*TODO debug*/if(testIncrementalFitness != testFitnessFromScratch) {
-		/*TODO debug*/	System.err.println("Different fitness values");
-		/*TODO debug*/	System.exit(1);
-		/*TODO debug*/}
+//		/*TODO debug*/if(testIncrementalFitness != testFitnessFromScratch) {
+//		/*TODO debug*/	System.err.println("Different fitness values");
+//		/*TODO debug*/	System.exit(1);
+//		/*TODO debug*/}
 		/*TODO debug (fitness from scratch)*/ System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
 		
 
@@ -301,13 +309,12 @@ public abstract class TabuSearch {
 	          System.exit(1);
 	      }
 	}
-	
+
 	/**
-	 * Returns the proper solution corresponding to this
-	 * Tabu Search implementation.
-	 * @return	the Tabu Search solution.
+	 * Stopping condition used in the optimization
+	 * problem, called by a timer.
 	 */
-	public Solution getSolution() {
-		return bestSolution;
+	public static void stopExecution() {
+		TIMER_EXPIRED = true;
 	}
 }
