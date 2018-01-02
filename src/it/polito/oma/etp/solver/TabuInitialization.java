@@ -186,8 +186,9 @@ public class TabuInitialization extends TabuSearch {
 		/*TODO debug*/
 		System.out.println(
 				"Returning infeasible solution\npenalizingPairs" + Arrays.toString(penalizingPairs.toArray()) + 
-				"\nfitness: " + fitness
+				"\nIncremental fitness: " + fitness
 		);
+		
 		
 		return new InitializationSolution(
 			instance, 

@@ -44,7 +44,7 @@ public class ETPsolver_OMAAL_group15 {
 			
 			// Tuning
 			Settings initializationSettings = new Settings(
-				false,	// firstRandomSolution
+				true,	// firstRandomSolution
 				0.6,	// neighborhoodGeneratingPairsPercentage
 				false,	// considerAllTimeslots
 				20 		// tabuListInitialSize

@@ -249,10 +249,15 @@ public abstract class TabuSearch {
 		if(currentSolution instanceof OptimizationSolution)
 			((OptimizationSolution)currentSolution).initializeDistanceMatrix();
 				
-		/*TODO debug*/ //System.out.println("oldTimeslot = " + oldTimeslot);
+		/*TODO debug*/float testIncrementalFitness = currentSolution.getFitness();
 		/*TODO debug (fitness)*/ System.out.println("\nFitness: " + currentSolution.getFitness());
 		/*TODO debug*/ currentSolution.initializeFitness();
-		/*TODO debug (fitness from scratch)*/ System.out.println("\nCalculating the fitness from scratch: " + currentSolution.getFitness());
+		/*TODO debug*/float testFitnessFromScratch = currentSolution.getFitness();
+		/*TODO debug*/if(testIncrementalFitness != testFitnessFromScratch) {
+		/*TODO debug*/	System.err.println("Different fitness values");
+		/*TODO debug*/	System.exit(1);
+		/*TODO debug*/}
+		/*TODO debug (fitness from scratch)*/ System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
 		
 
 		// Updating bestSolution if necessary

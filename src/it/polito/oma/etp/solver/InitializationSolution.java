@@ -66,11 +66,7 @@ public class InitializationSolution extends Solution {
 			
 			if(examPair.getExam1() == movingExam || examPair.getExam2() == movingExam)
 				iterator.remove();
-		}
-		/*for(ExamPair examPair: penalizingPairs)
-			if(examPair.getExam1() == movingExam || examPair.getExam2() == movingExam)
-				penalizingPairs.remove(examPair);*/
-		
+		}		
 		
 		// Adding new exam pairs
 		for(int otherExam = 0; otherExam < instance.getE(); ++otherExam) {
@@ -122,6 +118,7 @@ public class InitializationSolution extends Solution {
 		int E = instance.getE();
 		int[][] N = instance.getN();
 		
+		// Used when removing old infeasibilities
 		int oldTimeslot = schedule[movingExam];
 		
 		// Computing the neighbor's fitness value
@@ -131,7 +128,7 @@ public class InitializationSolution extends Solution {
 				
 				// If there are students enrolled in both exams (conflicting exams)
 				N[movingExam][otherExam] > 0
-			) 
+			) {
 				// Removing old infeasibilities
 				if(	// If both exams have been scheduled in the same timeslot
 					te[oldTimeslot][otherExam] == 1
@@ -139,11 +136,12 @@ public class InitializationSolution extends Solution {
 					--neighborFitnessValue;
 				
 				// Adding new infeasibilities
-				else if(// If there will be new exams in the same timeslot
-						te[newTimeslot][otherExam] == 1
+				if(	// If there will be new exams in the same timeslot
+					te[newTimeslot][otherExam] == 1
 				)
 					++neighborFitnessValue;
-				
+			}
+		
 		return new Neighbor(movingExam, newTimeslot, neighborFitnessValue);
 	}
 }
