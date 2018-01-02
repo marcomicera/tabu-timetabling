@@ -5,8 +5,8 @@ import java.util.Collections;
 import it.polito.oma.etp.reader.InstanceData;
 
 public class TabuOptimization extends TabuSearch {
-	public TabuOptimization(InstanceData instanceData, InitializationSolution initialSolution) {
-		super(instanceData);
+	public TabuOptimization(InstanceData instanceData, InitializationSolution initialSolution, Settings settings) {
+		super(instanceData, settings);
 		
 		// Initially, the current solution is the initial one
 		currentSolution = new OptimizationSolution(initialSolution);

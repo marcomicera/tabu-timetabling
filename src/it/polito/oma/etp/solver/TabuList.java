@@ -5,11 +5,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class TabuList {
-	private int MAX_SIZE = 40;
+	private int size;
 	
 	private LinkedList<Neighbor> tabuList;
 	
-	public TabuList() {
+	public TabuList(int initialSize) {
+		size = initialSize;
 		tabuList = new LinkedList<Neighbor>();
 	}
 
@@ -27,7 +28,7 @@ public class TabuList {
 	}
 	
 	private boolean isFull() {
-		return tabuList.size() == MAX_SIZE;
+		return tabuList.size() == size;
 	}
 	
 	public boolean contains(int exam, int t) {
@@ -44,12 +45,12 @@ public class TabuList {
 		return b;		
 	}
 	
-	public int getMAX_SIZE() {
-		return MAX_SIZE;
+	public int getSize() {
+		return size;
 	}
 
-	public void setMAX_SIZE(int MAX_SIZE) {
-		this.MAX_SIZE = MAX_SIZE;
+	public void setSize(int size) {
+		this.size = size;
 	}
 	
 	public Neighbor getLastEntry() {
@@ -61,20 +62,4 @@ public class TabuList {
 		return Arrays.toString(tabuList.toArray());
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

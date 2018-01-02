@@ -6,8 +6,19 @@ import java.util.Arrays;
 import it.polito.oma.etp.reader.InstanceData;
 
 public class TabuInitialization extends TabuSearch {
-	public TabuInitialization(InstanceData instanceData) {
-		super(instanceData);
+	/**
+	 * Default constructor, creating a Tabu Search implementation for computing
+	 * the first feasible solution.
+	 * @param instanceData			The given problem instance data.
+	 * @param settings				This Tabu Search implementation settings.
+	 * @param firstRandomSolution	If true, the first infeasible solution is
+	 * 								computed randomly; otherwise, our ad-hoc
+	 * 								deterministic algorithm tries to obtain an
+	 * 								initial solution with the minimum number of
+	 * 								conflicts.
+	 */
+	public TabuInitialization(InstanceData instanceData, Settings settings) {
+		super(instanceData, settings);
 		
 		// Initially, the current solution is the initial one
 		currentSolution = generateUnfeasibleSolution();
@@ -39,98 +50,33 @@ public class TabuInitialization extends TabuSearch {
 		// Boolean array that tells me if a given exam was already assigned in a timeslot.
 		int assignedExams[] = new int[E];
 
-		// first step: put e0 in t0
-		te[0][0] = 1;
-		schedule[0] = 0;
-		assignedExams[0] = 1;
-		texamsCounter[0]++;
+		// First exam e0
+		if(!settings.firstRandomSolution) {
+			// first step: put e0 in t0
+			te[0][0] = 1;
+			schedule[0] = 0;
+			assignedExams[0] = 1;
+			texamsCounter[0]++;
+		}
 		
 		// cycling through all exams
-		for(int exam = 1; exam < E; exam++) {
+		for(int exam = (settings.firstRandomSolution) ? 0 : 1; exam < E; exam++) {
 			
-			/* IN: texamsCounter, OUT: timeslotOrder*
-			 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
-			timeslotOrder = getTimeslotOrder(texamsCounter);
-			
-			// cycling through all timeslots
-			for(int t = 0; t < Tmax; t++) {
+			// First infeasible solution computed randomly
+			if(settings.firstRandomSolution) {
+				// Random timeslot index generation
+				int randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, Tmax);
 				
-				// Check if this exam was already assigned
-				if (assignedExams[exam] == 1)
-					break;
-					
-				// checking exams in conflict
-				boolean conflict = false;
+				// Exam assignment
+				te[randomTimeslot][exam] = 1;
+				schedule[exam] = randomTimeslot;
 				
-				for(int conflictualExam = 0; conflictualExam < E; conflictualExam++) {
-					// are exam and conflictualExam in conflict? If not, search next exam for a conflict.
-					if (N[exam][conflictualExam] != 0) {
-						/* Here we know exam and conflictualExam are in conflict. I'd like to put exam in
-						 * timeslot, but first I check if conflictualExam is already in timeslot.
-						 * If it is there, I need to change timeslot, otherwise i look the next conflictualExam. */
-						if(te[timeslotOrder[t]][conflictualExam] == 1) {
-							conflict = true;
-							break;
-						}						
-					}
-				} // END FOR conflictualExam
-				
-				/* We are here for 2 motivations:
-				 * 1. we checked all conflictualExams and no one is in timeslot (conflict = false) -> write in timeslot.
-				 * 2. we found that a conflictualExam is in timeslot (conflict = true) -> look next timeslot */
-				if(conflict == false) {
-					te[timeslotOrder[t]][exam] = 1;
-					schedule[exam] = timeslotOrder[t];
-					// This exam is assigned, do not assign it again.
-					assignedExams[exam] = 1;
-					texamsCounter[timeslotOrder[t]]++;
-				}		
-			} // END FOR timeslot (increasing slots)
-					
-			/* If at the end of the timeslots checking, the exam can't still be assigned, we introuduce infeasibility.
-			 * We assign exam to the timeslot with less conflictual exams and update U accordingly. */
-			if (assignedExams[exam] == 0) {
-				
-				// number of conflicts for each timeslot
-				int[] numberOfConflicts = new int[Tmax];
-				
-				// cycling timeslots, counting the number of conflicts
-				for(int t = 0; t < Tmax; t++) {
-					numberOfConflicts[t] = 0;
-					
-					for(int confExam = 0; confExam < E; confExam++) {
-						
-						// are exam and confExam in conflict?
-						if(N[exam][confExam] > 0) {
-							// yes; is confExam in timeslot t? Increase the number of conflicts for that timeslot
-							if(te[t][confExam] == 1) {
-								numberOfConflicts[t]++;
-							}		
-						}
-					}// end FOR confExam
-					
-				}// end FOR timeslots
-				
-				int minConflicts = E;
-				int myTimeslot = 0;
-				// searching for the timeslot with the minimum of conflict for the given exam
-				for(int t = 0; t < numberOfConflicts.length; t++) {
-					if(numberOfConflicts[t] < minConflicts) {
-						minConflicts = numberOfConflicts[t];
-						myTimeslot = t;
-					}
-				}
-				
-				/* Now the exam is placed in the timeslot myTimeslot and the relative U elements are set at 1,
-				 * remembering it is introducing an unfeasibility in the solution.*/
-				te[myTimeslot][exam] = 1;
-				schedule[exam] = myTimeslot;
+				// Fitness value calculation
 				assignedExams[exam] = 1;
-				texamsCounter[myTimeslot]++;
-				// cycling through exams in myTimeslot
+				texamsCounter[randomTimeslot]++;
 				for(int e = 0; e < E; e++) {
 					// looks only allocated exams
-					if(te[myTimeslot][e] == 1) {
+					if(te[randomTimeslot][e] == 1) {
 						// and check if they are conflictual with exam
 						if(N[exam][e] != 0) {
 							penalizingPairs.add(new ExamPair(e, exam));
@@ -138,8 +84,102 @@ public class TabuInitialization extends TabuSearch {
 						}
 					}
 				}
+			}
+			// Ad-hoc deterministic algorithm
+			else {
+				/* IN: texamsCounter, OUT: timeslotOrder*
+				 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
+				timeslotOrder = getTimeslotOrder(texamsCounter);
 				
-			}// end IF exam cannot be placed
+				// cycling through all timeslots
+				for(int t = 0; t < Tmax; t++) {
+					
+					// Check if this exam was already assigned
+					if (assignedExams[exam] == 1)
+						break;
+						
+					// checking exams in conflict
+					boolean conflict = false;
+					
+					for(int conflictualExam = 0; conflictualExam < E; conflictualExam++) {
+						// are exam and conflictualExam in conflict? If not, search next exam for a conflict.
+						if (N[exam][conflictualExam] != 0) {
+							/* Here we know exam and conflictualExam are in conflict. I'd like to put exam in
+							 * timeslot, but first I check if conflictualExam is already in timeslot.
+							 * If it is there, I need to change timeslot, otherwise i look the next conflictualExam. */
+							if(te[timeslotOrder[t]][conflictualExam] == 1) {
+								conflict = true;
+								break;
+							}						
+						}
+					} // END FOR conflictualExam
+					
+					/* We are here for 2 motivations:
+					 * 1. we checked all conflictualExams and no one is in timeslot (conflict = false) -> write in timeslot.
+					 * 2. we found that a conflictualExam is in timeslot (conflict = true) -> look next timeslot */
+					if(conflict == false) {
+						te[timeslotOrder[t]][exam] = 1;
+						schedule[exam] = timeslotOrder[t];
+						// This exam is assigned, do not assign it again.
+						assignedExams[exam] = 1;
+						texamsCounter[timeslotOrder[t]]++;
+					}		
+				} // END FOR timeslot (increasing slots)
+						
+				/* If at the end of the timeslots checking, the exam can't still be assigned, we introuduce infeasibility.
+				 * We assign exam to the timeslot with less conflictual exams and update U accordingly. */
+				if (assignedExams[exam] == 0) {
+					
+					// number of conflicts for each timeslot
+					int[] numberOfConflicts = new int[Tmax];
+					
+					// cycling timeslots, counting the number of conflicts
+					for(int t = 0; t < Tmax; t++) {
+						numberOfConflicts[t] = 0;
+						
+						for(int confExam = 0; confExam < E; confExam++) {
+							
+							// are exam and confExam in conflict?
+							if(N[exam][confExam] > 0) {
+								// yes; is confExam in timeslot t? Increase the number of conflicts for that timeslot
+								if(te[t][confExam] == 1) {
+									numberOfConflicts[t]++;
+								}		
+							}
+						}// end FOR confExam
+						
+					}// end FOR timeslots
+					
+					int minConflicts = E;
+					int myTimeslot = 0;
+					// searching for the timeslot with the minimum of conflict for the given exam
+					for(int t = 0; t < numberOfConflicts.length; t++) {
+						if(numberOfConflicts[t] < minConflicts) {
+							minConflicts = numberOfConflicts[t];
+							myTimeslot = t;
+						}
+					}
+					
+					/* Now the exam is placed in the timeslot myTimeslot and the relative U elements are set at 1,
+					 * remembering it is introducing an unfeasibility in the solution.*/
+					te[myTimeslot][exam] = 1;
+					schedule[exam] = myTimeslot;
+					assignedExams[exam] = 1;
+					texamsCounter[myTimeslot]++;
+					// cycling through exams in myTimeslot
+					for(int e = 0; e < E; e++) {
+						// looks only allocated exams
+						if(te[myTimeslot][e] == 1) {
+							// and check if they are conflictual with exam
+							if(N[exam][e] != 0) {
+								penalizingPairs.add(new ExamPair(e, exam));
+								++fitness;
+							}
+						}
+					}
+					
+				}// end IF exam cannot be placed
+			}
 			
 		} // END FOR exam
 		

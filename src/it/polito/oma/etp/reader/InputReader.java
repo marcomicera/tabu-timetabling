@@ -103,6 +103,8 @@ public class InputReader {
 	 * @param iName	Instance name
 	 */
 	private static int extractTmax(String iName) {
+		// TODO check if there is a blank char at the beginning of the file
+		
 		String currentLine = "";
 		
 		try {
