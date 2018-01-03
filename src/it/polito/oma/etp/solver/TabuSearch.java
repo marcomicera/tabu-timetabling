@@ -133,27 +133,15 @@ public abstract class TabuSearch {
 					}
 				}
 			else {
-				// Random timeslot index generation for both exams belonging to the exam pair
-				int randomTimeslot1, randomTimeslot2;
-				
-				do {
-					randomTimeslot1 = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
-				} while(currentSolution.getTimeslot(examPair.getExam1()) == randomTimeslot1);
-				/*TODO debug*/ //System.out.println("Random chosen timeslot for exam1: " + randomTimeslot1);
-				if(currentSolution.getTimeslot(examPair.getExam1()) == randomTimeslot1)
-					throw new AssertionError("Exam " + examPair.getExam1() + " is not moving");
-				
-				do {
-					randomTimeslot2 = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
-				} while(currentSolution.getTimeslot(examPair.getExam2()) == randomTimeslot2);
-				/*TODO debug*/ //System.out.println("Random chosen timeslot for exam2: " + randomTimeslot2);
-				if(currentSolution.getTimeslot(examPair.getExam2()) == randomTimeslot2)
-					throw new AssertionError("Exam " + examPair.getExam2() + " is not moving");
-				
-				try {
-					neighborhood.add(currentSolution.getNeighbor(examPair.getExam1(), randomTimeslot1));
-					neighborhood.add(currentSolution.getNeighbor(examPair.getExam2(), randomTimeslot2));
-				} catch(InvalidMoveException e) { }
+				// Obtaining a feasible neighbor for exam1 using a random timeslot
+				 Neighbor neighbor1 = getFeasibleNeighborRandomly(examPair.getExam1());
+				 if(neighbor1 != null)
+					 neighborhood.add(neighbor1);
+				 		
+				 // Obtaining a feasible neighbor for exam1 using a random timeslot
+				 Neighbor neighbor2 = getFeasibleNeighborRandomly(examPair.getExam2());
+				 if(neighbor2 != null)
+					 neighborhood.add(neighbor2);
 			}
 						
 			// Counting exam pairs to be considered for the neighborhood generation
@@ -166,6 +154,41 @@ public abstract class TabuSearch {
 			Collections.sort(neighborhood);
 		
 		return neighborhood;
+	}
+	
+	/**
+	 * Given an exam index, specified as an argument, it returns a
+	 * neighbor using a random timeslot.
+	 * It returns null if the random timeslot produces an
+	 * infeasible neighbor. 
+	 * @param exam	the exam to be rescheduled in a random timeslot.
+	 * @return		a feasible neighbor using a random timeslot.
+	 * 				null if the generated neighbor is infeasible.
+	 */
+	private Neighbor getFeasibleNeighborRandomly(int exam) {
+		// One-time-only random timeslot
+		int randomTimeslot;
+		
+		// The randomly-generated neighbor will be assigned to this variable (if feasible)
+		Neighbor neighbor = null;
+		
+		do {
+			// Random timeslot index generation
+			randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
+		} while(currentSolution.getTimeslot(exam) == randomTimeslot);
+		
+		if(currentSolution.getTimeslot(exam) == randomTimeslot)
+			throw new AssertionError("Exam " + exam + " is not moving");
+		
+		try {
+			neighbor = currentSolution.getNeighbor(exam, randomTimeslot);
+		} catch(InvalidMoveException e) {
+			/*
+			 * If no feasible neighbor is found, return null.
+			 */
+		}
+		
+		return neighbor;
 	}
 	
 	/**
@@ -269,7 +292,7 @@ public abstract class TabuSearch {
 //		/*TODO debug*/	System.err.println("Different fitness values");
 //		/*TODO debug*/	System.exit(1);
 //		/*TODO debug*/}
-		/*TODO debug (fitness from scratch)*/ System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
+		/*TODO debug (fitness from scratch)*/ //System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
 		
 		// Updating bestSolution if necessary
 		updateBestSolution();
