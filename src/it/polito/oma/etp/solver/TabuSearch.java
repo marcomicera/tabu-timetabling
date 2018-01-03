@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -101,52 +103,43 @@ public abstract class TabuSearch {
 		boolean considerAllPairs = (settings.neighborhoodGeneratingPairsPercentage == 1) ? true : false;
 		int neighborhoodGeneratingPairs = (int)Math.ceil(penalizingPairs.size() * settings.neighborhoodGeneratingPairsPercentage);
 		
-		for(ExamPair examPair: penalizingPairs) {
-			// Retrieving the timeslots in which the two exams have been scheduled
-			int firstExamSlot = currentSolution.getTimeslot(examPair.getExam1());
-			int secondExamSlot = currentSolution.getTimeslot(examPair.getExam2());
-			/*TODO debug*/ //System.out.println("firstExamSlot = " + firstExamSlot + "\nsecondExamSlot = " + secondExamSlot);
+		if(settings.considerAllTimeslots) {
+			// Creating a set containing all penalizing exams once
+			HashSet<Integer> penalizingExams = getPenalizingExams(considerAllPairs, neighborhoodGeneratingPairs);
 			
-			// Computing support variables for excluding timeslots between the two exams 
-			int lowestIndex = (firstExamSlot < secondExamSlot) ? firstExamSlot : secondExamSlot;
-			int highestIndex = (firstExamSlot < secondExamSlot) ? secondExamSlot : firstExamSlot;
-			/*TODO debug*/ //System.out.println("lowestIndex = " + lowestIndex + "\nhighestIndex = " + highestIndex);
-			
-			if(settings.considerAllTimeslots)
+			/**
+			 *  For each penalizing exams, examined only once even if it appears
+			 *  multiple times in the penalizingPairs data structure
+			 */
+			for(int movingExam: penalizingExams) {
+				// For any other timeslot
 				for(int newTimeslot = 0; newTimeslot < instance.getTmax(); ++newTimeslot) {
-					if(	/**
-						 * Skipping timeslots between the two exams: these positions will
-						 * increase the fitness value for sure
-						 */
-						newTimeslot < lowestIndex || newTimeslot > highestIndex
-					) {
+					// Skipping the current timeslots
+					if(newTimeslot != currentSolution.getTimeslot(movingExam)) {
 						try {
-							/**
-							 *  Retrieving neighbor objects, containing its fitness and its corresponding schedule
-							 *  and adding them to the neighborhood set
-							 */
-							neighborhood.add(currentSolution.getNeighbor(examPair.getExam1(), newTimeslot));
-							neighborhood.add(currentSolution.getNeighbor(examPair.getExam2(), newTimeslot));
-						} catch(InvalidMoveException e) {
+							neighborhood.add(currentSolution.getNeighbor(movingExam, newTimeslot));
+						} catch (InvalidMoveException e) {
 							continue;
 						}
 					}
 				}
-			else {
-				// Obtaining a feasible neighbor for exam1 using a random timeslot
-				 Neighbor neighbor1 = getFeasibleNeighborRandomly(examPair.getExam1());
-				 if(neighbor1 != null)
-					 neighborhood.add(neighbor1);
-				 		
-				 // Obtaining a feasible neighbor for exam1 using a random timeslot
-				 Neighbor neighbor2 = getFeasibleNeighborRandomly(examPair.getExam2());
-				 if(neighbor2 != null)
-					 neighborhood.add(neighbor2);
 			}
-						
-			// Counting exam pairs to be considered for the neighborhood generation
-			if(!considerAllPairs && --neighborhoodGeneratingPairs == 0)
-				break;
+		} else {
+			for(ExamPair examPair: penalizingPairs) {
+				// Obtaining a feasible neighbor for exam1 using a random timeslot
+				Neighbor neighbor1 = getFeasibleNeighborRandomly(examPair.getExam1());
+				if(neighbor1 != null)
+					neighborhood.add(neighbor1);
+				
+				// Obtaining a feasible neighbor for exam1 using a random timeslot
+				Neighbor neighbor2 = getFeasibleNeighborRandomly(examPair.getExam2());
+				if(neighbor2 != null)
+					neighborhood.add(neighbor2);
+				
+				// Counting exam pairs to be considered for the neighborhood generation
+				if(!considerAllPairs && --neighborhoodGeneratingPairs == 0)
+					break;
+			}
 		}
 		
 		if(!neighborhood.isEmpty())
@@ -183,12 +176,32 @@ public abstract class TabuSearch {
 		try {
 			neighbor = currentSolution.getNeighbor(exam, randomTimeslot);
 		} catch(InvalidMoveException e) {
-			/*
-			 * If no feasible neighbor is found, return null.
-			 */
+			// If no feasible neighbor is found, return null.
 		}
 		
 		return neighbor;
+	}
+	
+	/**
+	 * Returns a set containing all penalizing exams appearing
+	 * just once, derived from the penalizingPairs data structure.
+	 * @param considerAllPairs				true if all exam pairs have to be considered.
+	 * @param neighborhoodGeneratingPairs	how many exam pairs have to be considered in case considerAllPairs is false.
+	 * @return								the penalizing exams set.
+	 */
+	private HashSet<Integer> getPenalizingExams(boolean considerAllPairs, int neighborhoodGeneratingPairs) {
+		HashSet<Integer> penalizingExams = new HashSet<Integer>();
+		
+		for(ExamPair examPair: currentSolution.getPenalizingPairs()) {
+			penalizingExams.add(examPair.getExam1());
+			penalizingExams.add(examPair.getExam2());
+			
+			// Counting exam pairs to be considered for the neighborhood generation
+			if(!considerAllPairs && --neighborhoodGeneratingPairs == 0)
+				break;
+		}
+		
+		return penalizingExams;
 	}
 	
 	/**
