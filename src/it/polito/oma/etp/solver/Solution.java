@@ -1,7 +1,6 @@
 package it.polito.oma.etp.solver;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import it.polito.oma.etp.reader.InstanceData;
 

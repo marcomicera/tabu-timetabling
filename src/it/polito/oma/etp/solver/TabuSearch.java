@@ -139,12 +139,16 @@ public abstract class TabuSearch {
 				do {
 					randomTimeslot1 = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
 				} while(currentSolution.getTimeslot(examPair.getExam1()) == randomTimeslot1);
-				/*TODO debug*/ System.out.println("Random chosen timeslot for exam1: " + randomTimeslot1);
+				/*TODO debug*/ //System.out.println("Random chosen timeslot for exam1: " + randomTimeslot1);
+				if(currentSolution.getTimeslot(examPair.getExam1()) == randomTimeslot1)
+					throw new AssertionError("Exam " + examPair.getExam1() + " is not moving");
 				
 				do {
 					randomTimeslot2 = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
 				} while(currentSolution.getTimeslot(examPair.getExam2()) == randomTimeslot2);
-				/*TODO debug*/ System.out.println("Random chosen timeslot for exam1: " + randomTimeslot2);
+				/*TODO debug*/ //System.out.println("Random chosen timeslot for exam2: " + randomTimeslot2);
+				if(currentSolution.getTimeslot(examPair.getExam2()) == randomTimeslot2)
+					throw new AssertionError("Exam " + examPair.getExam2() + " is not moving");
 				
 				try {
 					neighborhood.add(currentSolution.getNeighbor(examPair.getExam1(), randomTimeslot1));
@@ -188,7 +192,7 @@ public abstract class TabuSearch {
 			
 			// This move is in the Tabu List
 			if(tabuList.find(neighbor) != -1) {
-				/*TODO debug*/System.out.println("Neighbor " + neighbor + " has been found in the Tabu List");
+				/*TODO debug*/ //System.out.println("Neighbor " + neighbor + " has been found in the Tabu List");
 				
 				// Aspiration criteria satisfied
 				if(neighbor.getFitness() < bestSolution.getFitness()) {
@@ -267,7 +271,6 @@ public abstract class TabuSearch {
 //		/*TODO debug*/}
 		/*TODO debug (fitness from scratch)*/ System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
 		
-
 		// Updating bestSolution if necessary
 		updateBestSolution();
 	}

@@ -39,15 +39,15 @@ public class ETPsolver_OMAAL_group15 {
 		// Tuning
 		Settings initializationSettings = new Settings(
 			false,	// firstRandomSolution
-			0.6,	// neighborhoodGeneratingPairsPercentage
+			1,		// neighborhoodGeneratingPairsPercentage
 			false,	// considerAllTimeslots
-			20 		// tabuListInitialSize
+			20		// tabuListInitialSize
 		);
 		Settings optimizationSettings  = new Settings(
 			false,	// firstRandomSolution
-			0.6,		// neighborhoodGeneratingPairsPercentage
+			1,		// neighborhoodGeneratingPairsPercentage
 			false,	// considerAllTimeslots
-			20		// tabuListInitialSize
+			10		// tabuListInitialSize
 		);
 		
 		// Starting the execution timer 
@@ -68,6 +68,7 @@ public class ETPsolver_OMAAL_group15 {
 		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
 		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
 		/*TODO debug*/System.out.println("Initial feasible solution found: " + initialFeasibleSolution);
+		/*TODO debug*/ //System.exit(0);
 		
 		// Computing the timetabling solution
 		TabuSearch solutionGenerator = new TabuOptimization(instanceData, initialFeasibleSolution, optimizationSettings);

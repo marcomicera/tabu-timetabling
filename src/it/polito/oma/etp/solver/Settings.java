@@ -27,13 +27,14 @@ public class Settings {
 	/**
 	 * Tabu List initial size.
 	 */
-	public int tabuListInitialSize;
+	protected int tabuListInitialSize;
 
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
 			boolean considerAllTimeslots, int tabuListInitialSize) {
+		super();
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
 		this.tabuListInitialSize = tabuListInitialSize;
-	}	
+	}
 }
