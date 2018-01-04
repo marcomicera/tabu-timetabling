@@ -37,9 +37,7 @@ public abstract class TabuSearch {
 	 * @return					the best solution found so far.
 	 */
 	public Solution solve() {
-		
-		int iteration = 0;
-		
+				
 		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
 			
@@ -54,7 +52,6 @@ public abstract class TabuSearch {
 					    currentSolution.getFitness() > bestSolution.getFitness()) {
 						
 						returnToBestSolution();
-						bestSolutionIteration = iteration;
 						/*TODO debug*/System.err.println("RETURN TO BEST SOLUTION");
 						
 					}

@@ -42,7 +42,7 @@ public class ETPsolver_OMAAL_group15 {
 			0.5,	// neighborhoodGeneratingPairsPercentage
 			true,	// considerAllTimeslots
 			false,  // enableReturnToBestSolution
-			25000,	// numberOfIteration
+			15000,	// numberOfIteration
 			20		// tabuListInitialSize
 		);
 		Settings optimizationSettings  = new Settings(
@@ -72,7 +72,7 @@ public class ETPsolver_OMAAL_group15 {
 		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
 		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
 		/*TODO debug*/System.out.println("Initial feasible solution found: " + initialFeasibleSolution);
-		/*TODO debug*///System.exit(0);
+		/*TODO debug*/System.exit(0);
 		
 		// Computing the timetabling solution
 		TabuSearch solutionGenerator = new TabuOptimization(instanceData, initialFeasibleSolution, optimizationSettings);
