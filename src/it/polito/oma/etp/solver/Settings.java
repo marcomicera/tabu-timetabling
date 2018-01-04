@@ -30,6 +30,11 @@ public class Settings {
 	protected int tabuListInitialSize;
 	
 	/**
+	 * Tabu List maximum size.
+	 */
+	protected int tabuListMaxSize;
+	
+	/**
 	 * Minimum fitness value difference over which two consecutive 
 	 * iterations are considered as non-improving.
 	 */
@@ -40,16 +45,23 @@ public class Settings {
 	 * the Tabu Search algorithm.
 	 */
 	protected int maxNonImprovingIterationsAllowed;
+	
+	/**
+	 * How many elements will be added every time the Tabu List size
+	 * gets increased.
+	 */
+	protected int tabuListIncrementSize;
 
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
-			boolean considerAllTimeslots, int tabuListInitialSize, float deltaFitnessThreshold,
-			int maxNonImprovingIterationsAllowed) {
-		super();
+			boolean considerAllTimeslots, int tabuListInitialSize, int tabuListMaxSize, float deltaFitnessThreshold,
+			int maxNonImprovingIterationsAllowed, int tabuListIncrementSize) {
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
 		this.tabuListInitialSize = tabuListInitialSize;
+		this.tabuListMaxSize = tabuListMaxSize;
 		this.deltaFitnessThreshold = deltaFitnessThreshold;
 		this.maxNonImprovingIterationsAllowed = maxNonImprovingIterationsAllowed;
+		this.tabuListIncrementSize = tabuListIncrementSize;
 	}
 }

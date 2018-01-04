@@ -5,12 +5,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class TabuList {
-	private int size;
+	private int	size,
+				maxSize;
 	
 	private LinkedList<Neighbor> tabuList;
 	
-	public TabuList(int initialSize) {
+	public TabuList(int initialSize, int maxSize) {
 		size = initialSize;
+		this.maxSize = maxSize;
 		tabuList = new LinkedList<Neighbor>();
 	}
 
@@ -50,6 +52,9 @@ public class TabuList {
 	}
 
 	public void setSize(int size) {
+		if(size == this.size)
+			return;
+		
 		// Decreasing size
 		if(size < this.size) {
 			int decrease = this.size - size;
@@ -59,13 +64,20 @@ public class TabuList {
 				tabuList.pop();
 				--decrease;
 			}
+			
+			this.size = size;
 		}
-		
-		this.size = size;
+		else {
+			int newSize = (this.size > maxSize) ? maxSize : size;
+			
+			this.size = newSize;
+		}
 	}
 	
 	public void increaseSize(int quantity) {
-		size += quantity;
+		int newSize = (size + quantity > maxSize) ? maxSize : size + quantity;
+		
+		size = newSize;
 	}
 	
 	public Neighbor getLastEntry() {

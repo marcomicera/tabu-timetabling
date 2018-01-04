@@ -22,7 +22,7 @@ public abstract class TabuSearch {
 	public TabuSearch(InstanceData instanceData, Settings settings) {
 		this.instance = instanceData;
 		this.settings = settings;
-		tabuList = new TabuList(settings.tabuListInitialSize);
+		tabuList = new TabuList(settings.tabuListInitialSize, settings.tabuListMaxSize);
 	}
 	
 	/**
@@ -89,17 +89,17 @@ public abstract class TabuSearch {
 						 * 
 						 * 1) Returning to best solution
 						 * 2) (Disabling aspiration criterion)
-						 * 3) Increasing Tabu List size
+						 * DONE) Increasing Tabu List size
 						 */
 						
 						// Increasing Tabu List size
+						tabuList.increaseSize(settings.tabuListIncrementSize);
+						nonImprovingIterations = 0;
 					}
 				} else {
 					nonImprovingIterations = 0;
 				}
 					
-					
-				
 				move(validNeighbor);
 			}
 			/*TODO debug*/System.out.println("\n");

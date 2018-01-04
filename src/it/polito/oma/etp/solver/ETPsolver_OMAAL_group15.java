@@ -41,16 +41,20 @@ public class ETPsolver_OMAAL_group15 {
 			0.5,	// neighborhoodGeneratingPairsPercentage
 			true,	// considerAllTimeslots
 			20,		// tabuListInitialSize
-			3,		// deltaFitnessThreshold
-			10000	// maxNonImprovingIterationsAllowed
+			40,		// tabuListMaxSize
+			4,		// deltaFitnessThreshold
+			10000,	// maxNonImprovingIterationsAllowed
+			7		// tabuListIncrementSize
 		);
 		Settings optimizationSettings  = new Settings(
 			false,	// firstRandomSolution
 			1,		// neighborhoodGeneratingPairsPercentage
 			false,	// considerAllTimeslots
 			20,		// tabuListInitialSize
+			40,		// tabuListMaxSize
 			3,		// deltaFitnessThreshold
-			20000	// maxNonImprovingIterationsAllowed
+			20000,	// maxNonImprovingIterationsAllowed
+			5		// tabuListIncrementSize
 		);
 		
 		// Starting the execution timer 
