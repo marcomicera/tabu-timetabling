@@ -35,7 +35,13 @@ public class ETPsolver_OMAAL_group15 {
 		// Instance data
 		InstanceData instanceData = InputReader.getData("res\\" + instanceName);
 		
-		// Tuning
+		// Tabu List dynamic size: time worsening criterion
+	    int tabuListInitialSize = 20;
+	    int tabuListMaxSize = 40;
+	    int tabuListIntervalAdd = 5;
+	    double tabuListIncrementTimeInterval = ((float)timeout / 3) / ((tabuListMaxSize-tabuListInitialSize)/tabuListIntervalAdd);
+	    
+	    // Tuning
 		Settings initializationSettings = new Settings(
 			// General Tabu List settings
 			false,	// firstRandomSolution
@@ -45,7 +51,7 @@ public class ETPsolver_OMAAL_group15 {
 			
 			// Dynamic Tabu List section
 			true,	// dynamicTabuList
-			1,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
+			2,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
 			40,		// tabuListMaxSize
 			10000,	// maxNonImprovingIterationsAllowed
 			5,		// tabuListIncrementSize
@@ -54,7 +60,7 @@ public class ETPsolver_OMAAL_group15 {
 			4,		// deltaFitnessThreshold
 			
 			// time worsening criterion
-			5 		// tabuListIncrementTimeInterval
+			tabuListIncrementTimeInterval 		// tabuListIncrementTimeInterval
 		);
 		Settings optimizationSettings  = new Settings(
 			// General Tabu List settings
@@ -94,7 +100,7 @@ public class ETPsolver_OMAAL_group15 {
 		// Computing the first feasible solution
 		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
 		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
-		/*TODO debug*/System.out.println("Initial feasible solution found: " + initialFeasibleSolution);
+		/*TODO debug*/System.out.println("Initial feasible solution " + ((initialFeasibleSolution.getFitness() != 0) ? "not" : "") + " found: " + initialFeasibleSolution);
 		/*TODO debug*/System.exit(0);
 		
 		// Computing the timetabling solution

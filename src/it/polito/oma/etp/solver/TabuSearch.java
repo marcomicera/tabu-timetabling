@@ -6,6 +6,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -34,15 +36,31 @@ public abstract class TabuSearch {
 	 * @return					the best solution found so far.
 	 */
 	public Solution solve() {
-		
+		// Number of consecutive non-improving iterations
 		int nonImprovingIterations = 0;
+		
+		// Tabu List dynamic size: time worsening criterion
+		if(settings.worseningCriterion == 3) {
+			int delay = (int)(settings.tabuListIncrementTimeInterval * 1000); 
+		    
+			new Timer().schedule(
+		    	new TimerTask() {
+		    		@Override
+		    		public void run() {
+		    			// Increasing Tabu List size
+		    			tabuList.increaseSize(settings.tabuListIncrementSize);
+	    			}
+	    		},
+		    	delay,
+		        delay
+		    );
+		}
 		
 		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
 			/*TODO debug (nonImprovingIterations)*/System.out.println("***** nonImprovingIterations " + nonImprovingIterations + " *****");
 			
-			// Number of consecutive non-improving iterations 
-			
+			// Tabu List dynamic size: delta fitness worsening criterion
 			float	oldFitness = currentSolution.getFitness(),
 					newFitness;
 			/*TODO debug (oldFitness)*/System.out.println("oldFitness: " + oldFitness);
@@ -117,12 +135,7 @@ public abstract class TabuSearch {
 								tabuList.increaseSize(settings.tabuListIncrementSize);
 							
 							break;
-							
-						// time worsening criterion
-						case 3:
-								
-							break;
-								
+						
 						default:
 							break;
 					}	
