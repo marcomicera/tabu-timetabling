@@ -6,9 +6,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
-
-import javax.management.openmbean.TabularData;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -37,24 +34,24 @@ public abstract class TabuSearch {
 	 * @return					the best solution found so far.
 	 */
 	public Solution solve() {
-				
+		
+		int nonImprovingIterations = 0;
+		
 		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
+			/*TODO debug (nonImprovingIterations)*/System.out.println("***** nonImprovingIterations " + nonImprovingIterations + " *****");
+			
+			// Number of consecutive non-improving iterations 
+			
+			float	oldFitness = currentSolution.getFitness(),
+					newFitness;
+			/*TODO debug (oldFitness)*/System.out.println("oldFitness: " + oldFitness);
 			
 			Neighbor validNeighbor = null;
 			
 			// No valid neighbor in the neighborhood
 			while(validNeighbor == null) {
 				try {
-					
-					if( settings.enableReturnToBestSolution &&
-						iteration - bestSolutionIteration > settings.numberOfIteration &&
-					    currentSolution.getFitness() > bestSolution.getFitness()) {
-						
-						returnToBestSolution();
-						/*TODO debug*/System.err.println("RETURN TO BEST SOLUTION");
-						
-					}
 					
 					ArrayList<Neighbor> neighborhood = getNeighborhood(currentSolution.getPenalizingPairs());
 					
@@ -73,6 +70,36 @@ public abstract class TabuSearch {
 			}
 			
 			if(validNeighbor != null) {
+				newFitness = validNeighbor.getFitness();
+				/*TODO debug (newFitness)*/System.out.println("newFitness: " + newFitness);
+				/*TODO debug (Fitness difference)*/System.out.println("Fitness difference: " + (oldFitness - newFitness));
+				/*TODO debug (It's not getting better)*/System.out.println("It's not getting better: " + (oldFitness - newFitness < settings.deltaFitnessThreshold));
+				
+				// This iteration did not bring any significant advantage in terms of fitness
+				if(oldFitness - newFitness < settings.deltaFitnessThreshold) {
+					++nonImprovingIterations;
+					
+					// The maximum number of allowed consecutive non-improving iterations has been reached
+					if(nonImprovingIterations == settings.maxNonImprovingIterationsAllowed) {
+						/*TODO debug*/System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " consecutive iterations");
+						
+						
+						/**
+						 * TODO choose and implement
+						 * 
+						 * 1) Returning to best solution
+						 * 2) (Disabling aspiration criterion)
+						 * 3) Increasing Tabu List size
+						 */
+						
+						// Increasing Tabu List size
+					}
+				} else {
+					nonImprovingIterations = 0;
+				}
+					
+					
+				
 				move(validNeighbor);
 			}
 			/*TODO debug*/System.out.println("\n");
@@ -327,11 +354,6 @@ public abstract class TabuSearch {
 	 * if necessary
 	 */
 	protected abstract void updateBestSolution();
-	
-	/**
-	 * Change the current solution with the best solution found until now.
-	 */
-	protected abstract void returnToBestSolution();
 	
 	/**
 	 * Prints the solution into a file.

@@ -25,32 +25,31 @@ public class Settings {
 	protected boolean considerAllTimeslots;
 	
 	/**
-	 * If true, when the algorithm can't find a fitness better than the best one 
-	 * until 'numberOfIteration' iterations, the current solution is updated
-	 * with the best one, making the algorithm starting again from that point.
-	 */
-	protected boolean enableReturnToBestSolution;
-	
-	/**
-	 * If 'enableReturnToBestSolution', it stores the number of iterations to 
-	 * be cycled before returning to the best solution.
-	 */
-	protected int numberOfIteration;
-	
-	/**
 	 * Tabu List initial size.
 	 */
 	protected int tabuListInitialSize;
+	
+	/**
+	 * Minimum fitness value difference over which two consecutive 
+	 * iterations are considered as non-improving.
+	 */
+	protected float deltaFitnessThreshold;
+	
+	/**
+	 * The maximum number of non-improving iterations allowed by
+	 * the Tabu Search algorithm.
+	 */
+	protected int maxNonImprovingIterationsAllowed;
 
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
-			boolean considerAllTimeslots, boolean enableReturnToBestSolution,
-			int numberOfIteration, int tabuListInitialSize) {
+			boolean considerAllTimeslots, int tabuListInitialSize, float deltaFitnessThreshold,
+			int maxNonImprovingIterationsAllowed) {
 		super();
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
-		this.enableReturnToBestSolution = enableReturnToBestSolution;
-		this.numberOfIteration = numberOfIteration;
 		this.tabuListInitialSize = tabuListInitialSize;
+		this.deltaFitnessThreshold = deltaFitnessThreshold;
+		this.maxNonImprovingIterationsAllowed = maxNonImprovingIterationsAllowed;
 	}
 }

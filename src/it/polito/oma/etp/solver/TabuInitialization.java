@@ -252,10 +252,4 @@ public class TabuInitialization extends TabuSearch {
 			bestSolutionIteration = iteration;
 		}
 	}
-	
-	@Override
-	protected void returnToBestSolution() {
-		currentSolution = new InitializationSolution((InitializationSolution)bestSolution);
-		bestSolutionIteration = iteration;
-	}
 }

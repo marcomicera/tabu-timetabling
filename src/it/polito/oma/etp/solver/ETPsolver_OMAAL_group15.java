@@ -33,25 +33,24 @@ public class ETPsolver_OMAAL_group15 {
 		}
 		
 		// Instance data
-		/*TODO restore*/ InstanceData instanceData = InputReader.getData("res\\" + instanceName);
-		/*TODO debug*///InstanceData instanceData = InputReader.getData("res\\instance05");
+		InstanceData instanceData = InputReader.getData("res\\" + instanceName);
 		
 		// Tuning
 		Settings initializationSettings = new Settings(
 			false,	// firstRandomSolution
 			0.5,	// neighborhoodGeneratingPairsPercentage
 			true,	// considerAllTimeslots
-			false,  // enableReturnToBestSolution
-			15000,	// numberOfIteration
-			20		// tabuListInitialSize
+			20,		// tabuListInitialSize
+			3,		// deltaFitnessThreshold
+			10000	// maxNonImprovingIterationsAllowed
 		);
 		Settings optimizationSettings  = new Settings(
 			false,	// firstRandomSolution
 			1,		// neighborhoodGeneratingPairsPercentage
 			false,	// considerAllTimeslots
-			false,  // enableReturnToBestSolution
-			0,		// numberOfIteration
-			20		// tabuListInitialSize
+			20,		// tabuListInitialSize
+			3,		// deltaFitnessThreshold
+			20000	// maxNonImprovingIterationsAllowed
 		);
 		
 		// Starting the execution timer 

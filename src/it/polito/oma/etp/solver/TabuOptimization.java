@@ -42,11 +42,5 @@ public class TabuOptimization extends TabuSearch {
 			bestSolution = new OptimizationSolution((OptimizationSolution)currentSolution);
 			bestSolutionIteration = iteration;
 		}
-	}	
-	
-	@Override
-	protected void returnToBestSolution() {
-		currentSolution = new OptimizationSolution((OptimizationSolution)bestSolution);
-		bestSolutionIteration = iteration;
 	}
 }
