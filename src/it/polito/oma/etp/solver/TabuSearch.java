@@ -71,33 +71,61 @@ public abstract class TabuSearch {
 			
 			if(validNeighbor != null) {
 				newFitness = validNeighbor.getFitness();
-				/*TODO debug (newFitness)*/System.out.println("newFitness: " + newFitness);
-				/*TODO debug (Fitness difference)*/System.out.println("Fitness difference: " + (oldFitness - newFitness));
-				/*TODO debug (It's not getting better)*/System.out.println("It's not getting better: " + (oldFitness - newFitness < settings.deltaFitnessThreshold));
 				
-				// This iteration did not bring any significant advantage in terms of fitness
-				if(oldFitness - newFitness < settings.deltaFitnessThreshold) {
-					++nonImprovingIterations;
+				// Dynamic Tabu List section
+				if(	// If the Tabu List has a dynamic size
+					settings.dynamicTabuList && 
 					
-					// The maximum number of allowed consecutive non-improving iterations has been reached
-					if(nonImprovingIterations == settings.maxNonImprovingIterationsAllowed) {
-						/*TODO debug*/System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " consecutive iterations");
+					// If it's not the first iteration
+					iteration != 0
+				) {
+					switch(settings.worseningCriterion) {
 						
-						
-						/**
-						 * TODO choose and implement
-						 * 
-						 * 1) Returning to best solution
-						 * 2) (Disabling aspiration criterion)
-						 * DONE) Increasing Tabu List size
-						 */
-						
-						// Increasing Tabu List size
-						tabuList.increaseSize(settings.tabuListIncrementSize);
-						nonImprovingIterations = 0;
-					}
-				} else {
-					nonImprovingIterations = 0;
+						// deltaFitness worsening criterion
+						case 1:
+							// This iteration did not bring any significant advantage in terms of fitness
+							if(oldFitness - newFitness < settings.deltaFitnessThreshold) {
+								++nonImprovingIterations;
+								
+								// The maximum number of allowed consecutive non-improving iterations has been reached
+								if(nonImprovingIterations == settings.maxNonImprovingIterationsAllowed) {
+									/*TODO debug*/System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " consecutive iterations");
+									
+									
+									/**
+									 * TODO choose and implement
+									 * 
+									 * 1) Returning to best solution
+									 * 2) (Disabling aspiration criterion)
+									 * DONE) Increasing Tabu List size
+									 */
+									
+									// Increasing Tabu List size
+									tabuList.increaseSize(settings.tabuListIncrementSize);
+									nonImprovingIterations = 0;
+								}
+							} else {
+								nonImprovingIterations = 0;
+							}
+							
+							break;
+								
+						// iterations worsening criterion
+						case 2: 
+							if(iteration % settings.maxNonImprovingIterationsAllowed == 0)
+								// Increasing Tabu List size
+								tabuList.increaseSize(settings.tabuListIncrementSize);
+							
+							break;
+							
+						// time worsening criterion
+						case 3:
+								
+							break;
+								
+						default:
+							break;
+					}	
 				}
 					
 				move(validNeighbor);

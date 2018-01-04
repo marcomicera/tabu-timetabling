@@ -37,24 +37,44 @@ public class ETPsolver_OMAAL_group15 {
 		
 		// Tuning
 		Settings initializationSettings = new Settings(
+			// General Tabu List settings
 			false,	// firstRandomSolution
 			0.5,	// neighborhoodGeneratingPairsPercentage
 			true,	// considerAllTimeslots
 			20,		// tabuListInitialSize
+			
+			// Dynamic Tabu List section
+			true,	// dynamicTabuList
+			1,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
 			40,		// tabuListMaxSize
-			4,		// deltaFitnessThreshold
 			10000,	// maxNonImprovingIterationsAllowed
-			7		// tabuListIncrementSize
+			5,		// tabuListIncrementSize
+			
+			// deltaFitness worsening criterion
+			4,		// deltaFitnessThreshold
+			
+			// time worsening criterion
+			5 		// tabuListIncrementTimeInterval
 		);
 		Settings optimizationSettings  = new Settings(
+			// General Tabu List settings
 			false,	// firstRandomSolution
 			1,		// neighborhoodGeneratingPairsPercentage
 			false,	// considerAllTimeslots
 			20,		// tabuListInitialSize
+			
+			// Dynamic Tabu List section
+			false,	// dynamicTabuList
+			1,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
 			40,		// tabuListMaxSize
-			3,		// deltaFitnessThreshold
 			20000,	// maxNonImprovingIterationsAllowed
-			5		// tabuListIncrementSize
+			5,		// tabuListIncrementSize
+			
+			// deltaFitness worsening criterion
+			3,		// deltaFitnessThreshold
+			
+			// time worsening criterion
+			5 		// tabuListIncrementTimeInterval
 		);
 		
 		// Starting the execution timer 

@@ -30,15 +30,31 @@ public class Settings {
 	protected int tabuListInitialSize;
 	
 	/**
+	 * True if the Tabu List size will be modified dynamically.
+	 */
+	protected boolean dynamicTabuList;
+	
+	/**
+	 * How the Tabu Search algorithm detects a non-improving situation.
+	 * Allowed values:
+	 * 
+	 * • 1 (deltaFitness):	for 'maxNonImprovingIterationsAllowed' iterations,
+	 * 						it never happens that two consecutive iterations
+	 * 						bring an advantage of 'deltaFitnessThreshold'
+	 * 						concerning the fitness value.
+	 * 
+	 * • 2 (iterations):	for 'maxNonImprovingIterationsAllowed' iterations,
+	 * 						no other condition has to be satisfied
+	 * 
+	 * • 3 (time):			every 'tabuListIncrementTimeInterval' seconds, the
+	 * 						Tabu List size gets incremented
+	 */
+	protected int worseningCriterion;
+	
+	/**
 	 * Tabu List maximum size.
 	 */
 	protected int tabuListMaxSize;
-	
-	/**
-	 * Minimum fitness value difference over which two consecutive 
-	 * iterations are considered as non-improving.
-	 */
-	protected float deltaFitnessThreshold;
 	
 	/**
 	 * The maximum number of non-improving iterations allowed by
@@ -51,17 +67,32 @@ public class Settings {
 	 * gets increased.
 	 */
 	protected int tabuListIncrementSize;
+	
+	/**
+	 * Minimum fitness value difference over which two consecutive 
+	 * iterations are considered as non-improving.
+	 */
+	protected float deltaFitnessThreshold;
+	
+	/**
+	 * Time interval by which the Tabu List size could be incremented.
+	 */
+	protected double tabuListIncrementTimeInterval;
 
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
-			boolean considerAllTimeslots, int tabuListInitialSize, int tabuListMaxSize, float deltaFitnessThreshold,
-			int maxNonImprovingIterationsAllowed, int tabuListIncrementSize) {
+			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,
+			int tabuListMaxSize, int maxNonImprovingIterationsAllowed, int tabuListIncrementSize,
+			float deltaFitnessThreshold, double tabuListIncrementTimeInterval) {
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
 		this.tabuListInitialSize = tabuListInitialSize;
+		this.dynamicTabuList = dynamicTabuList;
+		this.worseningCriterion = worseningCriterion;
 		this.tabuListMaxSize = tabuListMaxSize;
-		this.deltaFitnessThreshold = deltaFitnessThreshold;
 		this.maxNonImprovingIterationsAllowed = maxNonImprovingIterationsAllowed;
 		this.tabuListIncrementSize = tabuListIncrementSize;
+		this.deltaFitnessThreshold = deltaFitnessThreshold;
+		this.tabuListIncrementTimeInterval = tabuListIncrementTimeInterval;
 	}
 }
