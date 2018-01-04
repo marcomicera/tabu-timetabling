@@ -52,12 +52,12 @@ public class ETPsolver_OMAAL_group15 {
 			// Dynamic Tabu List section
 			true,	// dynamicTabuList
 			2,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
-			40,		// tabuListMaxSize
-			10000,	// maxNonImprovingIterationsAllowed
-			5,		// tabuListIncrementSize
+			45,		// tabuListMaxSize
+			9000,	// maxNonImprovingIterationsAllowed
+			7,		// tabuListIncrementSize
 			
 			// deltaFitness worsening criterion
-			4,		// deltaFitnessThreshold
+			50,		// movingAveragePeriod
 			
 			// time worsening criterion
 			tabuListIncrementTimeInterval 		// tabuListIncrementTimeInterval
@@ -70,17 +70,17 @@ public class ETPsolver_OMAAL_group15 {
 			20,		// tabuListInitialSize
 			
 			// Dynamic Tabu List section
-			false,	// dynamicTabuList
-			1,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
-			40,		// tabuListMaxSize
-			20000,	// maxNonImprovingIterationsAllowed
-			5,		// tabuListIncrementSize
+			true,	// dynamicTabuList
+			2,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
+			45,		// tabuListMaxSize
+			9000,	// maxNonImprovingIterationsAllowed
+			7,		// tabuListIncrementSize
 			
 			// deltaFitness worsening criterion
-			3,		// deltaFitnessThreshold
+			50,		// movingAveragePeriod
 			
 			// time worsening criterion
-			5 		// tabuListIncrementTimeInterval
+			tabuListIncrementTimeInterval 		// tabuListIncrementTimeInterval
 		);
 		
 		// Starting the execution timer 
@@ -100,8 +100,8 @@ public class ETPsolver_OMAAL_group15 {
 		// Computing the first feasible solution
 		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
 		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
-		/*TODO debug*/System.out.println("Initial feasible solution " + ((initialFeasibleSolution.getFitness() != 0) ? "not" : "") + " found: " + initialFeasibleSolution);
-		/*TODO debug*/System.exit(0);
+		/*TODO debug*/System.out.println("Initial feasible solution " + ((initialFeasibleSolution.getFitness() != 0) ? "not " : "") + "found: " + initialFeasibleSolution);
+		/*TODO debug*/ //System.exit(0);
 		
 		// Computing the timetabling solution
 		TabuSearch solutionGenerator = new TabuOptimization(instanceData, initialFeasibleSolution, optimizationSettings);

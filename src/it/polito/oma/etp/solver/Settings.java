@@ -69,10 +69,10 @@ public class Settings {
 	protected int tabuListIncrementSize;
 	
 	/**
-	 * Minimum fitness value difference over which two consecutive 
-	 * iterations are considered as non-improving.
+	 * Moving average window used for the delta fitness automatic
+	 * calculation.
 	 */
-	protected float deltaFitnessThreshold;
+	protected int movingAveragePeriod;
 	
 	/**
 	 * Time interval by which the Tabu List size could be incremented.
@@ -82,7 +82,7 @@ public class Settings {
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
 			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,
 			int tabuListMaxSize, int maxNonImprovingIterationsAllowed, int tabuListIncrementSize,
-			float deltaFitnessThreshold, double tabuListIncrementTimeInterval) {
+			int deltaFitnessThreshold, double tabuListIncrementTimeInterval) {
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
@@ -92,7 +92,7 @@ public class Settings {
 		this.tabuListMaxSize = tabuListMaxSize;
 		this.maxNonImprovingIterationsAllowed = maxNonImprovingIterationsAllowed;
 		this.tabuListIncrementSize = tabuListIncrementSize;
-		this.deltaFitnessThreshold = deltaFitnessThreshold;
+		this.movingAveragePeriod = deltaFitnessThreshold;
 		this.tabuListIncrementTimeInterval = tabuListIncrementTimeInterval;
 	}
 }

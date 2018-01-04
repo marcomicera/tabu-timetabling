@@ -6,6 +6,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,11 +22,13 @@ public abstract class TabuSearch {
 	protected TabuList tabuList;
 	private static boolean TIMER_EXPIRED = false;
 	protected int bestSolutionIteration = 0;
+	protected MovingAverage fitnessMovingAverage;
 	
 	public TabuSearch(InstanceData instanceData, Settings settings) {
 		this.instance = instanceData;
 		this.settings = settings;
 		tabuList = new TabuList(settings.tabuListInitialSize, settings.tabuListMaxSize);
+		fitnessMovingAverage = new MovingAverage(settings.movingAveragePeriod);
 	}
 	
 	/**
@@ -58,19 +62,12 @@ public abstract class TabuSearch {
 		
 		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
-			/*TODO debug (nonImprovingIterations)*/System.out.println("***** nonImprovingIterations " + nonImprovingIterations + " *****");
-			
-			// Tabu List dynamic size: delta fitness worsening criterion
-			float	oldFitness = currentSolution.getFitness(),
-					newFitness;
-			/*TODO debug (oldFitness)*/System.out.println("oldFitness: " + oldFitness);
 			
 			Neighbor validNeighbor = null;
 			
 			// No valid neighbor in the neighborhood
 			while(validNeighbor == null) {
 				try {
-					
 					ArrayList<Neighbor> neighborhood = getNeighborhood(currentSolution.getPenalizingPairs());
 					
 					/*TODO debug*/ //System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
@@ -88,49 +85,55 @@ public abstract class TabuSearch {
 			}
 			
 			if(validNeighbor != null) {
-				newFitness = validNeighbor.getFitness();
-				
 				// Dynamic Tabu List section
-				if(	// If the Tabu List has a dynamic size
-					settings.dynamicTabuList && 
-					
-					// If it's not the first iteration
-					iteration != 0
-				) {
+				if(settings.dynamicTabuList) { // If the Tabu List has a dynamic size
 					switch(settings.worseningCriterion) {
-						
 						// deltaFitness worsening criterion
 						case 1:
+							float currentFitness = currentSolution.getFitness();
+							
+							// Adding the current solution's fitness to the moving average
+							fitnessMovingAverage.addNum(currentFitness);
+							
+							// Computing the moving average
+							float avg = fitnessMovingAverage.getAvg();
+							
+							// Computing the delta fitness used to detect non-improving situations
+							float delta = Math.abs(currentFitness - avg);
+							/*TODO debug (delta)*/System.out.println("***** delta " + delta + " *****");
+							
+							// Valid neighbor's fitness
+							float newFitness = validNeighbor.getFitness();
+							
 							// This iteration did not bring any significant advantage in terms of fitness
-							if(oldFitness - newFitness < settings.deltaFitnessThreshold) {
+							if(	newFitness <= currentFitness + delta/2 &&
+								newFitness >= currentFitness - delta/2
+							) {
+								/*TODO debug (nonImprovingIterations)*/System.out.println("***** nonImprovingIterations " + nonImprovingIterations + " *****");
 								++nonImprovingIterations;
 								
 								// The maximum number of allowed consecutive non-improving iterations has been reached
 								if(nonImprovingIterations == settings.maxNonImprovingIterationsAllowed) {
 									/*TODO debug*/System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " consecutive iterations");
 									
-									
-									/**
-									 * TODO choose and implement
-									 * 
-									 * 1) Returning to best solution
-									 * 2) (Disabling aspiration criterion)
-									 * DONE) Increasing Tabu List size
-									 */
-									
 									// Increasing Tabu List size
 									tabuList.increaseSize(settings.tabuListIncrementSize);
 									nonImprovingIterations = 0;
 								}
 							} else {
-								nonImprovingIterations = 0;
+								//nonImprovingIterations = 0;
 							}
 							
 							break;
 								
 						// iterations worsening criterion
 						case 2: 
-							if(iteration % settings.maxNonImprovingIterationsAllowed == 0)
+							if(	// If the maximum number of non-improving iterations has been reached
+								iteration % settings.maxNonImprovingIterationsAllowed == 0 &&
+							
+								// If it's not the first iteration
+								iteration != 0
+							)
 								// Increasing Tabu List size
 								tabuList.increaseSize(settings.tabuListIncrementSize);
 							
@@ -344,7 +347,7 @@ public abstract class TabuSearch {
 	 * @param neighbor
 	 */
 	private void move(Neighbor neighbor) {
-		/*TODO debug*/System.out.println("Move: <e" + neighbor.getMovingExam() + ", from t" + currentSolution.getTimeslot(neighbor.getMovingExam()) + " to t" + neighbor.getNewTimeslot() + ">");
+		/*TODO debug*/ //System.out.println("Move: <e" + neighbor.getMovingExam() + ", from t" + currentSolution.getTimeslot(neighbor.getMovingExam()) + " to t" + neighbor.getNewTimeslot() + ">");
 		
 		// Retrieving current solution's infos before performing the move
 		int movingExam = neighbor.getMovingExam();
@@ -434,5 +437,30 @@ public abstract class TabuSearch {
 	 */
 	public static void stopExecution() {
 		TIMER_EXPIRED = true;
+	}
+	
+	class MovingAverage {
+	    private final Queue<Float> window = new LinkedList<Float>();
+	    private final int period;
+	    private float sum;
+
+	    protected MovingAverage(int period) {
+	        if(period <= 0)
+	        	throw new AssertionError("Period must be a positive integer");
+	        this.period = period;
+	    }
+
+	    protected void addNum(float num) {
+	        sum += num;
+	        window.add(num);
+	        if(window.size() > period) {
+	            sum -= window.remove();
+	        }
+	    }
+
+	    protected float getAvg() {
+	        if(window.isEmpty()) return 0; // technically the average is undefined
+	        return sum / window.size();
+	    }
 	}
 }
