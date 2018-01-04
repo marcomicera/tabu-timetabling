@@ -51,7 +51,7 @@ public class ETPsolver_OMAAL_group15 {
 			
 			// Dynamic Tabu List section
 			true,	// dynamicTabuList
-			2,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
+			1,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
 			45,		// tabuListMaxSize
 			9000,	// maxNonImprovingIterationsAllowed
 			7,		// tabuListIncrementSize
@@ -65,13 +65,13 @@ public class ETPsolver_OMAAL_group15 {
 		Settings optimizationSettings  = new Settings(
 			// General Tabu List settings
 			false,	// firstRandomSolution
-			1,		// neighborhoodGeneratingPairsPercentage
-			false,	// considerAllTimeslots
+			1,	// neighborhoodGeneratingPairsPercentage
+			true,	// considerAllTimeslots
 			20,		// tabuListInitialSize
 			
 			// Dynamic Tabu List section
 			true,	// dynamicTabuList
-			2,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
+			1,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
 			45,		// tabuListMaxSize
 			9000,	// maxNonImprovingIterationsAllowed
 			7,		// tabuListIncrementSize

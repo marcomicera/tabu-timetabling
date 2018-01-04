@@ -66,22 +66,14 @@ public abstract class TabuSearch {
 			Neighbor validNeighbor = null;
 			
 			// No valid neighbor in the neighborhood
-			while(validNeighbor == null) {
-				try {
-					ArrayList<Neighbor> neighborhood = getNeighborhood(currentSolution.getPenalizingPairs());
-					
-					/*TODO debug*/ //System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
-					/*TODO debug (neighborhood)*/ //System.out.println("Neighborhood: " + neighborhood);
-					/*TODO debug (neighborhood size)*/System.out.println("Neighborhood size: " + neighborhood.size());
-					
-					validNeighbor = selectBestValidNeighbor(neighborhood);
-				} catch(IndexOutOfBoundsException e) {
-					// TODO what happens here? (empty Tabu List?)
-					// There's no valid neighborhood for every exam pair
-				} catch(IllegalArgumentException e) {
-					System.err.println("Illegal argument exception thrown: ");
-					e.printStackTrace();
-				}
+			while(validNeighbor == null && !TIMER_EXPIRED) {
+				ArrayList<Neighbor> neighborhood = getNeighborhood(currentSolution.getPenalizingPairs());
+				
+				/*TODO debug*/ //System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
+				/*TODO debug (neighborhood)*/ //System.out.println("Neighborhood: " + neighborhood);
+				/*TODO debug (neighborhood size)*/System.out.println("Neighborhood size: " + neighborhood.size());
+				
+				validNeighbor = selectBestValidNeighbor(neighborhood);
 			}
 			
 			if(validNeighbor != null) {
@@ -100,21 +92,25 @@ public abstract class TabuSearch {
 							
 							// Computing the delta fitness used to detect non-improving situations
 							float delta = Math.abs(currentFitness - avg);
-							/*TODO debug (delta)*/System.out.println("***** delta " + delta + " *****");
 							
 							// Valid neighbor's fitness
 							float newFitness = validNeighbor.getFitness();
+							
+							/*TODO debug (currentFitness)*/System.out.println("\ncurrentFitness: " + currentFitness + " (movingAverage: " + fitnessMovingAverage.getAvg() + ")");
+							/*TODO debug (newFitness)*/System.out.println("newFitness: " + newFitness);
+							/*TODO debug (delta/2)*/System.out.println("delta/2: " + (delta/2));
+							/*TODO debug (Not improving)*/System.out.println("Not improving: " + (newFitness <= currentFitness + delta/2 && newFitness >= currentFitness - delta/2) + ". Window goes from " + (currentFitness - delta/2) + " to " + (currentFitness + delta/2));
 							
 							// This iteration did not bring any significant advantage in terms of fitness
 							if(	newFitness <= currentFitness + delta/2 &&
 								newFitness >= currentFitness - delta/2
 							) {
-								/*TODO debug (nonImprovingIterations)*/System.out.println("***** nonImprovingIterations " + nonImprovingIterations + " *****");
 								++nonImprovingIterations;
+								/*TODO debug (nonImprovingIterations)*/System.out.println("nonImprovingIterations gets incremented: " + nonImprovingIterations);
 								
 								// The maximum number of allowed consecutive non-improving iterations has been reached
 								if(nonImprovingIterations == settings.maxNonImprovingIterationsAllowed) {
-									/*TODO debug*/System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " consecutive iterations");
+									/*TODO debug*/System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " iterations");
 									
 									// Increasing Tabu List size
 									tabuList.increaseSize(settings.tabuListIncrementSize);
@@ -310,10 +306,12 @@ public abstract class TabuSearch {
 			
 			// This move is in the Tabu List
 			if(tabuList.find(neighbor) != -1) {
-				/*TODO debug*/ //System.out.println("Neighbor " + neighbor + " has been found in the Tabu List");
+				/*TODO debug*/ System.out.print("Neighbor " + neighbor + " has been found in the Tabu List. ");
+				/*TODO debug*/ System.out.println("Best solution's fitness is " + bestSolution.getFitness());
 				
-				// Aspiration criteria satisfied
+				// Aspiration criterion satisfied
 				if(neighbor.getFitness() < bestSolution.getFitness()) {
+					/*TODO debug*/ System.out.println("Aspiration criterion satisfied by " + neighbor);
 					validNeighbor = neighbor;
 					break;
 				}
