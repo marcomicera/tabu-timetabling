@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.management.openmbean.TabularData;
+
 import it.polito.oma.etp.reader.InstanceData;
 
 public abstract class TabuSearch {
@@ -18,6 +20,7 @@ public abstract class TabuSearch {
 	protected int iteration = 0;
 	protected TabuList tabuList;
 	private static boolean TIMER_EXPIRED = false;
+	protected int bestSolutionIteration = 0;
 	
 	public TabuSearch(InstanceData instanceData, Settings settings) {
 		this.instance = instanceData;
@@ -45,6 +48,17 @@ public abstract class TabuSearch {
 			// No valid neighbor in the neighborhood
 			while(validNeighbor == null) {
 				try {
+					
+					if( settings.enableReturnToBestSolution &&
+						iteration - bestSolutionIteration > settings.numberOfIteration &&
+					    currentSolution.getFitness() > bestSolution.getFitness()) {
+						
+						returnToBestSolution();
+						bestSolutionIteration = iteration;
+						/*TODO debug*/System.err.println("RETURN TO BEST SOLUTION");
+						
+					}
+					
 					ArrayList<Neighbor> neighborhood = getNeighborhood(currentSolution.getPenalizingPairs());
 					
 					/*TODO debug*/ //System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
@@ -61,9 +75,9 @@ public abstract class TabuSearch {
 				}
 			}
 			
-			if(validNeighbor != null)
+			if(validNeighbor != null) {
 				move(validNeighbor);
-			
+			}
 			/*TODO debug*/System.out.println("\n");
 			
 			++iteration;
@@ -316,6 +330,11 @@ public abstract class TabuSearch {
 	 * if necessary
 	 */
 	protected abstract void updateBestSolution();
+	
+	/**
+	 * Change the current solution with the best solution found until now.
+	 */
+	protected abstract void returnToBestSolution();
 	
 	/**
 	 * Prints the solution into a file.

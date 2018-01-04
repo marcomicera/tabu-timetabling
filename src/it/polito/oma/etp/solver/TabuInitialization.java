@@ -247,7 +247,14 @@ public class TabuInitialization extends TabuSearch {
 	
 	@Override
 	protected void updateBestSolution() {
-		if(currentSolution.getFitness() < bestSolution.getFitness())
+		if(currentSolution.getFitness() < bestSolution.getFitness()) {
 			bestSolution = new InitializationSolution((InitializationSolution)currentSolution);
+			bestSolutionIteration = iteration;
+		}
+	}
+	
+	@Override
+	protected void returnToBestSolution() {
+		currentSolution = new InitializationSolution((InitializationSolution)bestSolution);
 	}
 }

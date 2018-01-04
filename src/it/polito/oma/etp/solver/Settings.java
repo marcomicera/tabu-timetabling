@@ -25,16 +25,32 @@ public class Settings {
 	protected boolean considerAllTimeslots;
 	
 	/**
+	 * If true, when the algorithm can't find a fitness better than the best one 
+	 * until 'numberOfIteration' iterations, the current solution is updated
+	 * with the best one, making the algorithm starting again from that point.
+	 */
+	protected boolean enableReturnToBestSolution;
+	
+	/**
+	 * If 'enableReturnToBestSolution', it stores the number of iterations to 
+	 * be cycled before returning to the best solution.
+	 */
+	protected int numberOfIteration;
+	
+	/**
 	 * Tabu List initial size.
 	 */
 	protected int tabuListInitialSize;
 
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
-			boolean considerAllTimeslots, int tabuListInitialSize) {
+			boolean considerAllTimeslots, boolean enableReturnToBestSolution,
+			int numberOfIteration, int tabuListInitialSize) {
 		super();
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
+		this.enableReturnToBestSolution = enableReturnToBestSolution;
+		this.numberOfIteration = numberOfIteration;
 		this.tabuListInitialSize = tabuListInitialSize;
 	}
 }

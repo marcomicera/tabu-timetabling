@@ -38,7 +38,14 @@ public class TabuOptimization extends TabuSearch {
 
 	@Override
 	protected void updateBestSolution() {
-		if(currentSolution.getFitness() < bestSolution.getFitness())
+		if(currentSolution.getFitness() < bestSolution.getFitness()) {
 			bestSolution = new OptimizationSolution((OptimizationSolution)currentSolution);
+			bestSolutionIteration = iteration;
+		}
 	}	
+	
+	@Override
+	protected void returnToBestSolution() {
+		currentSolution = new OptimizationSolution((OptimizationSolution)bestSolution);
+	}
 }
