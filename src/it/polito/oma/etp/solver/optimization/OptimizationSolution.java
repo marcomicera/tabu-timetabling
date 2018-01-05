@@ -1,9 +1,14 @@
-package it.polito.oma.etp.solver;
+package it.polito.oma.etp.solver.optimization;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import it.polito.oma.etp.reader.InstanceData;
+import it.polito.oma.etp.solver.ExamPair;
+import it.polito.oma.etp.solver.InvalidMoveException;
+import it.polito.oma.etp.solver.Neighbor;
+import it.polito.oma.etp.solver.Solution;
+import it.polito.oma.etp.solver.initialization.InitializationSolution;
 
 public class OptimizationSolution extends Solution {
 	/**

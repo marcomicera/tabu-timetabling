@@ -1,8 +1,12 @@
-package it.polito.oma.etp.solver;
+package it.polito.oma.etp.solver.optimization;
 
 import java.util.Collections;
 
 import it.polito.oma.etp.reader.InstanceData;
+import it.polito.oma.etp.solver.ExamPair;
+import it.polito.oma.etp.solver.Settings;
+import it.polito.oma.etp.solver.TabuSearch;
+import it.polito.oma.etp.solver.initialization.InitializationSolution;
 
 public class TabuOptimization extends TabuSearch {
 	public TabuOptimization(InstanceData instanceData, InitializationSolution initialSolution, Settings settings) {

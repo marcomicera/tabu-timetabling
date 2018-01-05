@@ -6,7 +6,7 @@ public class Settings {
 	 * otherwise, our ad-hoc deterministic algorithm tries to obtain 
 	 * an initial solution with the minimum number of conflicts.
 	 */
-	protected boolean firstRandomSolution;
+	public boolean firstRandomSolution;
 	
 	/**
 	 * Percentage of exam pairs to be used for the neighborhood generation.
@@ -14,7 +14,7 @@ public class Settings {
 	 * The highest, the less number of iterations.
 	 * The lowest, the faster iterations.
 	 */
-	protected double neighborhoodGeneratingPairsPercentage;
+	public double neighborhoodGeneratingPairsPercentage;
 	
 	/**
 	 * If true, each considered exam will produce as many neighbors
@@ -22,17 +22,17 @@ public class Settings {
 	 * Otherwise, a random timeslot (different from the one in which
 	 * the exam is currently assigned) will be used. 
 	 */
-	protected boolean considerAllTimeslots;
+	public boolean considerAllTimeslots;
 	
 	/**
 	 * Tabu List initial size.
 	 */
-	protected int tabuListInitialSize;
+	public int tabuListInitialSize;
 	
 	/**
 	 * True if the Tabu List size will be modified dynamically.
 	 */
-	protected boolean dynamicTabuList;
+	public boolean dynamicTabuList;
 	
 	/**
 	 * How the Tabu Search algorithm detects a non-improving situation.
@@ -49,36 +49,42 @@ public class Settings {
 	 * • 3 (time):			every 'tabuListIncrementTimeInterval' seconds, the
 	 * 						Tabu List size gets incremented
 	 */
-	protected int worseningCriterion;
+	public int worseningCriterion;
 	
 	/**
 	 * Tabu List maximum size.
 	 */
-	protected int tabuListMaxSize;
+	public int tabuListMaxSize;
 	
 	/**
 	 * The maximum number of non-improving iterations allowed by
 	 * the Tabu Search algorithm.
 	 */
-	protected int maxNonImprovingIterationsAllowed;
+	public int maxNonImprovingIterationsAllowed;
 	
 	/**
 	 * How many elements will be added every time the Tabu List size
 	 * gets increased.
 	 */
-	protected int tabuListIncrementSize;
+	public int tabuListIncrementSize;
 	
 	/**
 	 * Moving average window used for the delta fitness automatic
 	 * calculation.
 	 */
-	protected int movingAveragePeriod;
+	public int movingAveragePeriod;
 	
 	/**
 	 * Time interval by which the Tabu List size could be incremented.
 	 */
-	protected double tabuListIncrementTimeInterval;
-
+	public double tabuListIncrementTimeInterval;
+	
+	/**
+	 * How many chromosomes belong to the initial population used by
+	 * the Genetic Algorithm.
+	 */
+	public int gaInitialPopulationSize;
+	
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
 			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,
 			int tabuListMaxSize, int maxNonImprovingIterationsAllowed, int tabuListIncrementSize,

@@ -5,6 +5,10 @@ import java.util.TimerTask;
 
 import it.polito.oma.etp.reader.InputReader;
 import it.polito.oma.etp.reader.InstanceData;
+import it.polito.oma.etp.solver.initialization.InitializationSolution;
+import it.polito.oma.etp.solver.initialization.TabuInitialization;
+import it.polito.oma.etp.solver.optimization.OptimizationSolution;
+import it.polito.oma.etp.solver.optimization.TabuOptimization;
 
 public class ETPsolver_OMAAL_group15 {
 	public static void main(String[] args) {

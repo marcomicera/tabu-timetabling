@@ -12,6 +12,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import it.polito.oma.etp.reader.InstanceData;
+import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 public abstract class TabuSearch {
 	protected Settings settings;
