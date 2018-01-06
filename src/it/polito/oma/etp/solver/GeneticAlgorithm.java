@@ -16,12 +16,11 @@ import it.polito.oma.etp.solver.initialization.InitializationSolution;
 import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 public class GeneticAlgorithm {
-	protected Settings tbSettings;
+	protected TsSettings tbSettings;
 	protected GaSettings gaSettings;
 	protected InstanceData instance;
 	
-	
-	public GeneticAlgorithm(Settings tbSettings, GaSettings gaSettings, InstanceData instance) {
+	public GeneticAlgorithm(TsSettings tbSettings, GaSettings gaSettings, InstanceData instance) {
 		this.tbSettings = tbSettings;
 		this.gaSettings = gaSettings;
 		this.instance = instance;
@@ -29,45 +28,35 @@ public class GeneticAlgorithm {
 
 	public Solution solve() {
 		// Population generation
-		Population initialPopulation = new Population(instance, gaSettings, tbSettings);
+		Population population = new Population(instance, gaSettings, tbSettings);
 		
 		/*	it's very important that the population is orderd in order to 
 		 * 	select the correct parents that will generate childrens.
 		 */
-		Collections.sort(initialPopulation.getPopulation());
+		Collections.sort(population.getPopulation());
 		
 		//while(...) {
 			// ***** Parents selection (for children generation) *********
 		
-			/* prents : array list that contains the parents that will generate childrens.
+			/* parents:	array list that contains the parents that will generate childrens.
 			 * 			the size of the array depens on the numberOfReproductiveParents
 			 * 			of the GASettings
 			 */
 			ArrayList<Solution> parents = new ArrayList();
 			
-			/*TODO debug*/ System.out.println("Population: "+ Arrays.toString(initialPopulation.getPopulation().toArray()));
+			/*TODO debug*/System.out.println(population);
 
-			if(!gaSettings.selectParentsByRelativeFitness) { // parents selected by best fitness
-				
-				int count = 1;
-				while (count <= gaSettings.numberOfReproductiveParents) {
-					
-					/*	because the population is ordered with decresent value of fitness,
-					 *  we have to keep the last "numberOfReproductiveParents" elements in order to have
-					 * 	parents that have the best fitness among all the population.
-					 */
-					
-					parents.add(initialPopulation.getPopulation().get(initialPopulation.getPopulation().size()-count));
-					count++;
-				}
-				/*TODO debug*/ //System.out.println("parents: "+ Arrays.toString(parents.toArray()));
-
+			// Random parent selection using the Cumulative Reproduction Probability
+			if(gaSettings.randomParentSelection) {				
+				double[] CRP = generateCRP(population);
+				for(int i = 0; i < gaSettings.numberOfReproductiveParents; i++)
+					parents.add(selectRandomParent(CRP, population));
 			}
-			else { // parents selected randomly with by best relative fitness probability
-				
-				double[] CRP = GenerateCRP(initialPopulation);
-					for (int i = 0; i < gaSettings.numberOfReproductiveParents; i++)
-						parents.add(SelectRandomParent(CRP, initialPopulation));
+			// Deterministic parent selection using their fitness
+			else {
+				// Best parents (having a low fitness value) are selected for reproduction 
+				for(int i = 0; i < gaSettings.numberOfReproductiveParents; ++i)
+					parents.add(population.getPopulation().get(i));
 			}
 			
 			// Crossover (generating new children)
@@ -77,10 +66,10 @@ public class GeneticAlgorithm {
 			childrens.add(crossover(parents.get(0), parents.get(1)));
 			childrens.add(crossover(parents.get(1), parents.get(0)));
 
-			
 			// Chromosomes substitution (which chromosome survives)
+			double[] CKP = generateCKP(population);
 			
-		//}
+		//} // while end
 		
 		// TODO complete
 		return null;
@@ -124,7 +113,7 @@ public class GeneticAlgorithm {
 								   //if it isn't an initialization problem we have to check the 
 								   //feasibility of the move
 								   if(!gaSettings.initializationProblem) { 
-									  if(chechFeasibility(parentTimeSlot, exam, childrenSchedule)) {
+									  if(checkFeasibility(parentTimeSlot, exam, childrenSchedule)) {
 										  //we update the children schedule only if it is feasible
 										  //considering the current exam already set.
 										  childrenSchedule[childrenExamToSet] = parentTimeSlot;
@@ -202,7 +191,7 @@ public class GeneticAlgorithm {
 	 * @return isFeasible true if we can put the currentExam in the TimeSlot given by param
 	 */
 	
-	private boolean chechFeasibility(int TimeSlot, int currentExam, int[] childrenSchedule) {
+	private boolean checkFeasibility(int TimeSlot, int currentExam, int[] childrenSchedule) {
 		boolean isFeasible = true;
 		
 		int startingExam = gaSettings.whereToCut[0]; 
@@ -222,7 +211,7 @@ public class GeneticAlgorithm {
 
 	
 	/** (tested)
-	 * Returns the CUMULATIVE relative probability of each element of the population.
+	 * Returns the Cumulative Reproduction Probability of each element of the population.
 	 * 
 	 * EXAMPLE:
 	 * 
@@ -233,19 +222,42 @@ public class GeneticAlgorithm {
 	 * 			   8	    (1/8) / 1/8+1/7+1/8+1/8 				   1		
 	 * 
 	 * 
-	 * @param 		the pupulation of which we'll calculate the relative fitness.
-	 * @return		CUMULATIVE relative fitness of each element of the population.
+	 * @param 		the population of which we'll calculate the relative fitness.
+	 * @return		Cumulative Reproduction Probability of each element of the population.
 	 */
-	private double[] GenerateCRP(Population poulation) {
-		double[] CRP = new double[gaSettings.PopulationSize];
+	private double[] generateCRP(Population population) {
+		double[] CRP = new double[gaSettings.initialPopulationSize];
+		
+		double cumulativeInverseSum = 0;
+		for(int i = 0; i < population.getPopulation().size() - 1; ++i) {
+			cumulativeInverseSum += 1 / population.getPopulation().get(i).getFitness();
+			CRP[i] = cumulativeInverseSum / population.getTotalInverseFitness();
+		}
+		CRP[population.getPopulation().size() - 1] = 1;
+		
+		/*TODO debug*/System.out.println("CRP: "+Arrays.toString(CRP));
+		
+		return CRP;
+	}
+	
+	/** (TODO test)
+	 * Cumulative Killing Probability generator function, starting from a given population.
+	 * @param population	population 
+	 * @return
+	 */
+	private double[] generateCKP(Population population) {
+		double[] CKP = new double[gaSettings.initialPopulationSize];
 		
 		double cumulativeSum = 0;
-		for (int i = 0; i < poulation.getPopulation().size(); i++) {
-			cumulativeSum += 1/poulation.getPopulation().get(i).getFitness();
-			CRP[i] = (cumulativeSum/(poulation.getTotalFitness()));
+		for(int i = 0; i < population.getPopulation().size() - 1; ++i) {
+			cumulativeSum += population.getPopulation().get(i).getFitness();
+			CKP[i] = cumulativeSum / population.getTotalFitness();
 		}
-		/*TODO debug*/ System.out.println("CRP: "+Arrays.toString(CRP));
-		return CRP;
+		CKP[population.getPopulation().size() - 1] = 1;
+		
+		/*TODO debug*/System.out.println("CKP: "+Arrays.toString(CKP));
+		
+		return CKP;
 	}
 	
 	/*(tested)
@@ -253,7 +265,7 @@ public class GeneticAlgorithm {
 	 * use the range between consecutive values of CRP
 	 */
 	
-	private Solution SelectRandomParent(double[] relativeFitness, Population population) {
+	private Solution selectRandomParent(double[] relativeFitness, Population population) {
 		Solution selectedParent = null;
 		
 		// generate a random number in the range [0,1]
@@ -283,12 +295,13 @@ public class GeneticAlgorithm {
 		return selectedParent;
 	}
 	
-	
-	
-	
-	
-	
-	
+	private Solution selectRandomVictimChromosome() {
+		Solution victim = null;
+		
+		
+		
+		return null;
+	}
 }
 
 

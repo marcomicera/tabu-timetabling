@@ -46,7 +46,7 @@ public class ETPsolver_OMAAL_group15 {
 	    double tabuListIncrementTimeInterval = ((float)timeout / 3) / ((tabuListMaxSize-tabuListInitialSize)/tabuListIntervalAdd);
 	    
 	    // Tuning
-		Settings initializationSettings = new Settings(
+		TsSettings initializationSettings = new TsSettings(
 			// General Tabu List settings
 			true,	// firstRandomSolution
 			0.5,	// neighborhoodGeneratingPairsPercentage
@@ -66,7 +66,7 @@ public class ETPsolver_OMAAL_group15 {
 			// time worsening criterion
 			tabuListIncrementTimeInterval 		// tabuListIncrementTimeInterval
 		);
-		Settings optimizationSettings  = new Settings(
+		TsSettings optimizationSettings  = new TsSettings(
 			// General Tabu List settings
 			false,	// firstRandomSolution
 			1,	// neighborhoodGeneratingPairsPercentage
@@ -103,21 +103,20 @@ public class ETPsolver_OMAAL_group15 {
 		
 		int[] cuttingPoints = {4,7};
 		GaSettings gaSettings = new GaSettings(
-				// general GA Setting
-				true, 				// it's an initialization problem?
-				5, 					// PopulationSize
-				2, 					// numberOfReproductiveParents
-				true, 				// selectParentsByRelativeFitness
-				2, 					// cuttingPointsNumber
-				false, 				// randomCuttingPoint
-				cuttingPoints		// whereToCut
-				);
+			// general GA Setting
+			true, 				// it's an initialization problem?
+			5, 					// PopulationSize
+			2, 					// numberOfReproductiveParents
+			true, 				// randomParentSelection
+			2, 					// cuttingPointsNumber
+			false, 				// randomCuttingPoint
+			cuttingPoints		// whereToCut
+		);
 		
 		//TODO debug(GA)
 		GeneticAlgorithm gaAlgorithm = new GeneticAlgorithm(initializationSettings, gaSettings, instanceData);
 		gaAlgorithm.solve();
-		System.exit(0);
-		
+		/*TODO debug*/System.exit(0);
 		
 		// Computing the first feasible solution
 		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);

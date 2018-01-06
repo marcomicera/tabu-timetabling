@@ -1,6 +1,9 @@
 package it.polito.oma.etp.solver;
 
-public class Settings {
+/**
+ * Tabu Search settings used for tuning
+ */
+public class TsSettings {
 	/**
 	 * If true, the first infeasible solution is computed randomly; 
 	 * otherwise, our ad-hoc deterministic algorithm tries to obtain 
@@ -80,7 +83,7 @@ public class Settings {
 	public double tabuListIncrementTimeInterval;
 	
 	
-	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
+	public TsSettings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
 			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,
 			int tabuListMaxSize, int maxNonImprovingIterationsAllowed, int tabuListIncrementSize,
 			int deltaFitnessThreshold, double tabuListIncrementTimeInterval) {

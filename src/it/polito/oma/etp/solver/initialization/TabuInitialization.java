@@ -2,7 +2,7 @@ package it.polito.oma.etp.solver.initialization;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.ExamPair;
-import it.polito.oma.etp.solver.Settings;
+import it.polito.oma.etp.solver.TsSettings;
 import it.polito.oma.etp.solver.Solution;
 import it.polito.oma.etp.solver.TabuSearch;
 
@@ -18,7 +18,7 @@ public class TabuInitialization extends TabuSearch {
 	 * 								initial solution with the minimum number of
 	 * 								conflicts.
 	 */
-	public TabuInitialization(InstanceData instance, Settings settings) {
+	public TabuInitialization(InstanceData instance, TsSettings settings) {
 		super(instance, settings);
 		
 		// Initially, the current solution is the initial one

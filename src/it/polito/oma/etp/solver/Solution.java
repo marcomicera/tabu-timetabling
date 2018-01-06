@@ -43,13 +43,6 @@ public abstract class Solution implements Comparable<Solution>{
 	protected ArrayList<ExamPair> penalizingPairs;
 	
 	/**
-	 * Relative fitness used in Genetic Algorithms for computing
-	 * the probability by which a chromosome will be selected
-	 * to generate a child (crossover).
-	 */
-	protected float parentSelectionProbability;
-	
-	/**
 	 * Default constructor
 	 * @param te	time-slots exams matrix.
 	 */
@@ -163,8 +156,8 @@ public abstract class Solution implements Comparable<Solution>{
 	 * @param settings
 	 * @return
 	 */
-	public static InitializationSolution generateUnfeasibleSolution(InstanceData instance, Settings settings) {
-		/*TODO debug*/System.out.println("Generating infeasible solution...");
+	public static InitializationSolution generateUnfeasibleSolution(InstanceData instance, TsSettings settings) {
+		/*TODO debug*/ //System.out.println("Generating infeasible solution...");
 		
 		// Instance data
 		int E = instance.getE();
@@ -320,10 +313,10 @@ public abstract class Solution implements Comparable<Solution>{
 		} // END FOR exam
 		
 		/*TODO debug*/
-		System.out.println(
+		/*System.out.println(
 				"Returning infeasible solution\npenalizingPairs" + Arrays.toString(penalizingPairs.toArray()) + 
 				"\nIncremental fitness: " + fitness
-		);
+		);*/
 		
 		
 		return new InitializationSolution(
@@ -336,7 +329,7 @@ public abstract class Solution implements Comparable<Solution>{
 	}
 	
 	/**
-	 * Given an array containing the occurrencies of exams for every timeslot (index) it calculates 
+	 * Given an array containing the occurrences of exams for every timeslot (index) it calculates 
 	 * the timeslot with most exams. Then it returns an array with an increasing number of exams in the
 	 * following format:
 	 * 3, 6, 12, 5, 1, 0 ...
@@ -405,22 +398,11 @@ public abstract class Solution implements Comparable<Solution>{
 	    return isFeasible;
 	}
 
-	// ************************* IMPORTANT (HUGLY) ******************************************
-	/*
-	 * the overrided method make possible the ordering of sulution obj
-	 * using the ParentSelectionProbability. in particular the order is
-	 * crescent (implicate that it order solutions with fitness decreasing value).
-	 */
+	// Ordering (increasing fitness)
 	@Override
-	public int compareTo(Solution sol) {
-		// TODO Auto-generated method stub
-		
-		return sol.getParentSelectionProbability() >= getParentSelectionProbability() ? -1 : 0;
+	public int compareTo(Solution otherSolution) {
+		return Float.valueOf(fitness).compareTo(Float.valueOf(otherSolution.getFitness()));
 	}
-	// *********************************************************************************************
-	
-	
-	
 	
 	/**
 	 * Overridden method which displays info about this solution.
@@ -460,14 +442,6 @@ public abstract class Solution implements Comparable<Solution>{
 
 	public void setFitness(float fitness) {
 		this.fitness = fitness;
-	}
-
-	public float getParentSelectionProbability() {
-		return parentSelectionProbability;
-	}
-
-	public void setParentSelectionProbability(float parentSelectionProbability) {
-		this.parentSelectionProbability = parentSelectionProbability;
 	}
 
 	public ArrayList<ExamPair> getPenalizingPairs() {

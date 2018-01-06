@@ -15,7 +15,7 @@ import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 public abstract class TabuSearch {
-	protected Settings settings;
+	protected TsSettings settings;
 	protected InstanceData instance;	
 	protected Solution currentSolution;
 	protected Solution bestSolution;
@@ -25,7 +25,7 @@ public abstract class TabuSearch {
 	protected int bestSolutionIteration = 0;
 	protected MovingAverage fitnessMovingAverage;
 	
-	public TabuSearch(InstanceData instanceData, Settings settings) {
+	public TabuSearch(InstanceData instanceData, TsSettings settings) {
 		this.instance = instanceData;
 		this.settings = settings;
 		tabuList = new TabuList(settings.tabuListInitialSize, settings.tabuListMaxSize);

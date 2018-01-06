@@ -1,8 +1,9 @@
 package it.polito.oma.etp.solver;
 
+/**
+ * Genetic Algorithm settings used for tuning
+ */
 public class GaSettings {
-	
-	
 	/*
 	 * to know if it's an initialization problem or not (in this case 
 	 * we have an optimization problem)
@@ -13,14 +14,14 @@ public class GaSettings {
 	 * How many chromosomes belong to the initial population used by
 	 * the Genetic Algorithm.
 	 */
-	public int PopulationSize;
+	public int initialPopulationSize;
 	
 	/**
 	 * if true we select a parent that will generate children by using it's fitness
 	 * as probability. if false we don't use probability to select the parents but
 	 * just the value of the fitness.
 	 */
-	public boolean selectParentsByRelativeFitness;
+	public boolean randomParentSelection;
 	
 	/**
 	 * the number of parents that will be used to generate childrens.
@@ -74,8 +75,8 @@ public class GaSettings {
 			double mutationProbability, double crossoverProbability, double populationPercentageReplacement,
 			int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut) {
 		this.initializationProblem = initializationProblem;
-		this.PopulationSize = InitialPopulationSize;
-		this.selectParentsByRelativeFitness = selectParentsByRelativeFitness;
+		this.initialPopulationSize = InitialPopulationSize;
+		this.randomParentSelection = selectParentsByRelativeFitness;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
 		this.selectChromosomesToKillByRelativeFitness = selectChromosomesToKillByRelativeFitness;
 		this.mutationProbability = mutationProbability;
@@ -98,9 +99,9 @@ public class GaSettings {
 	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
 				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut) {
 		this.initializationProblem = initializationProblem;
-		this.PopulationSize = PopulationSize;
+		this.initialPopulationSize = PopulationSize;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
-		this.selectParentsByRelativeFitness = selectParentsByRelativeFitness;
+		this.randomParentSelection = selectParentsByRelativeFitness;
 		this.cuttingPointsNumber = cuttingPointsNumber;
 		this.randomCuttingPoint = randomCuttingPoint;
 		this.whereToCut = whereToCut;

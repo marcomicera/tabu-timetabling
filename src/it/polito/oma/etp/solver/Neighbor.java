@@ -3,7 +3,7 @@ package it.polito.oma.etp.solver;
 public class Neighbor implements Comparable<Neighbor> {
 	private int movingExam;
 	private int newTimeslot;
-	protected Float fitness;
+	protected float fitness;
  	
 	public Neighbor() {
 	}
@@ -38,10 +38,10 @@ public class Neighbor implements Comparable<Neighbor> {
 				newTimeslot == otherNeighbor.newTimeslot;
 	}
 
-	// Ordering
+	// Ordering (increasing fitness)
 	@Override
 	public int compareTo(Neighbor otherNeighbor) {
-		return fitness.compareTo(Float.valueOf(otherNeighbor.fitness));
+		return Float.valueOf(fitness).compareTo(Float.valueOf(otherNeighbor.fitness));
 	}
 	
 	@Override
