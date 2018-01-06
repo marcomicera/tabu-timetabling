@@ -33,7 +33,7 @@ public class Population {
 				population.size() + " chromosomes, " + 
 				"totalFitness: " + totalFitness + ", " +
 				"totalInverseFitness: " + totalInverseFitness + "\n" +
-				Arrays.toString(population.toArray())
+				"Chromosomes: " + Arrays.toString(population.toArray())
 		;
 	}
 

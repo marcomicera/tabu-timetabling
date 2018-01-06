@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.lang.model.type.UnionType;
@@ -35,6 +36,8 @@ public class GeneticAlgorithm {
 		 */
 		Collections.sort(population.getPopulation());
 		
+		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getPopulation().toArray()));
+		
 		//while(...) {
 			// ***** Parents selection (for children generation) *********
 		
@@ -44,13 +47,14 @@ public class GeneticAlgorithm {
 			 */
 			ArrayList<Solution> parents = new ArrayList();
 			
-			/*TODO debug*/System.out.println(population);
-
 			// Random parent selection using the Cumulative Reproduction Probability
 			if(gaSettings.randomParentSelection) {				
 				double[] CRP = generateCRP(population);
-				for(int i = 0; i < gaSettings.numberOfReproductiveParents; i++)
-					parents.add(selectRandomParent(CRP, population));
+				//for(int i = 0; i < gaSettings.numberOfReproductiveParents; i++)
+				//	parents.add(selectRandomParent(CRP, population));
+				parents = selectRandomParent(CRP, population, gaSettings.numberOfReproductiveParents);
+						
+				/*TODO debug*/ System.out.println("Parents: "+parents);
 			}
 			// Deterministic parent selection using their fitness
 			else {
@@ -265,34 +269,48 @@ public class GeneticAlgorithm {
 	 * use the range between consecutive values of CRP
 	 */
 	
-	private Solution selectRandomParent(double[] relativeFitness, Population population) {
-		Solution selectedParent = null;
+	private ArrayList<Solution> selectRandomParent(double[] relativeFitness, Population population, int numberOfParents) {
 		
+		ArrayList<Solution> parents = new ArrayList();
+		
+		// to avoid the selection of the same parents
+		Integer[] selectedNum = new Integer[numberOfParents];
+		int numberOfSelectedParents = 0;
+		
+		// already selected numbers
 		// generate a random number in the range [0,1]
 		Random rnd = new Random();
 		
-		// Returns the next pseudorandom, uniformly distributed double value between 0.0 and 1.0 
-		double randomNum = rnd.nextDouble();
-		
-		/*
-		 * example:  CRP= [0,26; 0,48; 0,78; 1]
-		 * 			 if the random value is 0,3
-		 * 				 -> we select the second element of population
-		 */
-		if(randomNum <= relativeFitness[0]) {
-			selectedParent = population.getPopulation().get(0);
-			/* TODO debug */ System.out.println("Selected element: "+ 1);
-		}
-		else
-			for (int i = 1; i < relativeFitness.length; i++) {
-				if(randomNum <= relativeFitness[i] && randomNum>relativeFitness[i-1]) {
-					selectedParent = population.getPopulation().get(i);	
-					/* TODO debug */ System.out.println("Selected element: "+ (i+1) +
-														" with fitness: " +selectedParent.getFitness());
-				}
+		while (numberOfSelectedParents!=numberOfParents) {
+			// Returns the next pseudorandom, uniformly distributed double value between 0.0 and 1.0 
+			double randomNum = rnd.nextDouble();
+			
+			/*
+			 * example:  CRP= [0,26; 0,48; 0,78; 1]
+			 * 			 if the random value is 0,3
+			 * 				 -> we select the second element of population
+			 */
+			if(randomNum <= relativeFitness[0] &&
+					!Arrays.asList(selectedNum).contains(1)) {
+						parents.add(population.getPopulation().get(0));
+						//update the selected numbers in order to avoid to select same parents
+						selectedNum[numberOfSelectedParents] = 1;
+						numberOfSelectedParents++;
 			}
+			else
+				for (int i = 1; i < relativeFitness.length; i++) {
+					if(randomNum <= relativeFitness[i] 
+							&& randomNum>relativeFitness[i-1] 
+									&& !Arrays.asList(selectedNum).contains(i+1)) {						
+											parents.add(population.getPopulation().get(i));	
+											//update the selected numbers in order to avoid to select same parents
+											selectedNum[numberOfSelectedParents] = i+1;
+											numberOfSelectedParents++;
+										}
+				}
+		}
 		
-		return selectedParent;
+		return parents;
 	}
 	
 	private Solution selectRandomVictimChromosome() {
