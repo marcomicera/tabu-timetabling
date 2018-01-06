@@ -79,11 +79,6 @@ public class Settings {
 	 */
 	public double tabuListIncrementTimeInterval;
 	
-	/**
-	 * How many chromosomes belong to the initial population used by
-	 * the Genetic Algorithm.
-	 */
-	public int gaInitialPopulationSize;
 	
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
 			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,

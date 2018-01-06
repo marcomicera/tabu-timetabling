@@ -48,7 +48,7 @@ public class ETPsolver_OMAAL_group15 {
 	    // Tuning
 		Settings initializationSettings = new Settings(
 			// General Tabu List settings
-			false,	// firstRandomSolution
+			true,	// firstRandomSolution
 			0.5,	// neighborhoodGeneratingPairsPercentage
 			true,	// considerAllTimeslots
 			20,		// tabuListInitialSize
@@ -100,6 +100,14 @@ public class ETPsolver_OMAAL_group15 {
 			// Timeout value in milliseconds
 			timeout * 1000
 		);
+		
+		GaSettings gaSettings = new GaSettings(5, 3, true);
+		
+		//TODO debug(GA)
+		GeneticAlgorithm gaAlgorithm = new GeneticAlgorithm(initializationSettings, gaSettings, instanceData);
+		gaAlgorithm.solve();
+		System.exit(0);
+		
 		
 		// Computing the first feasible solution
 		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);

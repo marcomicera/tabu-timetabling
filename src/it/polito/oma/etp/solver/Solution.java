@@ -10,7 +10,8 @@ import it.polito.oma.etp.solver.initialization.InitializationSolution;
  * Solution base-class both for the Tabu Search algorithm
  * and for the Genetic Algorithm.
  */
-public abstract class Solution {
+public abstract class Solution implements Comparable<Solution>{
+
 	/**
 	 * Instance to which this solution refers to. 
 	 */
@@ -398,11 +399,28 @@ public abstract class Solution {
 	    		for(int exam2 = exam1+1; exam2 < E; ++exam2)
 	    			if(N[exam1][exam2]>0 && te[t][exam1]==1 && te[t][exam2]==1) {
 	    				isFeasible = false;
-	    				/*TODO debug*/System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
+	    				/*TODO debug*/ //System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
 	    			}
 	    
 	    return isFeasible;
 	}
+
+	// ************************* IMPORTANT (HUGLY) ******************************************
+	/*
+	 * the overrided method make possible the ordering of sulution obj
+	 * using the ParentSelectionProbability. in particular the order is
+	 * crescent (implicate that it order solutions with fitness decreasing value).
+	 */
+	@Override
+	public int compareTo(Solution sol) {
+		// TODO Auto-generated method stub
+		
+		return sol.getParentSelectionProbability() >= getParentSelectionProbability() ? -1 : 0;
+	}
+	// *********************************************************************************************
+	
+	
+	
 	
 	/**
 	 * Overridden method which displays info about this solution.
