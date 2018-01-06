@@ -28,7 +28,7 @@ public class TabuInitialization extends TabuSearch {
 	}
 
 	private InitializationSolution generateUnfeasibleSolution() {
-		/*TODO debug*/System.out.println("Generating infeasible solution...");
+		/*TODO debug*///System.out.println("Generating infeasible solution...");
 		
 		// Instance data
 		int E = instance.getE();
@@ -58,39 +58,42 @@ public class TabuInitialization extends TabuSearch {
 			assignedExams[0] = 1;
 			texamsCounter[0]++;
 		}
-		
+		else {
+			timeslotOrder = getTimeslotOrderRandomly();
+		}
 		// cycling through all exams
 		for(int exam = (settings.firstRandomSolution) ? 0 : 1; exam < E; exam++) {
 			
 			// First infeasible solution computed randomly
-			if(settings.firstRandomSolution) {
-				// Random timeslot index generation
-				int randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, Tmax);
-				
-				// Exam assignment
-				te[randomTimeslot][exam] = 1;
-				schedule[exam] = randomTimeslot;
-				
-				// Fitness value calculation
-				assignedExams[exam] = 1;
-				texamsCounter[randomTimeslot]++;
-				for(int e = 0; e < E; e++) {
-					// looks only allocated exams
-					if(te[randomTimeslot][e] == 1) {
-						// and check if they are conflictual with exam
-						if(N[exam][e] != 0) {
-							penalizingPairs.add(new ExamPair(e, exam));
-							++fitness;
-						}
-					}
-				}
-			}
+//			if(settings.firstRandomSolution) {
+//				// Random timeslot index generation
+//				int randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, Tmax);
+//				
+//				// Exam assignment
+//				te[randomTimeslot][exam] = 1;
+//				schedule[exam] = randomTimeslot;
+//				
+//				// Fitness value calculation
+//				assignedExams[exam] = 1;
+//				texamsCounter[randomTimeslot]++;
+//				for(int e = 0; e < E; e++) {
+//					// looks only allocated exams
+//					if(te[randomTimeslot][e] == 1) {
+//						// and check if they are conflictual with exam
+//						if(N[exam][e] != 0) {
+//							penalizingPairs.add(new ExamPair(e, exam));
+//							++fitness;
+//						}
+//					}
+//				}
+//			}
 			// Ad-hoc deterministic algorithm
-			else {
+//			else {
 				/* IN: texamsCounter, OUT: timeslotOrder*
 				 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
-				timeslotOrder = getTimeslotOrder(texamsCounter);
-				
+				if(!settings.firstRandomSolution) {
+					timeslotOrder = getTimeslotOrderByExamsCount(texamsCounter);
+				}
 				// cycling through all timeslots
 				for(int t = 0; t < Tmax; t++) {
 					
@@ -179,15 +182,14 @@ public class TabuInitialization extends TabuSearch {
 					}
 					
 				}// end IF exam cannot be placed
-			}
 			
 		} // END FOR exam
 		
 		/*TODO debug*/
-		System.out.println(
-				"Returning infeasible solution\npenalizingPairs" + Arrays.toString(penalizingPairs.toArray()) + 
-				"\nIncremental fitness: " + fitness
-		);
+//		System.out.println(
+//				"Returning infeasible solution\npenalizingPairs" + Arrays.toString(penalizingPairs.toArray()) + 
+//				"\nIncremental fitness: " + fitness
+//		);
 		
 		
 		return new InitializationSolution(
@@ -208,7 +210,7 @@ public class TabuInitialization extends TabuSearch {
 	 * @param TEcounter
 	 * @return
 	 */
-	private int[] getTimeslotOrder(int[] TEcounter) {
+	private int[] getTimeslotOrderByExamsCount(int[] TEcounter) {
 		
 		int tec[] = new int[TEcounter.length];
 		int orderTec[] = new int[instance.getTmax()];
@@ -231,6 +233,29 @@ public class TabuInitialization extends TabuSearch {
 			tec[ind] = -1;
 			orderTec[x] = ind;
 			
+		}
+		return orderTec;
+	}
+	
+	/**
+	 * @return an array containing for every element a random timeslot.
+	 * This array will be used as a sequence of timeslot where to put 
+	 * the examined exam.
+	 */
+	private int[] getTimeslotOrderRandomly() {
+		int tmax = instance.getTmax();
+		int[] orderTec = new int[tmax];
+		ArrayList<Integer> timeslotPool = new ArrayList<Integer>();
+		// Filling the timeslot pool.
+		for(int i = 0; i < tmax; i++) {
+			timeslotPool.add(i);
+		}
+		// Filling orderTec with random timeslots from the pool.
+		int randomPoolIndex;
+		for(int i = 0; i < tmax; i++) {
+			randomPoolIndex = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, timeslotPool.size());
+			orderTec[i] = timeslotPool.get(randomPoolIndex);
+			timeslotPool.remove(randomPoolIndex);
 		}
 		return orderTec;
 	}

@@ -78,11 +78,16 @@ public class Settings {
 	 * Time interval by which the Tabu List size could be incremented.
 	 */
 	protected double tabuListIncrementTimeInterval;
+	
+	/**
+	 * Number of chromosome to start from for the genetic algorithm.
+	 */
+	protected int initialPopulationSize;
 
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
 			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,
 			int tabuListMaxSize, int maxNonImprovingIterationsAllowed, int tabuListIncrementSize,
-			int deltaFitnessThreshold, double tabuListIncrementTimeInterval) {
+			int deltaFitnessThreshold, double tabuListIncrementTimeInterval, int initialPopulationSize) {
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
@@ -94,5 +99,6 @@ public class Settings {
 		this.tabuListIncrementSize = tabuListIncrementSize;
 		this.movingAveragePeriod = deltaFitnessThreshold;
 		this.tabuListIncrementTimeInterval = tabuListIncrementTimeInterval;
+		this.initialPopulationSize = initialPopulationSize;
 	}
 }

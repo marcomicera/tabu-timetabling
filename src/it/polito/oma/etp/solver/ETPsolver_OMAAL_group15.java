@@ -1,5 +1,6 @@
 package it.polito.oma.etp.solver;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,23 +45,24 @@ public class ETPsolver_OMAAL_group15 {
 	    // Tuning
 		Settings initializationSettings = new Settings(
 			// General Tabu List settings
-			false,	// firstRandomSolution
+			true,	// firstRandomSolution
 			0.5,	// neighborhoodGeneratingPairsPercentage
 			true,	// considerAllTimeslots
 			20,		// tabuListInitialSize
 			
 			// Dynamic Tabu List section
 			true,	// dynamicTabuList
-			1,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
-			45,		// tabuListMaxSize
-			9000,	// maxNonImprovingIterationsAllowed
-			7,		// tabuListIncrementSize
+			2,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
+			55,		// tabuListMaxSize
+			5000,	// maxNonImprovingIterationsAllowed
+			4,		// tabuListIncrementSize
 			
 			// deltaFitness worsening criterion
 			50,		// movingAveragePeriod
 			
 			// time worsening criterion
-			tabuListIncrementTimeInterval 		// tabuListIncrementTimeInterval
+			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
+			4		// initialPopulationSize
 		);
 		Settings optimizationSettings  = new Settings(
 			// General Tabu List settings
@@ -80,7 +82,8 @@ public class ETPsolver_OMAAL_group15 {
 			50,		// movingAveragePeriod
 			
 			// time worsening criterion
-			tabuListIncrementTimeInterval 		// tabuListIncrementTimeInterval
+			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
+			0		// initialPopulationSize
 		);
 		
 		// Starting the execution timer 
@@ -97,15 +100,54 @@ public class ETPsolver_OMAAL_group15 {
 			timeout * 1000
 		);
 		
+		double old = System.nanoTime();
 		// Computing the first feasible solution
-		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
-		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
-		/*TODO debug*/System.out.println("Initial feasible solution " + ((initialFeasibleSolution.getFitness() != 0) ? "not " : "") + "found: " + initialFeasibleSolution);
-		/*TODO debug*/ //System.exit(0);
+		
+		ArrayList<Thread> threads = new ArrayList<Thread>();
+		ArrayList<InitializationSolution> feasibleSolutions = new ArrayList<InitializationSolution>();
+		
+		for(int i = 0; i < initializationSettings.initialPopulationSize; i++) {
+			threads.add(new Thread() {
+				public void run() {
+					TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
+					InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
+					//------
+					feasibleSolutions.add(initialFeasibleSolution);
+				}
+			});
+		}
+		
+		for(Thread thread : threads) {
+			thread.start();
+		}
+		
+		for(Thread thread : threads) {
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("Time to generate " + initializationSettings.initialPopulationSize + 
+						   " fesible solutions for " + instanceData.getInstanceName() + ": " +
+						   (System.nanoTime() - old)/1000000000 + " seconds");
+
+		for(InitializationSolution sol : feasibleSolutions) {
+			/*TODO debug*/System.out.println(sol);
+		}
+
+		
+//		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
+//		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
+		
+		/*TODO debug*/ //System.out.println("Initial feasible solution " + ((initialFeasibleSolution.getFitness() != 0) ? "not " : "") + "found: " + initialFeasibleSolution);
+		/*TODO debug*/ System.exit(0);
 		
 		// Computing the timetabling solution
-		TabuSearch solutionGenerator = new TabuOptimization(instanceData, initialFeasibleSolution, optimizationSettings);
+		TabuSearch solutionGenerator = new TabuOptimization(instanceData, feasibleSolutions.get(0), optimizationSettings);
 		OptimizationSolution solution = (OptimizationSolution)solutionGenerator.solve();
+		
 		/*TODO debug*/System.out.println("Final solution found: " + solution);
 	}
 }
