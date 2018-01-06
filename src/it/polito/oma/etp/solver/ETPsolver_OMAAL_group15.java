@@ -104,7 +104,7 @@ public class ETPsolver_OMAAL_group15 {
 		int[] cuttingPoints = {4,7};
 		GaSettings gaSettings = new GaSettings(
 				// general GA Setting
-				false, 				// it's an initialization problem?
+				true, 				// it's an initialization problem?
 				5, 					// PopulationSize
 				2, 					// numberOfReproductiveParents
 				true, 				// selectParentsByRelativeFitness

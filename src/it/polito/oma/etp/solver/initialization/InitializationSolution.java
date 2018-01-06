@@ -10,7 +10,7 @@ import it.polito.oma.etp.solver.Neighbor;
 import it.polito.oma.etp.solver.Solution;
 
 public class InitializationSolution extends Solution {
-	protected InitializationSolution(InstanceData instance, int[][] te) {
+	/*TODO IT WAS PROTECTED */public InitializationSolution(InstanceData instance, int[][] te) {
 		super(instance, te);
 	}
 	
@@ -45,6 +45,9 @@ public class InitializationSolution extends Solution {
 		// Instance data
 		int E = instance.getE();
 		int[][] N = instance.getN();
+		
+		penalizingPairs = new ArrayList<ExamPair>();
+
 		
 		for(int exam1 = 0; exam1 < E; ++exam1)
 			for(int exam2 = exam1 + 1; exam2 < E; ++exam2)
