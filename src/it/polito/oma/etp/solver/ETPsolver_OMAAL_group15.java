@@ -101,7 +101,17 @@ public class ETPsolver_OMAAL_group15 {
 			timeout * 1000
 		);
 		
-		GaSettings gaSettings = new GaSettings(5, 3, true);
+		int[] cuttingPoints = {4,7};
+		GaSettings gaSettings = new GaSettings(
+				// general GA Setting
+				false, 				// it's an initialization problem?
+				5, 					// PopulationSize
+				2, 					// numberOfReproductiveParents
+				true, 				// selectParentsByRelativeFitness
+				2, 					// cuttingPointsNumber
+				false, 				// randomCuttingPoint
+				cuttingPoints		// whereToCut
+				);
 		
 		//TODO debug(GA)
 		GeneticAlgorithm gaAlgorithm = new GeneticAlgorithm(initializationSettings, gaSettings, instanceData);

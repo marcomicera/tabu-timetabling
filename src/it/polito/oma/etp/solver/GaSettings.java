@@ -2,6 +2,13 @@ package it.polito.oma.etp.solver;
 
 public class GaSettings {
 	
+	
+	/*
+	 * to know if it's an initialization problem or not (in this case 
+	 * we have an optimization problem)
+	 */
+	public boolean initializationProblem;
+	
 	/**
 	 * How many chromosomes belong to the initial population used by
 	 * the Genetic Algorithm.
@@ -50,22 +57,23 @@ public class GaSettings {
 	
 	/**
 	 * if true the point where the cut is done will be chosen randomly. if it's false
-	 * we have to set where we wont to cut.
+	 * we have to set where we wont to cut. the array must be ordered.
 	 */
 	public boolean randomCuttingPoint;
 	
 	/**
 	 * if we don't use the random selection of cutting points we have to decide where
-	 * the cut will be done.
+	 * the cut will be done. in particular the first number (for ex.) indicate the first
+	 * gene that will not be changed.
 	 * it's dimension must be equal to "cuttingPointsNumber".
 	 */
 	public int[] whereToCut;
 
-	public GaSettings(int InitialPopulationSize, boolean selectParentsByRelativeFitness,
+	public GaSettings(boolean initializationProblem, int InitialPopulationSize, boolean selectParentsByRelativeFitness,
 			int numberOfReproductiveParents, boolean selectChromosomesToKillByRelativeFitness,
 			double mutationProbability, double crossoverProbability, double populationPercentageReplacement,
 			int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut) {
-		super();
+		this.initializationProblem = initializationProblem;
 		this.PopulationSize = InitialPopulationSize;
 		this.selectParentsByRelativeFitness = selectParentsByRelativeFitness;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
@@ -78,17 +86,24 @@ public class GaSettings {
 		
 		//The dimension of the whereToCut array must be equal to the number of cutting points
 		
-		if(randomCuttingPoint == false && whereToCut.length == cuttingPointsNumber)
+		if(randomCuttingPoint == false && whereToCut.length == cuttingPointsNumber && cuttingPointsNumber<=2)
 		this.whereToCut = whereToCut;
-		else
+		else if(whereToCut.length != cuttingPointsNumber)
 			System.err.println("The dimension of the whereToCut array must be equel to the number of cutting points: "
 								+ cuttingPointsNumber );
+		else if(cuttingPointsNumber>2)
+			System.err.println("the maximum number of cutting points is 2" );
 	}
 
-	public GaSettings(int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness) {
+	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
+				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut) {
+		this.initializationProblem = initializationProblem;
 		this.PopulationSize = PopulationSize;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
 		this.selectParentsByRelativeFitness = selectParentsByRelativeFitness;
+		this.cuttingPointsNumber = cuttingPointsNumber;
+		this.randomCuttingPoint = randomCuttingPoint;
+		this.whereToCut = whereToCut;
 	}
 	
 	
