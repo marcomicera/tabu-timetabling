@@ -83,11 +83,17 @@ public class Settings {
 	 * Number of chromosome to start from for the genetic algorithm.
 	 */
 	protected int initialPopulationSize;
+	
+	/**
+	 * Number of threads that will be used to populate the solution space.
+	 */
+	protected int numberOfThreads;
 
 	public Settings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
 			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,
 			int tabuListMaxSize, int maxNonImprovingIterationsAllowed, int tabuListIncrementSize,
-			int deltaFitnessThreshold, double tabuListIncrementTimeInterval, int initialPopulationSize) {
+			int deltaFitnessThreshold, double tabuListIncrementTimeInterval, 
+			int initialPopulationSize, int numberOfThreads) {
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
@@ -100,5 +106,6 @@ public class Settings {
 		this.movingAveragePeriod = deltaFitnessThreshold;
 		this.tabuListIncrementTimeInterval = tabuListIncrementTimeInterval;
 		this.initialPopulationSize = initialPopulationSize;
+		this.numberOfThreads = numberOfThreads;
 	}
 }

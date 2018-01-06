@@ -62,7 +62,8 @@ public class ETPsolver_OMAAL_group15 {
 			
 			// time worsening criterion
 			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
-			4		// initialPopulationSize
+			1,		// initialPopulationSize
+			2		// numberOfThreads
 		);
 		Settings optimizationSettings  = new Settings(
 			// General Tabu List settings
@@ -83,7 +84,8 @@ public class ETPsolver_OMAAL_group15 {
 			
 			// time worsening criterion
 			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
-			0		// initialPopulationSize
+			0,		// initialPopulationSize
+			1		// numberOfThreads
 		);
 		
 		// Starting the execution timer 
@@ -100,47 +102,64 @@ public class ETPsolver_OMAAL_group15 {
 			timeout * 1000
 		);
 		
+		//*** Time begins to flow from here
 		double old = System.nanoTime();
-		// Computing the first feasible solution
 		
+		/*
+		 * Definition of threads run's methods 
+		 */
 		ArrayList<Thread> threads = new ArrayList<Thread>();
-		ArrayList<InitializationSolution> feasibleSolutions = new ArrayList<InitializationSolution>();
+		ArrayList<InitializationSolution> feasibleSolutions = new ArrayList<InitializationSolution>();;
 		
-		for(int i = 0; i < initializationSettings.initialPopulationSize; i++) {
+		for(int i = 0; i < initializationSettings.numberOfThreads; i++) {
 			threads.add(new Thread() {
 				public void run() {
+					// Feasible solution generation.
+					/*TODO debug*/System.out.println(this.getName() + " started looking for an unfeasible solution.");
 					TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
 					InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
 					//------
-					feasibleSolutions.add(initialFeasibleSolution);
+					synchronized(feasibleSolutions) {
+						if(initialFeasibleSolution.isFeasible()) {
+							feasibleSolutions.add(initialFeasibleSolution);
+						}
+						// wakes main thread to see if population is full.
+						feasibleSolutions.notifyAll();
+					}
 				}
 			});
 		}
 		
+		/*
+		 * Make the threads start and make main thread wait their completion.
+		 */
 		for(Thread thread : threads) {
 			thread.start();
 		}
 		
-		for(Thread thread : threads) {
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		/*
+		 * Main thread will wait until the populations is generated
+		 */
+		synchronized(feasibleSolutions) {
+			while(feasibleSolutions.size() != initializationSettings.initialPopulationSize) {
+				try {
+					feasibleSolutions.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
+		double newt = System.nanoTime();
+		double time = (newt - old)/1000000000;
 		System.out.println("Time to generate " + initializationSettings.initialPopulationSize + 
 						   " fesible solutions for " + instanceData.getInstanceName() + ": " +
-						   (System.nanoTime() - old)/1000000000 + " seconds");
+						   time + " seconds");
 
 		for(InitializationSolution sol : feasibleSolutions) {
-			/*TODO debug*/System.out.println(sol);
+		/*TODO debug*/System.out.println("This solution was found!: " + sol);
 		}
 
-		
-//		TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
-//		InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
-		
 		/*TODO debug*/ //System.out.println("Initial feasible solution " + ((initialFeasibleSolution.getFitness() != 0) ? "not " : "") + "found: " + initialFeasibleSolution);
 		/*TODO debug*/ System.exit(0);
 		

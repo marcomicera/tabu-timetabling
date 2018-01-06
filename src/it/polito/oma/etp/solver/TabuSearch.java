@@ -60,8 +60,8 @@ public abstract class TabuSearch {
 		    );
 		}
 		
-		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
-			/*TODO debug (iteration)*/System.out.println(Thread.currentThread().getName() + "\n***** Iteration " + iteration + " *****");
+		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED && !Thread.interrupted()) {
+			/*TODO debug (iteration)*///System.out.println(Thread.currentThread().getName() + "\n***** Iteration " + iteration + " *****");
 			
 			Neighbor validNeighbor = null;
 			
@@ -378,7 +378,7 @@ public abstract class TabuSearch {
 			((OptimizationSolution)currentSolution).initializeDistanceMatrix();
 				
 		/*TODO debug*/float testIncrementalFitness = currentSolution.getFitness();
-		/*TODO debug (fitness)*/ System.out.println("\nFitness: " + currentSolution.getFitness());
+		/*TODO debug (fitness)*/ //System.out.println("\nFitness: " + currentSolution.getFitness());
 		/*TODO debug*/ currentSolution.initializeFitness();
 		/*TODO debug*/float testFitnessFromScratch = currentSolution.getFitness();
 //		/*TODO debug*/if(testIncrementalFitness != testFitnessFromScratch) {

@@ -64,31 +64,6 @@ public class TabuInitialization extends TabuSearch {
 		// cycling through all exams
 		for(int exam = (settings.firstRandomSolution) ? 0 : 1; exam < E; exam++) {
 			
-			// First infeasible solution computed randomly
-//			if(settings.firstRandomSolution) {
-//				// Random timeslot index generation
-//				int randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, Tmax);
-//				
-//				// Exam assignment
-//				te[randomTimeslot][exam] = 1;
-//				schedule[exam] = randomTimeslot;
-//				
-//				// Fitness value calculation
-//				assignedExams[exam] = 1;
-//				texamsCounter[randomTimeslot]++;
-//				for(int e = 0; e < E; e++) {
-//					// looks only allocated exams
-//					if(te[randomTimeslot][e] == 1) {
-//						// and check if they are conflictual with exam
-//						if(N[exam][e] != 0) {
-//							penalizingPairs.add(new ExamPair(e, exam));
-//							++fitness;
-//						}
-//					}
-//				}
-//			}
-			// Ad-hoc deterministic algorithm
-//			else {
 				/* IN: texamsCounter, OUT: timeslotOrder*
 				 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
 				if(!settings.firstRandomSolution) {
@@ -184,14 +159,7 @@ public class TabuInitialization extends TabuSearch {
 				}// end IF exam cannot be placed
 			
 		} // END FOR exam
-		
-		/*TODO debug*/
-//		System.out.println(
-//				"Returning infeasible solution\npenalizingPairs" + Arrays.toString(penalizingPairs.toArray()) + 
-//				"\nIncremental fitness: " + fitness
-//		);
-		
-		
+
 		return new InitializationSolution(
 			instance, 
 			te,
