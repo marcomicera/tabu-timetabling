@@ -71,7 +71,7 @@ public class GaSettings {
 	 * gene that will not be changed.
 	 * it's dimension must be equal to "cuttingPointsNumber".
 	 */
-	public int[] whereToCut = new int[2];
+	public int[] whereToCut;
 
 
 	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
@@ -88,9 +88,14 @@ public class GaSettings {
 		
 				if(!randomCuttingPoint && cuttingPointsNumber == 1 && whereToCut[0]!=0) {
 					System.err.println("in order to use one cutting point, the "
-							+ "first elemento of whereToCut must be zero!!!");
+							+ "first element of whereToCut must be zero!!!");
 					System.exit(0);
 				}
+				else if(!randomCuttingPoint && cuttingPointsNumber == 2 && whereToCut[0]==0)
+					System.err.println("you have set 2 cutting points!!!!!!! \n"
+							         + "but setting the first element of whereToCut to zero"
+									 + " correspond to have only one cutting point!!!"
+									 );
 				
 				if(randomCuttingPoint && whereToCut!=null)
 					System.err.println("whereToCut should be null");
