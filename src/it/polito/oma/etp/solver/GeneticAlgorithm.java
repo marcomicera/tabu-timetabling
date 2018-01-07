@@ -96,6 +96,12 @@ public class GeneticAlgorithm {
 			
 			/*TODO debug*/ System.out.println("New population: " + Arrays.toString(population.getPopulation().toArray()) + "\n");
 			
+			// TODO increase mutation probability
+			
+			// TODO check clones
+			
+			// TODO update best solution
+			
 			++iteration;
 
 		} // while end
