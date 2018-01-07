@@ -105,13 +105,14 @@ public class ETPsolver_OMAAL_group15 {
 		GaSettings gaSettings = new GaSettings(
 			// general GA Setting
 			true, 				// it's an initialization problem?
-			5, 					// PopulationSize
+			4, 					// PopulationSize
 			2, 					// numberOfReproductiveParents
 			true, 				// randomParentSelection
 			2, 					// cuttingPointsNumber -> NB: if we wont just one cutting point we have to 
 								//							  set whereToCut = {0,x}
-			false, 				// randomCuttingPoint
-			cuttingPoints				// whereToCut
+			true, 				// randomCuttingPoint
+			null,		// whereToCut
+			2					// number of children to generate
 		);
 		
 		//TODO debug(GA)

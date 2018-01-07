@@ -36,6 +36,24 @@ public class Population {
 				"Chromosomes: " + Arrays.toString(population.toArray())
 		;
 	}
+	
+	/**
+	 * @param newChromosome to be added in the current Solution.
+	 */
+	public void add(Solution newChromosome) {
+		population.add(newChromosome);
+		totalInverseFitness += 1/newChromosome.getFitness();
+		totalFitness += newChromosome.getFitness();
+	}
+	
+	/**
+	 * @param killedChromosome to be removed from the current population.
+	 */
+	public void delete(Solution killedChromosome) {
+		population.remove(killedChromosome);
+		totalInverseFitness -= 1/killedChromosome.getFitness();
+		totalFitness -= killedChromosome.getFitness();
+	}
 
 	public ArrayList<Solution> getPopulation() {
 		return population;

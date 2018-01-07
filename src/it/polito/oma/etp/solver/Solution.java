@@ -436,6 +436,18 @@ public abstract class Solution implements Comparable<Solution>{
 		return schedule[exam];
 	}
 	
+	// Searching in Lists
+	@Override
+	public boolean equals(Object o) {
+		if(this == o) return true;
+		if(!(o instanceof Neighbor)) return false;
+		
+		Solution otherSolution = (Solution)o;
+		
+		return	Arrays.equals(schedule, otherSolution.schedule);
+					
+	}
+	
 	public float getFitness() {
 		return fitness;
 	}

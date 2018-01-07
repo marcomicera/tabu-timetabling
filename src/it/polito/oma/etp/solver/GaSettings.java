@@ -72,10 +72,14 @@ public class GaSettings {
 	 * it's dimension must be equal to "cuttingPointsNumber".
 	 */
 	public int[] whereToCut;
-
+	
+	/**
+	 * number of children to generate.
+	 */
+	public int numberOfChildrenToGenerate;
 
 	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
-				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut) {
+				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut, int numberOfChildrenToGenerate) {
 		this.initializationProblem = initializationProblem;
 		this.initialPopulationSize = PopulationSize;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
@@ -83,6 +87,7 @@ public class GaSettings {
 		this.cuttingPointsNumber = cuttingPointsNumber;
 		this.randomCuttingPoint = randomCuttingPoint;
 		this.whereToCut = whereToCut;
+		this.numberOfChildrenToGenerate = numberOfChildrenToGenerate;
 		
 		//The dimension of the whereToCut array must be equal to the number of cutting points
 		

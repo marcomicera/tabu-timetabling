@@ -23,6 +23,7 @@ public class GeneticAlgorithm {
 
 	public Solution solve() {
 		// Population generation
+		
 		Population population = new Population(instance, gaSettings, tbSettings);
 		
 		/*	it's very important that the population is orderd in order to 
@@ -32,21 +33,21 @@ public class GeneticAlgorithm {
 		
 		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getPopulation().toArray()));
 		
-		//while(...) {
+		while(true) {
 			// ***** Parents selection (for children generation) *********
 		
-			/* parents:	array list that contains the parents that will generate childrens.
-			 * 			the size of the array depens on the numberOfReproductiveParents
+			/* parents:	array list that contains the parents that will generate children.
+			 * 			the size of the array depends on the numberOfReproductiveParents
 			 * 			of the GASettings
 			 */
-			ArrayList<Solution> parents = new ArrayList();
+			ArrayList<Solution> parents = new ArrayList<Solution>();
 			
 			// Random parent selection using the Cumulative Reproduction Probability
 			if(gaSettings.randomParentSelection) {				
 				double[] CRP = generateCRP(population);
 				//for(int i = 0; i < gaSettings.numberOfReproductiveParents; i++)
 				//	parents.add(selectRandomParent(CRP, population));
-				parents = selectRandomParent(CRP, population, gaSettings.numberOfReproductiveParents);
+				parents = selectRandomChromosome(CRP, population, gaSettings.numberOfReproductiveParents);
 						
 				/*TODO debug*/ System.out.println("Parents: "+parents);
 			}
@@ -67,18 +68,33 @@ public class GeneticAlgorithm {
 				generateRandomCuttingPoints();
 
 			ArrayList<Solution> childrens = new ArrayList<Solution>();
+			//TODO implement algorithm to generate more then 2 children
 			childrens.add(crossover(parents.get(0), parents.get(1)));
 			childrens.add(crossover(parents.get(1), parents.get(0)));
+			/*TODO debug*/System.out.println("Childrens: " + childrens);
 			
 			//********************* end crossover *************************************
 
+			// update of population with new children
+			for (Solution children : childrens) {
+				population.add(children);
+			}
+			
 			// Chromosomes substitution (which chromosome survives)
 			double[] CKP = generateCKP(population);
+			ArrayList<Solution> chromosomesToKill = selectRandomChromosome(CKP, population, gaSettings.numberOfChildrenToGenerate);
+			/*TODO debug*/System.out.println("Chromosomes killed: " + chromosomesToKill);
 			
-		//} // while end
+			for (Solution chromosomes : chromosomesToKill) {
+				population.delete(chromosomes);
+			}
+			
+			/*TODO debug*/ System.out.println("New population: " +Arrays.toString(population.getPopulation().toArray()));
+
+		} // while end
 		
 		// TODO complete
-		return null;
+		//return null;
 	}
 	
 	/*
@@ -144,16 +160,14 @@ public class GeneticAlgorithm {
 						    // continue until all exams are scheduled in the children schedule
 							} while(childrenExamToSet != gaSettings.whereToCut[0]);
 						
-						/*TODO debug*/ System.out.println("children schedule= "+Arrays.toString(childrenSchedule));
-						/*TODO debug*/ 
+						/*TODO debug*/ //System.out.println("children schedule= "+Arrays.toString(childrenSchedule));
+						/*TODO debug 
 						for (int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++) {
 							
-							/*TODO debug*/
 							//they must be equal!!!!!!!!!!!!!!
 							//System.out.println("parent exam = "+i+" time slot = "+parentSchedule1[i]);
 							//System.out.println("children exam = "+i+" time slot = "+childrenSchedule[i]);
-
-						}
+						}*/
 					
 					int[][] te = generateTe(childrenSchedule);
 					   if(!gaSettings.initializationProblem)
@@ -283,7 +297,7 @@ public class GeneticAlgorithm {
 	 * @return
 	 */
 	private double[] generateCKP(Population population) {
-		double[] CKP = new double[gaSettings.initialPopulationSize];
+		double[] CKP = new double[gaSettings.initialPopulationSize+gaSettings.numberOfChildrenToGenerate];
 		
 		double cumulativeSum = 0;
 		for(int i = 0; i < population.getPopulation().size() - 1; ++i) {
@@ -302,20 +316,20 @@ public class GeneticAlgorithm {
 	 * use the range between consecutive values of CRP
 	 */
 	
-	private ArrayList<Solution> selectRandomParent(double[] relativeFitness, Population population, int numberOfParents) {
+	private ArrayList<Solution> selectRandomChromosome(double[] relativeFitness, Population population, int numberOfChromosome) {
 		
-		ArrayList<Solution> parents = new ArrayList();
+		ArrayList<Solution> chromosomes = new ArrayList<Solution>();
 		
 		// to avoid the selection of the same parents
-		Integer[] selectedNum = new Integer[numberOfParents];
+		Integer[] selectedNum = new Integer[numberOfChromosome];
 		int numberOfSelectedParents = 0;
 		
 		// already selected numbers
 		// generate a random number in the range [0,1]
 		Random rnd = new Random();
 		
-		while (numberOfSelectedParents!=numberOfParents) {
-			// Returns the next pseudorandom, uniformly distributed double value between 0.0 and 1.0 
+		while (numberOfSelectedParents!=numberOfChromosome) {
+			// Returns the next pseudo-random, uniformly distributed double value between 0.0 and 1.0 
 			double randomNum = rnd.nextDouble();
 			
 			/*
@@ -325,7 +339,7 @@ public class GeneticAlgorithm {
 			 */
 			if(randomNum <= relativeFitness[0] &&
 					!Arrays.asList(selectedNum).contains(1)) {
-						parents.add(population.getPopulation().get(0));
+						chromosomes.add(population.getPopulation().get(0));
 						//update the selected numbers in order to avoid to select same parents
 						selectedNum[numberOfSelectedParents] = 1;
 						numberOfSelectedParents++;
@@ -335,7 +349,7 @@ public class GeneticAlgorithm {
 					if(randomNum <= relativeFitness[i] 
 							&& randomNum>relativeFitness[i-1] 
 									&& !Arrays.asList(selectedNum).contains(i+1)) {						
-											parents.add(population.getPopulation().get(i));	
+											chromosomes.add(population.getPopulation().get(i));	
 											//update the selected numbers in order to avoid to select same parents
 											selectedNum[numberOfSelectedParents] = i+1;
 											numberOfSelectedParents++;
@@ -343,7 +357,7 @@ public class GeneticAlgorithm {
 				}
 		}
 		
-		return parents;
+		return chromosomes;
 	}
 	
 	private Solution selectRandomVictimChromosome() {
