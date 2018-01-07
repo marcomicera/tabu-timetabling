@@ -111,8 +111,9 @@ public class ETPsolver_OMAAL_group15 {
 			2, 					// cuttingPointsNumber -> NB: if we wont just one cutting point we have to 
 								//							  set whereToCut = {0,x}
 			true, 				// randomCuttingPoint
-			null,		// whereToCut
-			2					// number of children to generate
+			null,				// whereToCut
+			2,					// number of children to generate
+			200					// cloningManagementThreshold
 		);
 		
 		//TODO debug(GA)

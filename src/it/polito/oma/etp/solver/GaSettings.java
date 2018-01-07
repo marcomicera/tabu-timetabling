@@ -78,8 +78,15 @@ public class GaSettings {
 	 */
 	public int numberOfChildrenToGenerate;
 	
+	/**
+	 * number of iterations to wait until the algorithm checks the presence of clones 
+	 * in the population.
+	 */
+	public int cloningManagementThreshold;
+	
 	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
-				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut, int numberOfChildrenToGenerate) {
+				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut, 
+				      int numberOfChildrenToGenerate, int cloningManagementThreshold) {
 		this.initializationProblem = initializationProblem;
 		this.initialPopulationSize = PopulationSize;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
@@ -88,6 +95,7 @@ public class GaSettings {
 		this.randomCuttingPoint = randomCuttingPoint;
 		this.whereToCut = whereToCut;
 		this.numberOfChildrenToGenerate = numberOfChildrenToGenerate;
+		this.cloningManagementThreshold = cloningManagementThreshold;
 		
 		//The dimension of the whereToCut array must be equal to the number of cutting points
 		if(!randomCuttingPoint && cuttingPointsNumber == 1 && whereToCut[0]!=0) {

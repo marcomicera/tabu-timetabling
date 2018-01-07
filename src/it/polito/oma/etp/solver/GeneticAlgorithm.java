@@ -17,6 +17,8 @@ public class GeneticAlgorithm {
 	protected GaSettings gaSettings;
 	protected InstanceData instance;
 	protected Population population;
+	protected int iteration = 0;
+	protected Solution bestSolution;
 	
 	public GeneticAlgorithm(TsSettings tbSettings, GaSettings gaSettings, InstanceData instance) {
 		this.tbSettings = tbSettings;
@@ -28,7 +30,7 @@ public class GeneticAlgorithm {
 		// Population generation
 		
 		population = new Population(instance, gaSettings, tbSettings);
-		
+		bestSolution = population.getBestSolution();
 		/*	it's very important that the population is orderd in order to 
 		 * 	select the correct parents that will generate childrens.
 		 */
@@ -36,7 +38,7 @@ public class GeneticAlgorithm {
 		
 		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getPopulation().toArray()));
 		
-		while(true) {
+		while(bestSolution.getFitness() > 0 /*TODO timer //&& !TIMER_EXPIRED*/) {
 			// ***** Parents selection (for children generation) *********
 		
 			/* parents:	array list that contains the parents that will generate children.
@@ -93,11 +95,12 @@ public class GeneticAlgorithm {
 			}
 			
 			/*TODO debug*/ System.out.println("New population: " + Arrays.toString(population.getPopulation().toArray()) + "\n");
+			
+			++iteration;
 
 		} // while end
 		
-		// TODO complete
-		//return null;
+		return bestSolution;
 	}
 	
 	/*

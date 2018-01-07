@@ -4,27 +4,59 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import it.polito.oma.etp.reader.InstanceData;
+import it.polito.oma.etp.solver.initialization.InitializationSolution;
+import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 public class Population {
 	protected ArrayList<Solution> population = new ArrayList<Solution>();
 	protected float totalFitness;
 	protected float totalInverseFitness;
 	
+	protected Solution bestSolution;
+	protected Solution worstSolution;
+	
 	/**
 	 * Genetic Algorithm used to find the initial
 	 * feasible solution.
 	 */
 	public Population(InstanceData instance, GaSettings gaSettings, TsSettings tbSettings) {
+		bestSolution = null;
+		worstSolution = null;
 		// Generating random population
 		for(int i = 0; i < gaSettings.initialPopulationSize; ++i) {
 			// Adding a new randomly-generated chromosome to the population
-			Solution tempSolution = Solution.generateUnfeasibleSolution(instance, tbSettings);
+			InitializationSolution tempSolution = Solution.generateUnfeasibleSolution(instance, tbSettings);
 			population.add(tempSolution);
 			
 			// Total fitness measures update
 			totalFitness += tempSolution.getFitness();
 			totalInverseFitness += 1/tempSolution.getFitness();
+			
+			// Initializing bestSolution
+			if(bestSolution == null) {
+				bestSolution = new InitializationSolution(tempSolution);
+			}
+			else if(bestSolution.getFitness() > tempSolution.getFitness()) {
+				bestSolution = new InitializationSolution(tempSolution);
+			}
+			
+			// Initializing worstSolution
+			if(worstSolution == null) {
+				worstSolution = new InitializationSolution(tempSolution);
+			}
+			else if(worstSolution.getFitness() < tempSolution.getFitness()) {
+				worstSolution = new InitializationSolution(tempSolution);
+			}
+
 		}
+	}
+
+	/**
+	 * Generate the population for the optimization problem.
+	 * @param population population of feasible solutions.
+	 */
+	public Population(Population population) {
+		//TODO create body
 	}
 
 	@Override
@@ -65,5 +97,13 @@ public class Population {
 
 	public float getTotalInverseFitness() {
 		return totalInverseFitness;
+	}
+	
+	public Solution getBestSolution() {
+		return bestSolution;
+	}
+	
+	public Solution getWorstSolution() {
+		return worstSolution;
 	}
 }
