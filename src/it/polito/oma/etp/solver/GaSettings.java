@@ -84,9 +84,14 @@ public class GaSettings {
 	 */
 	public int cloningManagementThreshold;
 	
+	/**
+	 * number of genes to mutate in the clone chromosomes.
+	 */
+	public int genesToMutateIfClones;
+	
 	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
 				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut, 
-				      int numberOfChildrenToGenerate, int cloningManagementThreshold) {
+				      int numberOfChildrenToGenerate, int cloningManagementThreshold, int genesToMutateIfClones) {
 		this.initializationProblem = initializationProblem;
 		this.initialPopulationSize = PopulationSize;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
@@ -96,6 +101,7 @@ public class GaSettings {
 		this.whereToCut = whereToCut;
 		this.numberOfChildrenToGenerate = numberOfChildrenToGenerate;
 		this.cloningManagementThreshold = cloningManagementThreshold;
+		this.genesToMutateIfClones = genesToMutateIfClones;
 		
 		//The dimension of the whereToCut array must be equal to the number of cutting points
 		if(!randomCuttingPoint && cuttingPointsNumber == 1 && whereToCut[0]!=0) {

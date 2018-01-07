@@ -113,7 +113,8 @@ public class ETPsolver_OMAAL_group15 {
 			true, 				// randomCuttingPoint
 			null,				// whereToCut
 			2,					// number of children to generate
-			200					// cloningManagementThreshold
+			5,					// cloningManagementThreshold
+			10					// genesToMutateIfClones
 		);
 		
 		//TODO debug(GA)

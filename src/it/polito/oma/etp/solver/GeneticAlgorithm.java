@@ -98,7 +98,9 @@ public class GeneticAlgorithm {
 			
 			// TODO increase mutation probability
 			
-			// TODO check clones
+			if(iteration % gaSettings.cloningManagementThreshold == 0) {
+				checkClones();
+			}
 			
 			// TODO update best solution
 			
@@ -275,7 +277,39 @@ public class GeneticAlgorithm {
 		/*TODO debug*/System.out.println("random cutting points: "+Arrays.toString(gaSettings.whereToCut));
 
 	}
-
+	/**
+	 * Every 'gaSettings.cloningManagementThreshold' iterations this method checks whether
+	 * clones are present in the current population. If clones are found, they are mutated
+	 * of a 
+	 */
+	//TODO we change all n clones or n-1 clones?
+	private void checkClones() {
+		ArrayList<Integer> cloneIndexes = new ArrayList<Integer>();
+		ArrayList<Solution> p = population.getPopulation();
+		
+		// Populate the list of indexes of clones.
+		for(int i = 0; i < p.size(); i++) {
+			for(int j = 0; j < p.size(); j++) {
+				if(i != j) {
+					if(!cloneIndexes.contains(i)) {
+						float f1 = p.get(i).getFitness();
+						float f2 = p.get(j).getFitness();
+						if(f1 == f2) {
+							cloneIndexes.add(i);
+						}
+					}
+				}
+			}
+		}
+				
+		// mutate the clones, if they are found
+		if(!cloneIndexes.isEmpty()) {
+			int i = (cloneIndexes.size() == p.size()) ? 1 : 0;
+			for(; i < cloneIndexes.size(); i++) {
+				mutate(p.get(cloneIndexes.get(i)), gaSettings.genesToMutateIfClones);
+			}
+		}
+	}
 	
 	/*
 	 * generate the te matrix starting from the schedule
