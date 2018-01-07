@@ -437,6 +437,10 @@ public abstract class TabuSearch {
 		TIMER_EXPIRED = true;
 	}
 	
+	public static boolean getTimerExpired() {
+		return TIMER_EXPIRED;
+	}
+	
 	class MovingAverage {
 	    private final Queue<Float> window = new LinkedList<Float>();
 	    private final int period;

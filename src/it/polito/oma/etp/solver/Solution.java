@@ -172,7 +172,7 @@ public abstract class Solution {
 	    		for(int exam2 = exam1+1; exam2 < E; ++exam2)
 	    			if(N[exam1][exam2]>0 && te[t][exam1]==1 && te[t][exam2]==1) {
 	    				isFeasible = false;
-	    				/*TODO debug*/System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
+	    				/*TODO debug*///System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
 	    			}
 	    
 	    return isFeasible;

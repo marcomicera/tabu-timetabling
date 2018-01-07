@@ -1,9 +1,9 @@
 package it.polito.oma.etp.solver;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import it.polito.oma.etp.reader.InputReader;
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -41,13 +41,13 @@ public class ETPsolver_OMAAL_group15 {
 	    int tabuListMaxSize = 40;
 	    int tabuListIntervalAdd = 5;
 	    double tabuListIncrementTimeInterval = ((float)timeout / 3) / ((tabuListMaxSize-tabuListInitialSize)/tabuListIntervalAdd);
-	    
+	  
 	    // Tuning
 		Settings initializationSettings = new Settings(
 			// General Tabu List settings
 			true,	// firstRandomSolution
-			0.5,	// neighborhoodGeneratingPairsPercentage
-			true,	// considerAllTimeslots
+			1,	// neighborhoodGeneratingPairsPercentage
+			false,	// considerAllTimeslots
 			20,		// tabuListInitialSize
 			
 			// Dynamic Tabu List section
@@ -63,7 +63,7 @@ public class ETPsolver_OMAAL_group15 {
 			// time worsening criterion
 			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
 			1,		// initialPopulationSize
-			2		// numberOfThreads
+			4		// numberOfThreads
 		);
 		Settings optimizationSettings  = new Settings(
 			// General Tabu List settings
@@ -109,7 +109,7 @@ public class ETPsolver_OMAAL_group15 {
 		 * Definition of threads run's methods 
 		 */
 		ArrayList<Thread> threads = new ArrayList<Thread>();
-		ArrayList<InitializationSolution> feasibleSolutions = new ArrayList<InitializationSolution>();;
+		ArrayList<InitializationSolution> setOfSolutions = new ArrayList<InitializationSolution>();
 		
 		for(int i = 0; i < initializationSettings.numberOfThreads; i++) {
 			threads.add(new Thread() {
@@ -119,12 +119,10 @@ public class ETPsolver_OMAAL_group15 {
 					TabuSearch feasibleSolutionGenerator = new TabuInitialization(instanceData, initializationSettings);
 					InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
 					//------
-					synchronized(feasibleSolutions) {
-						if(initialFeasibleSolution.isFeasible()) {
-							feasibleSolutions.add(initialFeasibleSolution);
-						}
+					synchronized(setOfSolutions) {
+						setOfSolutions.add(initialFeasibleSolution);
 						// wakes main thread to see if population is full.
-						feasibleSolutions.notifyAll();
+						setOfSolutions.notifyAll();
 					}
 				}
 			});
@@ -138,16 +136,37 @@ public class ETPsolver_OMAAL_group15 {
 		}
 		
 		/*
-		 * Main thread will wait until the populations is generated
+		 * Main thread will wait until the populations is generated or time is over
 		 */
-		synchronized(feasibleSolutions) {
-			while(feasibleSolutions.size() != initializationSettings.initialPopulationSize) {
+		synchronized(setOfSolutions) {
+			while(	setOfSolutions.size() < initializationSettings.initialPopulationSize) {
 				try {
-					feasibleSolutions.wait();
+					setOfSolutions.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
+		}
+		
+		/*
+		 * IMPORTANT! You must filter unfeasible solutions from setOfSolutions here!
+		 */
+		for(int i = 0; i < setOfSolutions.size(); i++) {
+			if(setOfSolutions.size() != 0) {
+				if(!setOfSolutions.get(i).isFeasible()) {
+					setOfSolutions.remove(i);
+					i--;
+				}
+			}
+		}
+		/*
+		 * Have we found all the initial population? If not, exit.
+		 */
+		if(setOfSolutions.size() != initializationSettings.initialPopulationSize) {
+			System.err.println("The solver couldn't find " +  initializationSettings.initialPopulationSize + 
+							   " feasible solutions to start with.\nNumber of feasible solutions found: " +
+							    setOfSolutions.size());
+			System.exit(1);
 		}
 		
 		double newt = System.nanoTime();
@@ -156,15 +175,15 @@ public class ETPsolver_OMAAL_group15 {
 						   " fesible solutions for " + instanceData.getInstanceName() + ": " +
 						   time + " seconds");
 
-		for(InitializationSolution sol : feasibleSolutions) {
+		for(InitializationSolution sol : setOfSolutions) {
 		/*TODO debug*/System.out.println("This solution was found!: " + sol);
 		}
 
 		/*TODO debug*/ //System.out.println("Initial feasible solution " + ((initialFeasibleSolution.getFitness() != 0) ? "not " : "") + "found: " + initialFeasibleSolution);
-		/*TODO debug*/ System.exit(0);
+		/*TODO debug*/ //System.exit(0);
 		
 		// Computing the timetabling solution
-		TabuSearch solutionGenerator = new TabuOptimization(instanceData, feasibleSolutions.get(0), optimizationSettings);
+		TabuSearch solutionGenerator = new TabuOptimization(instanceData, setOfSolutions.get(0), optimizationSettings);
 		OptimizationSolution solution = (OptimizationSolution)solutionGenerator.solve();
 		
 		/*TODO debug*/System.out.println("Final solution found: " + solution);
