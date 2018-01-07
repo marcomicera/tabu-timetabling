@@ -101,16 +101,17 @@ public class ETPsolver_OMAAL_group15 {
 			timeout * 1000
 		);
 		
-		int[] cuttingPoints = {4,7};
+		int[] cuttingPoints = {0,7};
 		GaSettings gaSettings = new GaSettings(
 			// general GA Setting
 			true, 				// it's an initialization problem?
 			5, 					// PopulationSize
 			2, 					// numberOfReproductiveParents
 			true, 				// randomParentSelection
-			2, 					// cuttingPointsNumber
-			false, 				// randomCuttingPoint
-			cuttingPoints		// whereToCut
+			2, 					// cuttingPointsNumber -> NB: if we wont just one cutting point we have to 
+								//							  set whereToCut = {0,x}
+			true, 				// randomCuttingPoint
+			null				// whereToCut
 		);
 		
 		//TODO debug(GA)

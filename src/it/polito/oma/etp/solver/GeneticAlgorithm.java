@@ -2,15 +2,9 @@ package it.polito.oma.etp.solver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.IntStream;
-
-import javax.imageio.metadata.IIOInvalidTreeException;
-import javax.lang.model.type.UnionType;
-import javax.print.attribute.standard.RequestingUserName;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
@@ -63,12 +57,20 @@ public class GeneticAlgorithm {
 					parents.add(population.getPopulation().get(i));
 			}
 			
-			// Crossover (generating new children)
+			// ***************** Crossover (generating new children) ******************
+			
 			/* TODO test the ordered crossover*/
 			
+			// in this case we have to generate random cutting points and so setting the value
+			// whereToCut of GaSettings.
+			if(gaSettings.randomCuttingPoint)
+				generateRandomCuttingPoints();
+
 			ArrayList<Solution> childrens = new ArrayList<Solution>();
 			childrens.add(crossover(parents.get(0), parents.get(1)));
 			childrens.add(crossover(parents.get(1), parents.get(0)));
+			
+			//********************* end crossover *************************************
 
 			// Chromosomes substitution (which chromosome survives)
 			double[] CKP = generateCKP(population);
@@ -93,8 +95,7 @@ public class GeneticAlgorithm {
 		// initialization of the children and it's schedule
 					Solution children = null;
 					int[] childrenSchedule = new int[instance.getE()];
-
-					if(!gaSettings.randomCuttingPoint) { // in case we select a deterministic cutting points
+						
 						int[] parentSchedule1 = parent1.schedule;
 						int[] parentSchedule2 = parent2.schedule;
 						
@@ -142,23 +143,18 @@ public class GeneticAlgorithm {
 								   
 						    // continue until all exams are scheduled in the children schedule
 							} while(childrenExamToSet != gaSettings.whereToCut[0]);
-			
-						if(childrenExamToSet<gaSettings.whereToCut[0]) {
-							System.err.println("children not completely setted!!!");
-							System.exit(0);
-						}
-						/*TODO debug*/else System.out.println("children1 schedule= "+Arrays.toString(childrenSchedule));
+						
+						/*TODO debug*/ System.out.println("children schedule= "+Arrays.toString(childrenSchedule));
 						/*TODO debug*/ 
 						for (int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++) {
+							
+							/*TODO debug*/
 							//they must be equal!!!!!!!!!!!!!!
-							System.out.println("parent exam = "+i+" time slot = "+parentSchedule1[i]);
-							System.out.println("parent exam = "+i+" time slot = "+childrenSchedule[i]);
+							//System.out.println("parent exam = "+i+" time slot = "+parentSchedule1[i]);
+							//System.out.println("children exam = "+i+" time slot = "+childrenSchedule[i]);
 
 						}
-					}
-					else {
-						// in case we select a random cutting points generation
-					}
+					
 					int[][] te = generateTe(childrenSchedule);
 					   if(!gaSettings.initializationProblem)
 						   children = new OptimizationSolution(instance, te);
@@ -167,7 +163,44 @@ public class GeneticAlgorithm {
 	
 				return children;
 	}				 
-		
+	
+	/*
+	 * randomly generation of the cutting points values. if the number of cutting cutting points
+	 * in the settings is 1, only one value is generated, and the other one is set to 0.
+	 * otherwise, two random value are generated.
+	 * all random values must be greater then 0, because if we have more then one cutting points 
+	 * we don't wont a zero in the whereToCut array.
+	 * 
+	 * the function set the value of whereToCut in the gaSettings.
+	 */
+	
+	private void generateRandomCuttingPoints() {
+		int firstRandomCuttingPoint = ThreadLocalRandom.current().nextInt(1, instance.getE()-1);
+		/*TODO debug*/ System.out.println("first random cutting point " + firstRandomCuttingPoint);
+		int[] cuttingPoints = new int[2];
+		if(gaSettings.cuttingPointsNumber == 1) {
+			cuttingPoints[0] = 0;
+			cuttingPoints[1] = firstRandomCuttingPoint;
+		}
+		else{
+			int secondRandomCuttingPoint = ThreadLocalRandom.current().nextInt(1, instance.getE()-1);
+			while (secondRandomCuttingPoint == firstRandomCuttingPoint) {
+				secondRandomCuttingPoint = ThreadLocalRandom.current().nextInt(1, instance.getE());
+			}
+			/*TODO debug*/ System.out.println("second random cutting point " + secondRandomCuttingPoint);
+
+			
+			if(firstRandomCuttingPoint < secondRandomCuttingPoint) {
+				cuttingPoints[0] = firstRandomCuttingPoint; cuttingPoints[1]=secondRandomCuttingPoint;}
+				else {
+					cuttingPoints[0] = secondRandomCuttingPoint; cuttingPoints[1]=firstRandomCuttingPoint;}
+
+		}
+		gaSettings.whereToCut = cuttingPoints;
+		/*TODO debug*/System.out.println("random cutting points: "+Arrays.toString(gaSettings.whereToCut));
+
+	}
+
 	
 	/*
 	 * generate the te matrix starting from the schedule

@@ -53,6 +53,9 @@ public class GaSettings {
 	
 	/**
 	 * the number of cutting points we wont to use in order to generate childrens.
+	 * it's useful only for random generation of cutting points, becouse in a  
+	 * deterministic case we always use 2 values, and if we wont to use just 1
+	 * cutting point we have to set the first number of "whereToCut" to zero.
 	 */
 	public int cuttingPointsNumber;
 	
@@ -68,33 +71,8 @@ public class GaSettings {
 	 * gene that will not be changed.
 	 * it's dimension must be equal to "cuttingPointsNumber".
 	 */
-	public int[] whereToCut;
+	public int[] whereToCut = new int[2];
 
-	public GaSettings(boolean initializationProblem, int InitialPopulationSize, boolean selectParentsByRelativeFitness,
-			int numberOfReproductiveParents, boolean selectChromosomesToKillByRelativeFitness,
-			double mutationProbability, double crossoverProbability, double populationPercentageReplacement,
-			int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut) {
-		this.initializationProblem = initializationProblem;
-		this.initialPopulationSize = InitialPopulationSize;
-		this.randomParentSelection = selectParentsByRelativeFitness;
-		this.numberOfReproductiveParents = numberOfReproductiveParents;
-		this.selectChromosomesToKillByRelativeFitness = selectChromosomesToKillByRelativeFitness;
-		this.mutationProbability = mutationProbability;
-		this.crossoverProbability = crossoverProbability;
-		this.populationPercentageReplacement = populationPercentageReplacement;
-		this.cuttingPointsNumber = cuttingPointsNumber;
-		this.randomCuttingPoint = randomCuttingPoint;
-		
-		//The dimension of the whereToCut array must be equal to the number of cutting points
-		
-		if(randomCuttingPoint == false && whereToCut.length == cuttingPointsNumber && cuttingPointsNumber<=2)
-		this.whereToCut = whereToCut;
-		else if(whereToCut.length != cuttingPointsNumber)
-			System.err.println("The dimension of the whereToCut array must be equel to the number of cutting points: "
-								+ cuttingPointsNumber );
-		else if(cuttingPointsNumber>2)
-			System.err.println("the maximum number of cutting points is 2" );
-	}
 
 	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
 				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut) {
@@ -105,6 +83,22 @@ public class GaSettings {
 		this.cuttingPointsNumber = cuttingPointsNumber;
 		this.randomCuttingPoint = randomCuttingPoint;
 		this.whereToCut = whereToCut;
+		
+		//The dimension of the whereToCut array must be equal to the number of cutting points
+		
+				if(!randomCuttingPoint && cuttingPointsNumber == 1 && whereToCut[0]!=0) {
+					System.err.println("in order to use one cutting point, the "
+							+ "first elemento of whereToCut must be zero!!!");
+					System.exit(0);
+				}
+				
+				if(randomCuttingPoint && whereToCut!=null)
+					System.err.println("whereToCut should be null");
+				if(!randomCuttingPoint && whereToCut==null) {
+					System.err.println("in order to use deterministic cutting points, the "
+							+ "whereToCut mustn't be null!!!");
+					System.exit(0);
+				}
 	}
 	
 	
