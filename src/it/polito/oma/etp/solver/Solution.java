@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
+import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 /**
  * Solution base-class both for the Tabu Search algorithm
@@ -434,6 +435,49 @@ public abstract class Solution implements Comparable<Solution>{
 		}
 			
 		return schedule[exam];
+	}
+	
+	/**
+	 * TODO JavaDoc
+	 * @param neighbor
+	 */
+	public void move(Neighbor neighbor) {
+		/*TODO debug*/ //System.out.println("Move: <e" + neighbor.getMovingExam() + ", from t" + currentSolution.getTimeslot(neighbor.getMovingExam()) + " to t" + neighbor.getNewTimeslot() + ">");
+		
+		// Retrieving current solution's infos before performing the move
+		int movingExam = neighbor.getMovingExam();
+		int oldTimeslot = getTimeslot(movingExam);
+		/*TODO debug*/ //System.out.println("movingExam's index inside move(): " + movingExam);
+		/*TODO debug*/ //System.out.println("old fitness = " + currentSolution.getFitness());
+		
+		updateSolution(movingExam, oldTimeslot, neighbor);
+	}
+	
+	/**
+	 * update the current solution with the chosen move
+	 * @param int						the exam to be moved
+	 * @param oldTimeSlod				the time-slot where the exam is moved
+	 * @param neighbor					the neighbor chosen by the algorithm
+	 */
+	private void updateSolution(int movingExam, int oldTimeslot, Neighbor neighbor) {		
+		// Updating the current solution
+		updateTe(movingExam, oldTimeslot, neighbor.getNewTimeslot());
+		updateSchedule(neighbor); 
+		setFitness(neighbor.getFitness());
+		updatePenalizingPairs(neighbor);
+		
+		if(this instanceof OptimizationSolution)
+			((OptimizationSolution)this).initializeDistanceMatrix();
+				
+//		/*TODO debug*/float testIncrementalFitness = getFitness();
+//		/*TODO debug (fitness)*/ System.out.println("\nFitness: " + getFitness());
+//		/*TODO debug*/ initializeFitness();
+//		/*TODO debug*/float testFitnessFromScratch = getFitness();
+//		/*TODO debug*/if(testIncrementalFitness != testFitnessFromScratch) {
+//		/*TODO debug*/	System.err.println("Different fitness values");
+//		/*TODO debug*/	System.exit(1);
+//		/*TODO debug*/}
+		/*TODO debug (fitness from scratch)*/ //System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
 	}
 	
 	// Searching in Lists

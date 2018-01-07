@@ -342,51 +342,21 @@ public abstract class TabuSearch {
 	protected abstract ExamPair getNextPair(int nextPairIndex) throws IndexOutOfBoundsException;
 	
 	/**
-	 * 
+	 * TODO JavaDoc
 	 * @param neighbor
 	 */
 	private void move(Neighbor neighbor) {
-		/*TODO debug*/ //System.out.println("Move: <e" + neighbor.getMovingExam() + ", from t" + currentSolution.getTimeslot(neighbor.getMovingExam()) + " to t" + neighbor.getNewTimeslot() + ">");
+		// Performing the actual move on the current solution
+		currentSolution.move(neighbor);
 		
 		// Retrieving current solution's infos before performing the move
 		int movingExam = neighbor.getMovingExam();
 		int oldTimeslot = currentSolution.getTimeslot(movingExam);
-		/*TODO debug*/ //System.out.println("movingExam's index inside move(): " + movingExam);
-		/*TODO debug*/ //System.out.println("old fitness = " + currentSolution.getFitness());
 		
 		// Inserting this move in the Tabu List
 		tabuList.add(new Neighbor(movingExam, oldTimeslot));
 		
 		/*TODO debug (tabu list)*/ //System.out.print("Tabu list: "+ tabuList);
-		
-		updateSolution(movingExam, oldTimeslot, neighbor);
-	}
-	
-	/**
-	 * update the current solution with the chosen move
-	 * @param int						the exam to be moved
-	 * @param oldTimeSlod				the time-slot where the exam is moved
-	 * @param neighbor					the neighbor chosen by the algorithm
-	 */
-	private void updateSolution(int movingExam, int oldTimeslot, Neighbor neighbor) {		
-		// Updating the current solution
-		currentSolution.updateTe(movingExam, oldTimeslot, neighbor.getNewTimeslot());
-		currentSolution.updateSchedule(neighbor); 
-		currentSolution.setFitness(neighbor.getFitness());
-		currentSolution.updatePenalizingPairs(neighbor);
-		
-		if(currentSolution instanceof OptimizationSolution)
-			((OptimizationSolution)currentSolution).initializeDistanceMatrix();
-				
-		/*TODO debug*/float testIncrementalFitness = currentSolution.getFitness();
-		/*TODO debug (fitness)*/ System.out.println("\nFitness: " + currentSolution.getFitness());
-		/*TODO debug*/ currentSolution.initializeFitness();
-		/*TODO debug*/float testFitnessFromScratch = currentSolution.getFitness();
-//		/*TODO debug*/if(testIncrementalFitness != testFitnessFromScratch) {
-//		/*TODO debug*/	System.err.println("Different fitness values");
-//		/*TODO debug*/	System.exit(1);
-//		/*TODO debug*/}
-		/*TODO debug (fitness from scratch)*/ //System.out.println("Calculating the fitness from scratch: " + currentSolution.getFitness());
 		
 		// Updating bestSolution if necessary
 		updateBestSolution();

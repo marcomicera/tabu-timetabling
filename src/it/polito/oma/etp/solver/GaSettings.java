@@ -77,7 +77,7 @@ public class GaSettings {
 	 * number of children to generate.
 	 */
 	public int numberOfChildrenToGenerate;
-
+	
 	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
 				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut, int numberOfChildrenToGenerate) {
 		this.initializationProblem = initializationProblem;
@@ -90,64 +90,23 @@ public class GaSettings {
 		this.numberOfChildrenToGenerate = numberOfChildrenToGenerate;
 		
 		//The dimension of the whereToCut array must be equal to the number of cutting points
+		if(!randomCuttingPoint && cuttingPointsNumber == 1 && whereToCut[0]!=0) {
+			System.err.println("in order to use one cutting point, the "
+					+ "first element of whereToCut must be zero!!!");
+			System.exit(0);
+		}
+		else if(!randomCuttingPoint && cuttingPointsNumber == 2 && whereToCut[0]==0)
+			System.err.println("you have set 2 cutting points!!!!!!! \n"
+					         + "but setting the first element of whereToCut to zero"
+							 + " correspond to have only one cutting point!!!"
+							 );
 		
-				if(!randomCuttingPoint && cuttingPointsNumber == 1 && whereToCut[0]!=0) {
-					System.err.println("in order to use one cutting point, the "
-							+ "first element of whereToCut must be zero!!!");
-					System.exit(0);
-				}
-				else if(!randomCuttingPoint && cuttingPointsNumber == 2 && whereToCut[0]==0)
-					System.err.println("you have set 2 cutting points!!!!!!! \n"
-							         + "but setting the first element of whereToCut to zero"
-									 + " correspond to have only one cutting point!!!"
-									 );
-				
-				if(randomCuttingPoint && whereToCut!=null)
-					System.err.println("whereToCut should be null");
-				if(!randomCuttingPoint && whereToCut==null) {
-					System.err.println("in order to use deterministic cutting points, the "
-							+ "whereToCut mustn't be null!!!");
-					System.exit(0);
-				}
+		if(randomCuttingPoint && whereToCut!=null)
+			System.err.println("whereToCut should be null");
+		if(!randomCuttingPoint && whereToCut==null) {
+			System.err.println("in order to use deterministic cutting points, the "
+					+ "whereToCut mustn't be null!!!");
+			System.exit(0);
+		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
