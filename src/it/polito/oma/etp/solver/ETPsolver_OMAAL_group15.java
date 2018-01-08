@@ -62,7 +62,7 @@ public class ETPsolver_OMAAL_group15 {
 	private void setCommonSettings() {
 		commonSettings = new Settings(
 			true,	// firstRandomSolution
-			3,		// initialPopulationSize
+			8,		// initialPopulationSize
 					/**
 					 * It will be overwritten to 1 if
 					 * the optimization problem will be solved
@@ -111,7 +111,7 @@ public class ETPsolver_OMAAL_group15 {
 			
 			// time worsening criterion
 			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
-			4									// numberOfThreads
+			8									// numberOfThreads
 		);
 		
 		// Starting a stopwatch
@@ -119,11 +119,7 @@ public class ETPsolver_OMAAL_group15 {
 		
 		// Thread definitions running TabuInitialization implementations
 		ArrayList<Thread> tabuInitializationThreads = new ArrayList<Thread>();
-		InitializationPopulation initialPopulation = new InitializationPopulation(
-			instance,
-			initializationSettings.initialPopulationSize,
-			initializationSettings.firstRandomSolution
-		);
+		InitializationPopulation initialPopulation = new InitializationPopulation(instance);
 		
 		for(int i = 0; i < initializationSettings.numberOfThreads; ++i) {
 			tabuInitializationThreads.add(
@@ -311,6 +307,7 @@ public class ETPsolver_OMAAL_group15 {
 				@Override
 				public void run() {
 					TabuSearch.stopExecution();
+					GeneticAlgorithm.stopExecution();
 				}
 			},
 			
@@ -328,6 +325,7 @@ public class ETPsolver_OMAAL_group15 {
 		
 		// Searching for feasible solutions
 		InitializationPopulation initialPopulation = solver.initialization();
+		
 		// Computing the timetabling solution
 		OptimizationSolution solution = solver.optimization(initialPopulation);
 		

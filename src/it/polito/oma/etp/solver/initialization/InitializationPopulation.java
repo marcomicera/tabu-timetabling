@@ -2,9 +2,18 @@ package it.polito.oma.etp.solver.initialization;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.Population;
+import it.polito.oma.etp.solver.Settings;
 import it.polito.oma.etp.solver.Solution;
 
 public class InitializationPopulation extends Population {
+	public InitializationPopulation(InstanceData instance) {
+		super(instance);
+		
+		// By now, there's not worst and better solution
+		bestSolution = Double.MAX_VALUE;
+		worstSolution = 0;
+	}
+	
 	/**
 	 * Population constructor for finding a feasible solution (initialization
 	 * problem), creating a random initial population.
@@ -18,14 +27,10 @@ public class InitializationPopulation extends Population {
 										int initialPopulationSize, 
 										boolean firstRandomSolution
 	) {
-		super(instance);
-		
-		// By now, there's not worst and better solution
-		bestSolution = null;
-		worstSolution = null;
+		this(instance);
 		
 		// Generating random population
-		/*for(int i = 0; i < initialPopulationSize; ++i) {
+		for(int i = 0; i < initialPopulationSize; ++i) {
 			// Infeasible solution generation
 			InitializationSolution tempSolution = Solution.generateInfeasibleSolution(instance, firstRandomSolution);
 			
@@ -37,16 +42,12 @@ public class InitializationPopulation extends Population {
 			totalInverseFitness += 1/tempSolution.getFitness();
 			
 			// Initializing bestSolution
-			if(bestSolution == null)
-				bestSolution = new InitializationSolution(tempSolution);
-			else if(bestSolution.getFitness() > tempSolution.getFitness())
-				bestSolution = new InitializationSolution(tempSolution);
+			if(bestSolution > tempSolution.getFitness())
+				bestSolution = tempSolution.getFitness();
 			
 			// Initializing worstSolution
-			if(worstSolution == null)
-				worstSolution = new InitializationSolution(tempSolution);
-			else if(worstSolution.getFitness() < tempSolution.getFitness())
-				worstSolution = new InitializationSolution(tempSolution);
-		}*/
+			if(worstSolution < tempSolution.getFitness())
+				worstSolution = tempSolution.getFitness();
+		}
 	}
 }

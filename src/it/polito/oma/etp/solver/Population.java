@@ -2,6 +2,7 @@ package it.polito.oma.etp.solver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import it.polito.oma.etp.reader.InstanceData;
 
@@ -12,8 +13,8 @@ public abstract class Population {
 	protected float totalFitness;
 	protected float totalInverseFitness;
 	
-	protected Solution bestSolution;
-	protected Solution worstSolution;
+	protected double bestSolution;
+	protected double worstSolution;
 	
 	/**
 	 * Population abstract class constructor, initializing
@@ -37,14 +38,6 @@ public abstract class Population {
 		chromosomes.add(newChromosome);
 		totalInverseFitness += 1/newChromosome.getFitness();
 		totalFitness += newChromosome.getFitness();
-		
-		if(bestSolution == null || newChromosome.getFitness() < bestSolution.getFitness())
-			// Updating best solution
-			bestSolution = newChromosome;
-		
-		else if(worstSolution == null || newChromosome.getFitness() > worstSolution.getFitness())
-			// Updating worst solution
-			worstSolution = newChromosome;
 	}
 	
 	/**
@@ -56,9 +49,6 @@ public abstract class Population {
 		chromosomes.remove(killedChromosome);
 		totalInverseFitness -= 1/killedChromosome.getFitness();
 		totalFitness -= killedChromosome.getFitness();
-		
-		if(bestSolution == killedChromosome || worstSolution == killedChromosome)
-			updateWorstAndBestSolution();
 	}
 	
 	/**
@@ -72,21 +62,15 @@ public abstract class Population {
 	
 	protected void updateWorstAndBestSolution() {
 		// By now, there's not worst and better solution
-		bestSolution = null;
-		worstSolution = null;
+		bestSolution = Double.MAX_VALUE;
+		worstSolution = 0;
 		
 		for(Solution chromosome: chromosomes) {
-			// Initializing bestSolution
-			if(bestSolution == null)
-				bestSolution = chromosome;
-			else if(bestSolution.getFitness() > chromosome.getFitness())
-				bestSolution = chromosome;
+			if(bestSolution > chromosome.getFitness())
+				bestSolution = chromosome.getFitness();
 			
-			// Initializing worstSolution
-			if(worstSolution == null)
-				worstSolution = chromosome;
-			else if(worstSolution.getFitness() < chromosome.getFitness())
-				worstSolution = chromosome;
+			if(worstSolution < chromosome.getFitness())
+				worstSolution = chromosome.getFitness();
 		}
 	}
 
@@ -116,11 +100,13 @@ public abstract class Population {
 	}
 	
 	public Solution getBestSolution() {
-		return bestSolution;
+		Collections.sort(chromosomes);
+		return chromosomes.get(0);
 	}
 	
 	public Solution getWorstSolution() {
-		return worstSolution;
+		Collections.sort(chromosomes);
+		return chromosomes.get(chromosomes.size()-1);	
 	}
 	
 	@Override

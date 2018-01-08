@@ -214,21 +214,9 @@ public class InputReader {
 
 			PrintStream write = new PrintStream(bestSolution);
 			
-			for(int j = 0; j < solution.getInstance().getE()+1; ++j) {
-				if(j == 0)
-					write.print("\t");
-				write.print("E" + j + "\t");
-			}
+			for(int i = 0; i < solution.getInstance().getE(); ++i)
+				write.println(i + " " + solution.getTimeslot(i));
 			
-			write.println();
-
-			for(int i = 0; i < solution.getInstance().getTmax(); ++i) {
-				write.print("T" + (i + 1) + "\t");
-				for(int j = 0; j < solution.getInstance().getE(); ++j)
-					write.print(solution.getTe()[i][j] + "\t");
-				write.println();
-			}
-
 			write.close();
 		} catch (IOException e) {
 			System.out.println("Errore: " + e);

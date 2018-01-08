@@ -17,6 +17,7 @@ public abstract class GeneticAlgorithm {
 	protected Population population;
 	protected int iteration = 0;
 	protected Solution bestSolution;
+	private static boolean TIMER_EXPIRED = false;
 	
 	/**
 	 * Children mutation is made following
@@ -51,9 +52,16 @@ public abstract class GeneticAlgorithm {
 		
 		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getChromosomes().toArray()));
 				
-		while(bestSolution.getFitness() > 0 /*TODO timer //&& !TIMER_EXPIRED*/) {
+		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
 
+			if(population.getBestSolution().getFitness() > population.getWorstSolution().getFitness())
+				throw new AssertionError(
+					"wrong update best and worst solution" + 
+					" \n best solution = " + population.getBestSolution() +
+					" \n worst solution = " + population.getWorstSolution())
+				;
+			
 			// Mutation probability management
 			if(iteration > settings.mutationProbabilityManagementThreshold)
 				updateMutationProbability();
@@ -121,9 +129,9 @@ public abstract class GeneticAlgorithm {
 			for(Solution chromosomes : chromosomesToKill)
 				population.delete(chromosomes);
 			
+			population.updateWorstAndBestSolution();
+			
 			/*TODO debug*/System.out.println("New population: " + Arrays.toString(population.getChromosomes().toArray()) + "\n");
-			
-			
 			
 			if(iteration % settings.cloningManagementThreshold == 0) {
 				checkClones();
@@ -132,6 +140,11 @@ public abstract class GeneticAlgorithm {
 			// TODO update best solution
 			
 			++iteration;
+			
+			if(population.getBestSolution().getFitness() < bestSolution.getFitness()) {
+				bestSolution = population.getBestSolution();
+				System.out.println("Best solution found until now :" + bestSolution);
+			}
 
 		} // while end
 		
@@ -165,9 +178,7 @@ public abstract class GeneticAlgorithm {
 	}
 	
 	/*
-	 * ***************must be tested!!!*********************
-	 * 
-	 * the first parent give the genes inside the cutting points, the second
+	 * The first parent give the genes inside the cutting points, the second
 	 * is scanned in order to implement the ordered crossover.
 	 * 
 	 * @param parent1 the parent that give the genes inside the cutting points
@@ -185,63 +196,77 @@ public abstract class GeneticAlgorithm {
 		int[] parentSchedule1 = parent1.schedule;
 		int[] parentSchedule2 = parent2.schedule;
 		
-		// Copying the cutting section from parent1 to the child
-		for(int i = settings.whereToCut[0]; i <= settings.whereToCut[1]; ++i)
-			childSchedule[i] = parentSchedule1[i];
-		
-		// the starting point is the first exam after the biggest cutting point.
-		// the wheretoCut array must be ordered.
-		
-		//children 1 generation -> we use parent 2!
-		int parentExam = settings.whereToCut[1] + 1; 
-		int parentExamIterator = parentExam;
-			do {
-				int parentTimeslot = parentSchedule2[parentExamIterator];
-				
-				   //if it isn't an initialization problem we have to check the 
-				   //feasibility of the move
-				   if(!settings.initializationProblem) {
-					  if(isFeasible(childSchedule, parentExam, parentExamIterator, parentTimeslot)) {
-						  //we update the children schedule only if it is feasible
-						  //considering the current exam already set.
-						  childSchedule[parentExam] = parentTimeslot;
-						  //we increment childrenExamToSet here 
-						  //because if this exam generate an infeasible solution we have to 
-						  //try with the next exam of the parent in order to set the current
-						  //exam of the children that isn't set jet.
-						  parentExam++;
-						  	if(parentExam>=instance.getE()) parentExam = 0;
-					  }
-				   }
-				   else { // this is the case of INITIALIZATION PROBLEM
-					   	  // simple crossover -> we haven't to check the feasibility
-					   	  // so we always set the exam 
-						childSchedule[parentExam] = parentTimeslot;
-					   	parentExam++;
-					  	if(parentExam>=instance.getE()) parentExam = 0;
-				   }
-				   
-				   parentExamIterator++; // the next exam of the parent
-				   if(parentExamIterator == instance.getE()) parentExamIterator = 0;
-				   
-		    // continue until all exams are scheduled in the children schedule
-			} while(parentExam != settings.whereToCut[0]);
-		
-		/*TODO debug*/ //System.out.println("children schedule= "+Arrays.toString(childrenSchedule));
-		/*TODO debug 
-		for (int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++) {
-			
-			//they must be equal!!!!!!!!!!!!!!
-			//System.out.println("parent exam = "+i+" time slot = "+parentSchedule1[i]);
-			//System.out.println("children exam = "+i+" time slot = "+childrenSchedule[i]);
-		}*/
+		for (int examIterator = 0; examIterator < instance.getE(); examIterator++) {
+			if(examIterator >= settings.whereToCut[0] &&
+			   examIterator <= settings.whereToCut[1])
+					childSchedule[examIterator] = parentSchedule2[examIterator];
+			else
+				childSchedule[examIterator] = parentSchedule1[examIterator];		
+		}
+		//TODO debug
+		//System.out.println("parent1 schedule: " +Arrays.toString(parentSchedule1));
+		//System.out.println("parent2 schedule: " +Arrays.toString(parentSchedule2));
+		//System.out.println("child schedule: " +Arrays.toString(childSchedule));
 	
+		//TODO debug
+		System.out.println("starting creossover");
+		
+		for (int examsInsideCut = settings.whereToCut[0]; examsInsideCut <= settings.whereToCut[1]; examsInsideCut++) {
+			int childExamIterator = 0;
+			
+			// counts how many iteration the loop has done
+			int loopIteration = 0;
+			// threshold: when the algorithm reaches this value, the crossover is stopped and a new couple of parents is looked for.
+			int maxLoopIteration = instance.getE()*10;
+			
+			while(childExamIterator < childSchedule.length) {
+				++loopIteration;
+				
+				if(loopIteration >= maxLoopIteration) {
+					if(settings.initializationProblem)
+						child = new InitializationSolution(parent1);
+					else
+						child = new OptimizationSolution((OptimizationSolution)parent1);
+					
+					mutate(child, (int)settings.mutatingGenesPercentage*instance.getE());
+					
+					//TODO debug
+					System.out.println("fail crossover -> mutation execution");
+					return child;
+				}
+			//for (int childExamIterator = 0; 
+				//	childExamIterator < childSchedule.length; 
+				//	childExamIterator++) {
+			
+				if(childExamIterator!=examsInsideCut) {
+					if(instance.getN()[examsInsideCut][childExamIterator]>0 &&
+								childSchedule[childExamIterator]==childSchedule[examsInsideCut]) {
+								//there is an infeasible pair, so we increment the value of the examsInsideCut timeSlot
+								//in order to avoid new infeasible pairs between exams outside the cutted point.
+								childSchedule[examsInsideCut] = (childSchedule[examsInsideCut]+1) % instance.getTmax();
+								childExamIterator = 0;
+								//TODO debug
+								System.out.println("pair infeasible");
+					}
+					else //the pair childExamIterator-examsInsideCut is feasible
+						childExamIterator++;
+				}
+				else //childExamIterator=examsInsideCut so we only increment the iterator
+					childExamIterator++;
+
+			}
+			
+		}
+		
+		//TODO debug
+		System.out.println("end crossover");
+		
 		int[][] te = generateTe(childSchedule);
 		   if(!settings.initializationProblem)
 			   child = new OptimizationSolution(instance, te);
 		   else
 			   child = new InitializationSolution(instance, te);
-	
+				
 		return child;
 	}				 
 	
@@ -252,46 +277,67 @@ public abstract class GeneticAlgorithm {
 	 */
 	public void mutate(Solution mutatingChromosome, int mutatingGenesNumber) {
 		// Set of already-mutated gene indexes
-		Set<Integer> mutatedGenesIndexes = new HashSet<Integer>(instance.getE());
 		
-		// For each gene that must be mutated
-		for(int i = 0; i < mutatingGenesNumber; ++i) {
-			// Random gene index generator
-			int mutatingGeneIndex;
-			do {
-				mutatingGeneIndex = Utility.getRandomInt(0, instance.getE() - 1);
-			} while(mutatedGenesIndexes.contains(mutatingGeneIndex));
-			mutatedGenesIndexes.add(mutatingGeneIndex);
-			
-			// Random new gene value generator
-			
-			// True when a new feasible gene value has been found
-			boolean newFeasibleGeneValueFound = false;
-			while(!newFeasibleGeneValueFound) {
-				// New gene value generation
-				int newGeneValue = Utility.getRandomInt(0, instance.getTmax() - 1);
+				//TODO debug 
+				System.out.println("start mutate");
 				
-				try {
-					/**
-					 * Performing the move: if the corresponding neighbor is infeasible, an
-					 * exception is thrown
-					 */
-					mutatingChromosome.move(mutatingChromosome.getNeighbor(mutatingGeneIndex, newGeneValue));
+				Set<Integer> mutatedGenesIndexes = new HashSet<Integer>(instance.getE());
+				
+				// For each gene that must be mutated
+				for(int i = 0; i < mutatingGenesNumber; ++i) {
+					// Random gene index generator
+					int mutatingGeneIndex;
+					do {
+						mutatingGeneIndex = Utility.getRandomInt(0, instance.getE() - 1);
+					} while(mutatedGenesIndexes.contains(mutatingGeneIndex));
+					//mutatedGenesIndexes.add(mutatingGeneIndex);
 					
-					/**
-					 * If the code reaches this point, the corresponding neighbor is feasible,
-					 * so the move has been performed successfully
-					 */
-					newFeasibleGeneValueFound = true;
-				} catch(InvalidMoveException e) {
-					/**
-					 *  The neighbor corresponding to the move was not feasible, a new
-					 *  random gene value has to be computed
-					 */
-					continue;
+					// Random new gene value generator
+					
+					// True when a new feasible gene value has been found
+					boolean newFeasibleGeneValueFound = false;
+					
+					//generate the initial time slot in a random way.
+					int newGeneValue = Utility.getRandomInt(0, instance.getTmax() - 1);
+					int initialTimeSlot = newGeneValue;
+					
+					while(!newFeasibleGeneValueFound) {
+						// New gene value generation
+						
+						try {
+							/**
+							 * Performing the move: if the corresponding neighbor is infeasible, an
+							 * exception is thrown
+							 */
+							mutatingChromosome.move(mutatingChromosome.getNeighbor(mutatingGeneIndex, newGeneValue));
+							
+							//if the exam is correctly rescheduled we add the exam to mutatedGenesIndexes
+							mutatedGenesIndexes.add(mutatingGeneIndex);
+							/**
+							 * If the code reaches this point, the corresponding neighbor is feasible,
+							 * so the move has been performed successfully
+							 */
+							newFeasibleGeneValueFound = true;
+							
+							
+						} catch(InvalidMoveException e) {
+							//e.printStackTrace();
+							/**
+							 *  The neighbor corresponding to the move was not feasible, a new
+							 *  random gene value has to be computed
+							 */
+							
+							newGeneValue = (newGeneValue+1) % instance.getTmax();
+							if(newGeneValue == initialTimeSlot) {
+								--i;
+								break;
+							}
+							continue;
+						}
+					}
 				}
-			}
-		}
+				//TODO debug 
+				System.out.println("end mutate");
 	}
 	
 	/*
@@ -502,5 +548,10 @@ public abstract class GeneticAlgorithm {
 		}
 		
 		return chromosomes;
+	}
+	
+	// Stopping condition
+	public static void stopExecution() {
+		TIMER_EXPIRED = true;
 	}
 }
