@@ -8,6 +8,7 @@ import it.polito.oma.etp.solver.ExamPair;
 import it.polito.oma.etp.solver.InvalidMoveException;
 import it.polito.oma.etp.solver.Neighbor;
 import it.polito.oma.etp.solver.Solution;
+import it.polito.oma.etp.solver.Utility;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
 
 public class OptimizationSolution extends Solution {
@@ -28,9 +29,7 @@ public class OptimizationSolution extends Solution {
 		super(instance, te);
 		
 		int E = instance.getE();
-		distanceMatrix = new int[E][E];
 				
-		initializeDistanceMatrix();
 	}
 	
 	public OptimizationSolution(OptimizationSolution s) {
@@ -70,6 +69,7 @@ public class OptimizationSolution extends Solution {
 	 */
 	public void initializeDistanceMatrix() {
 		int E = instance.getE();
+		distanceMatrix = new int[E][E];
 		
 		for(int i = 0; i < E; ++i)
 			for(int j = 0; j < E; ++j) {
@@ -132,8 +132,13 @@ public class OptimizationSolution extends Solution {
 		
 		for(int i = 0; i < E; ++i)
 			for(int j = i + 1; j < E; ++j)
-				if(i != j && distanceMatrix[i][j] > 0 && distanceMatrix[i][j] <= K)
+				if(i != j && distanceMatrix[i][j] > 0 && distanceMatrix[i][j] <= K) {
 					fitness += (float)(Math.pow(2, K - distanceMatrix[i][j]) * N[i][j] / S);
+					//TODO debug
+						System.out.print("fitness incremental" + fitness);
+				}
+		//TODO debug
+		System.out.println("total fitness "+fitness);
 	}
 	
 	@Override

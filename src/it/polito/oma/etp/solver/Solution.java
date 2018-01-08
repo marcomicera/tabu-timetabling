@@ -51,6 +51,7 @@ public abstract class Solution implements Comparable<Solution>{
 		this.instance = instance;
 		this.te = te;
 		initializeSchedule();
+		initializeDistanceMatrix();
 		initializePenalizingPairs();
 		initializeFitness();
 	}
@@ -88,6 +89,9 @@ public abstract class Solution implements Comparable<Solution>{
 		this.fitness = fitness;
 		this.penalizingPairs = penalizingPairs;
 	}
+	
+	protected abstract void initializeDistanceMatrix();
+	
 	
 	public static InitializationSolution generateUnfeasibleSolution(InstanceData instance, TsSettings settings) {
 		/*TODO debug*///System.out.println("Generating infeasible solution...");

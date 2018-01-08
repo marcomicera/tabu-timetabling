@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
+import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 public class Population {
 	protected ArrayList<Solution> population = new ArrayList<Solution>();
@@ -49,13 +50,36 @@ public class Population {
 
 		}
 	}
-
+		
 	/**
 	 * Generate the population for the optimization problem.
 	 * @param population population of feasible solutions.
 	 */
-	public Population(Population population) {
-		//TODO create body
+	public Population(ArrayList<InitializationSolution> initialPopulation) {
+		for(InitializationSolution initialSolution: initialPopulation) {
+			OptimizationSolution tempSolution = new OptimizationSolution(initialSolution);
+			population.add(tempSolution);
+			
+			// Total fitness measures update
+			totalFitness += tempSolution.getFitness();
+			totalInverseFitness += 1/tempSolution.getFitness();
+			
+			// Initializing bestSolution
+			if(bestSolution == null) {
+				bestSolution = new InitializationSolution(tempSolution);
+			}
+			else if(bestSolution.getFitness() > tempSolution.getFitness()) {
+				bestSolution = new InitializationSolution(tempSolution);
+			}
+			
+			// Initializing worstSolution
+			if(worstSolution == null) {
+				worstSolution = new InitializationSolution(tempSolution);
+			}
+			else if(worstSolution.getFitness() < tempSolution.getFitness()) {
+				worstSolution = new InitializationSolution(tempSolution);
+			}
+		}	
 	}
 
 	@Override

@@ -31,12 +31,23 @@ public class GeneticAlgorithm {
 		this.instance = instance;
 		
 		mutationProbability = gaSettings.mutationProbabilityInitialValue;
+		population = new Population(instance, gaSettings, tbSettings);
+
 	}
+	
+	public GeneticAlgorithm(ArrayList<InitializationSolution> initialPopulation, GaSettings gaSettings, InstanceData instance) {
+		this.gaSettings = gaSettings;
+		this.instance = instance;
+		
+		mutationProbability = gaSettings.mutationProbabilityInitialValue;
+		population = new Population(initialPopulation);
+	}
+	
+	
 
 	public Solution solve() {
 		// Population generation
-		
-		population = new Population(instance, gaSettings, tbSettings);
+
 		bestSolution = population.getBestSolution();
 		/*	it's very important that the population is orderd in order to 
 		 * 	select the correct parents that will generate childrens.
@@ -44,7 +55,7 @@ public class GeneticAlgorithm {
 		Collections.sort(population.getPopulation());
 		
 		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getPopulation().toArray()));
-		
+				
 		while(bestSolution.getFitness() > 0 /*TODO timer //&& !TIMER_EXPIRED*/) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
 			
@@ -195,7 +206,7 @@ public class GeneticAlgorithm {
 								   //if it isn't an initialization problem we have to check the 
 								   //feasibility of the move
 								   if(!gaSettings.initializationProblem) { 
-									  if(isFeasible(parentTimeSlot, exam, childrenSchedule, gaSettings.whereToCut[0])) {
+									  if(isFeasible(parentTimeSlot, exam, childrenSchedule, gaSettings.whereToCut[1]+1)) {
 										  //we update the children schedule only if it is feasible
 										  //considering the current exam already set.
 										  childrenSchedule[childrenExamToSet] = parentTimeSlot;
@@ -390,13 +401,13 @@ public class GeneticAlgorithm {
 	    int exam = startingExam;
 	    
 	      do {
-	           if(instance.getN()[currentExam][exam]>0 && 
-	            timeslot == childrenSchedule[exam])
+	           if(instance.getN()[currentExam][exam]>0 &&  timeslot == childrenSchedule[exam]) {
 	             isFeasible = false;
+	           }
 	           exam++;
 	           if(exam == instance.getE()) exam = 0;
 
-	      } while(exam != startingExam && !isFeasible);
+	      } while(exam != startingExam && isFeasible);
 	    
 	    return isFeasible;
 	  }

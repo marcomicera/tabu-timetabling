@@ -67,7 +67,7 @@ public class ETPsolver_OMAAL_group15 {
 			
 			// time worsening criterion
 			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
-			1,									// initialPopulationSize
+			4,									// initialPopulationSize
 			4									// numberOfThreads
 		);
 		TsSettings optimizationSettings  = new TsSettings(
@@ -110,7 +110,7 @@ public class ETPsolver_OMAAL_group15 {
 		int[] cuttingPoints = {3,7};
 		GaSettings gaSettings = new GaSettings(
 			// general GA Setting
-			true, 				// initializationProblem
+			false, 				// initializationProblem
 			4, 					// initialPopulationSize
 			true,				// randomParentSelection
 			2, 					// numberOfReproductiveParents
@@ -129,11 +129,6 @@ public class ETPsolver_OMAAL_group15 {
 			0.5,				// mutationProbabilityConvergenceRatio
 			0.1					// mutatingGenesPercentage
 		);
-		
-		//TODO debug(GA)
-		/*GeneticAlgorithm gaAlgorithm = new GeneticAlgorithm(initializationSettings, gaSettings, instanceData);
-		gaAlgorithm.solve();*/
-		/*TODO debug*/ //System.exit(0);
 		
 		//*** Time begins to flow from here
 		double old = System.nanoTime();
@@ -216,9 +211,23 @@ public class ETPsolver_OMAAL_group15 {
 		/*TODO debug*/ //System.exit(0);
 		
 		// Computing the timetabling solution
-		TabuSearch solutionGenerator = new TabuOptimization(instanceData, setOfSolutions.get(0), optimizationSettings);
+		/*TabuSearch solutionGenerator = new TabuOptimization(instanceData, setOfSolutions.get(0), optimizationSettings);
 		OptimizationSolution solution = (OptimizationSolution)solutionGenerator.solve();
 		
-		/*TODO debug*/System.out.println("Final solution found: " + solution);
+		/*TODO debug*///System.out.println("Final solution found: " + solution);
+		
+		//TODO debug(GA)
+				GeneticAlgorithm gaAlgorithm = new GeneticAlgorithm(setOfSolutions, gaSettings, instanceData);
+				gaAlgorithm.solve();
+				/*TODO debug*/ //System.exit(0);
+				
 	}
+	
 }
+
+
+
+
+
+
+

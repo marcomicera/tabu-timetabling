@@ -36,6 +36,10 @@ public class InitializationSolution extends Solution {
 		fitness = Float.valueOf(penalizingPairs.size());
 	}
 	
+	protected void initializeDistanceMatrix(){
+	
+	}
+	
 	/**
 	 * Computes the array containing all exam pairs causing
 	 * this solution to be infeasible. 
