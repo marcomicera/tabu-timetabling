@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.Population;
 import it.polito.oma.etp.solver.initialization.InitializationPopulation;
+import it.polito.oma.etp.solver.initialization.InitializationSolution;
 
 public class OptimizationPopulation extends Population {
 	/**
@@ -24,7 +25,8 @@ public class OptimizationPopulation extends Population {
 		chromosomes = new ArrayList<>(initialPopulation.getChromosomes());
 		totalFitness = initialPopulation.getTotalFitness();
 		totalInverseFitness = initialPopulation.getTotalInverseFitness();
-		bestSolution = initialPopulation.getBestSolution();
-		worstSolution = initialPopulation.getWorstSolution();
+		
+		bestSolution = new OptimizationSolution((InitializationSolution)initialPopulation.getBestSolution());
+		worstSolution = new OptimizationSolution((InitializationSolution)initialPopulation.getWorstSolution());
 	}
 }

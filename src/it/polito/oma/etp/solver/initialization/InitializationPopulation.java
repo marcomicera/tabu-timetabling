@@ -25,7 +25,7 @@ public class InitializationPopulation extends Population {
 		worstSolution = null;
 		
 		// Generating random population
-		for(int i = 0; i < initialPopulationSize; ++i) {
+		/*for(int i = 0; i < initialPopulationSize; ++i) {
 			// Infeasible solution generation
 			InitializationSolution tempSolution = Solution.generateInfeasibleSolution(instance, firstRandomSolution);
 			
@@ -47,6 +47,6 @@ public class InitializationPopulation extends Population {
 				worstSolution = new InitializationSolution(tempSolution);
 			else if(worstSolution.getFitness() < tempSolution.getFitness())
 				worstSolution = new InitializationSolution(tempSolution);
-		}
+		}*/
 	}
 }

@@ -38,11 +38,11 @@ public abstract class Population {
 		totalInverseFitness += 1/newChromosome.getFitness();
 		totalFitness += newChromosome.getFitness();
 		
-		if(newChromosome.getFitness() < bestSolution.getFitness())
+		if(bestSolution == null || newChromosome.getFitness() < bestSolution.getFitness())
 			// Updating best solution
 			bestSolution = newChromosome;
 		
-		else if(newChromosome.getFitness() > worstSolution.getFitness())
+		else if(worstSolution == null || newChromosome.getFitness() > worstSolution.getFitness())
 			// Updating worst solution
 			worstSolution = newChromosome;
 	}
@@ -70,7 +70,7 @@ public abstract class Population {
 		delete(getSolution(killedChromosomeIndex));
 	}
 	
-	private void updateWorstAndBestSolution() {
+	protected void updateWorstAndBestSolution() {
 		// By now, there's not worst and better solution
 		bestSolution = null;
 		worstSolution = null;

@@ -35,7 +35,7 @@ public abstract class GeneticAlgorithm {
 	public GeneticAlgorithm(InstanceData instance, GeneticSettings settings) {
 		this.instance = instance;
 		this.settings = settings;
-		
+
 		// Initializing the mutation probability to its initial value
 		mutationProbability = settings.mutationProbabilityInitialValue;
 	}
@@ -53,7 +53,7 @@ public abstract class GeneticAlgorithm {
 				
 		while(bestSolution.getFitness() > 0 /*TODO timer //&& !TIMER_EXPIRED*/) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
-			
+
 			// Mutation probability management
 			if(iteration > settings.mutationProbabilityManagementThreshold)
 				updateMutationProbability();
@@ -67,7 +67,7 @@ public abstract class GeneticAlgorithm {
 			ArrayList<Solution> parents = new ArrayList<Solution>();
 			
 			// Random parent selection using the Cumulative Reproduction Probability
-			if(settings.randomParentSelection) {				
+			if(settings.randomParentSelection) {
 				double[] CRP = generateCRP(population);
 				//for(int i = 0; i < gaSettings.numberOfReproductiveParents; i++)
 				//	parents.add(selectRandomParent(CRP, population));

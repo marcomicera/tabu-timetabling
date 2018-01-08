@@ -62,7 +62,7 @@ public class ETPsolver_OMAAL_group15 {
 	private void setCommonSettings() {
 		commonSettings = new Settings(
 			true,	// firstRandomSolution
-			4,		// initialPopulationSize
+			3,		// initialPopulationSize
 					/**
 					 * It will be overwritten to 1 if
 					 * the optimization problem will be solved
@@ -138,6 +138,7 @@ public class ETPsolver_OMAAL_group15 {
 						synchronized(initialPopulation) {
 							/*TODO debug*/System.out.println(this.getName() + " has found a solution. It's " + (!initialFeasibleSolution.isFeasible() ? "not" : "") + "feasible: " + initialFeasibleSolution);
 							
+							initialPopulation.updateWorstAndBestSolution();
 							/**
 							 * Adding the new feasible solution to the initial population
 							 * if it is feasible.
@@ -175,8 +176,11 @@ public class ETPsolver_OMAAL_group15 {
 			}
 		}
 		
-		/*TODO debug*/System.out.println("before filter initialPopulation.getSize(): " + initialPopulation.getSize());
-
+		for(Thread thread : tabuInitializationThreads) {
+			if(thread.getState() != Thread.State.TERMINATED)
+				thread.interrupt();
+		}
+		
 		/*
 		 * IMPORTANT! You must filter infeasible solutions from setOfSolutions here!
 		 */
@@ -191,9 +195,7 @@ public class ETPsolver_OMAAL_group15 {
 		}
 		
 		// Checking whether the initial population solution has been completely filled
-		/*TODO debug*/System.out.println("after filter initialPopulation.getSize(): " + initialPopulation.getSize());
-		/*TODO debug*/System.out.println("initializationSettings.initialPopulationSize: " + initializationSettings.initialPopulationSize);
-		if(initialPopulation.getSize() != initializationSettings.initialPopulationSize)
+		if(initialPopulation.getSize() < initializationSettings.initialPopulationSize)
 			throw new AssertionError(
 				"The solver couldn't find " +  initializationSettings.initialPopulationSize + 
 				" feasible solutions to start with." + 
@@ -210,10 +212,10 @@ public class ETPsolver_OMAAL_group15 {
 		);
 
 		// TODO (debug) Printing initial feasible population
-		System.out.println("initialPopulation found:");
-		for(Solution initialFeasibleSolution: initialPopulation.getChromosomes())
-			System.out.println(initialFeasibleSolution);
-		
+//		System.out.println("initialPopulation found:");
+//		for(Solution initialFeasibleSolution: initialPopulation.getChromosomes())
+//			System.out.println(initialFeasibleSolution);
+//		
 		return initialPopulation;
 	}
 	
@@ -326,7 +328,6 @@ public class ETPsolver_OMAAL_group15 {
 		
 		// Searching for feasible solutions
 		InitializationPopulation initialPopulation = solver.initialization();
-		
 		// Computing the timetabling solution
 		OptimizationSolution solution = solver.optimization(initialPopulation);
 		

@@ -10,7 +10,7 @@ import it.polito.oma.etp.solver.Neighbor;
 import it.polito.oma.etp.solver.Solution;
 
 public class InitializationSolution extends Solution {
-	/*TODO IT WAS PROTECTED */public InitializationSolution(InstanceData instance, int[][] te) {
+	public InitializationSolution(InstanceData instance, int[][] te) {
 		super(instance, te);
 	}
 	
