@@ -60,9 +60,7 @@ public abstract class TabuSearch {
 		
 		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED && !Thread.interrupted()) {
 			/*TODO debug (iteration)*///System.out.println(Thread.currentThread().getName() + "\n***** Iteration " + iteration + " *****");
-			
-			/*TODO debug*/System.out.println(Thread.currentThread().getName() + " " + Thread.currentThread().getState());
-			
+						
 			Neighbor validNeighbor = null;
 			
 			// No valid neighbor in the neighborhood
