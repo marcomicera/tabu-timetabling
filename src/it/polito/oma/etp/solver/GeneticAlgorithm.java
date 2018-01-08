@@ -181,73 +181,73 @@ public class GeneticAlgorithm {
 	 */
 	public Solution crossover(Solution parent1, Solution parent2) {
 		// initialization of the children and it's schedule
-					Solution children = null;
-					int[] childrenSchedule = new int[instance.getE()];
-						
-						int[] parentSchedule1 = parent1.schedule;
-						int[] parentSchedule2 = parent2.schedule;
-						
-						//setting the part of the children schedule that is equal to the parent schedule part
-						for (int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++) {
-							childrenSchedule[i] = parentSchedule1[i];
-						}
-						
-						
-						// the starting point is the first exam after the biggest cutting point.
-						// the wheretoCut array must be ordered.
-						
-						//children 1 generation -> we use parent 2!
-						int startingExam = gaSettings.whereToCut[1]+1; 
-						int exam = startingExam;
-						int childrenExamToSet = startingExam;
-							do {
-								   int parentTimeSlot = parentSchedule2[exam];
-								   
-								   //if it isn't an initialization problem we have to check the 
-								   //feasibility of the move
-								   if(!gaSettings.initializationProblem) { 
-									  if(isFeasible(parentTimeSlot, exam, childrenSchedule, gaSettings.whereToCut[1]+1)) {
-										  //we update the children schedule only if it is feasible
-										  //considering the current exam already set.
-										  childrenSchedule[childrenExamToSet] = parentTimeSlot;
-										  //we increment childrenExamToSet here 
-										  //because if this exam generate an infeasible solution we have to 
-										  //try with the next exam of the parent in order to set the current
-										  //exam of the children that isn't set jet.
-										  childrenExamToSet++;
-										  	if(childrenExamToSet>=instance.getE()) childrenExamToSet = 0;
-									  }
-								   }
-								   else { // this is the case of INITIALIZATION PROBLEM
-									   	  // simple crossover -> we haven't to check the feasibility
-									   	  // so we always set the exam 
-										childrenSchedule[childrenExamToSet] = parentTimeSlot;
-									   	childrenExamToSet++;
-									  	if(childrenExamToSet>=instance.getE()) childrenExamToSet = 0;
-								   }
-								   
-								   exam++; // the next exam of the parent
-								   if(exam == instance.getE()) exam = 0;
-								   
-						    // continue until all exams are scheduled in the children schedule
-							} while(childrenExamToSet != gaSettings.whereToCut[0]);
-						
-						/*TODO debug*/ //System.out.println("children schedule= "+Arrays.toString(childrenSchedule));
-						/*TODO debug 
-						for (int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++) {
-							
-							//they must be equal!!!!!!!!!!!!!!
-							//System.out.println("parent exam = "+i+" time slot = "+parentSchedule1[i]);
-							//System.out.println("children exam = "+i+" time slot = "+childrenSchedule[i]);
-						}*/
-					
-					int[][] te = generateTe(childrenSchedule);
-					   if(!gaSettings.initializationProblem)
-						   children = new OptimizationSolution(instance, te);
-					   else
-						   children = new InitializationSolution(instance, te);
+		Solution child = null;
+		int[] childSchedule = new int[instance.getE()];
+			
+		int[] parentSchedule1 = parent1.schedule;
+		/*TODO debug*/System.out.println("Schedule 1:\t\t" + Arrays.toString(parentSchedule1));
+		int[] parentSchedule2 = parent2.schedule;
+		/*TODO debug*/System.out.println("Schedule 2:\t\t" + Arrays.toString(parentSchedule2));
+		
+		//setting the part of the children schedule that is equal to the parent schedule part
+		for(int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++)
+			childSchedule[i] = parentSchedule1[i];
+		/*TODO debug*/System.out.println("Initial child schedule:\t" + Arrays.toString(childSchedule));
+		
+		// the starting point is the first exam after the biggest cutting point.
+		// the wheretoCut array must be ordered.
+		
+		//children 1 generation -> we use parent 2!
+		int parentExam = gaSettings.whereToCut[1] + 1; 
+		int parentExamIterator = parentExam;
+			do {
+				int parentTimeslot = parentSchedule2[parentExamIterator];
+				
+				   //if it isn't an initialization problem we have to check the 
+				   //feasibility of the move
+				   if(!gaSettings.initializationProblem) {
+					  if(isFeasible(childSchedule, parentExam, parentExamIterator, parentTimeslot)) {
+						  //we update the children schedule only if it is feasible
+						  //considering the current exam already set.
+						  childSchedule[parentExam] = parentTimeslot;
+						  //we increment childrenExamToSet here 
+						  //because if this exam generate an infeasible solution we have to 
+						  //try with the next exam of the parent in order to set the current
+						  //exam of the children that isn't set jet.
+						  parentExam++;
+						  	if(parentExam>=instance.getE()) parentExam = 0;
+					  }
+				   }
+				   else { // this is the case of INITIALIZATION PROBLEM
+					   	  // simple crossover -> we haven't to check the feasibility
+					   	  // so we always set the exam 
+						childSchedule[parentExam] = parentTimeslot;
+					   	parentExam++;
+					  	if(parentExam>=instance.getE()) parentExam = 0;
+				   }
+				   
+				   parentExamIterator++; // the next exam of the parent
+				   if(parentExamIterator == instance.getE()) parentExamIterator = 0;
+				   
+		    // continue until all exams are scheduled in the children schedule
+			} while(parentExam != gaSettings.whereToCut[0]);
+		
+		/*TODO debug*/ //System.out.println("children schedule= "+Arrays.toString(childrenSchedule));
+		/*TODO debug 
+		for (int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++) {
+			
+			//they must be equal!!!!!!!!!!!!!!
+			//System.out.println("parent exam = "+i+" time slot = "+parentSchedule1[i]);
+			//System.out.println("children exam = "+i+" time slot = "+childrenSchedule[i]);
+		}*/
 	
-				return children;
+		int[][] te = generateTe(childSchedule);
+		   if(!gaSettings.initializationProblem)
+			   child = new OptimizationSolution(instance, te);
+		   else
+			   child = new InitializationSolution(instance, te);
+	
+		return child;
 	}				 
 	
 	/**
@@ -381,37 +381,34 @@ public class GeneticAlgorithm {
 		return te;
 		}
 	
-	/*
-	   * it's used to check if the exam that we wont to put in the time slot given as
-	   * parameter is a feasible move considering the actual children schedule set
-	   * so far.
-	   * 
-	   * @param TimeSlot  the time slot we wont to use for the exam given by currentExam param
-	   * @param currentExam we are setting the children schedule, and this is the current exam
-	   *                   we want to schedule
-	   * @param childrenSchedule  the childrenSchedule that dynamically change by inserting 
-	   *                 exams in the order given by it's parent.
-	   * 
-	   * @return isFeasible true if we can put the currentExam in the TimeSlot given by param
-	   */
-	  private boolean isFeasible(int timeslot, int currentExam, int[] childrenSchedule, int startingExam) {
-	    boolean isFeasible = true;
-	    
-	    //int startingExam = gaSettings.whereToCut[0]; 
-	    int exam = startingExam;
-	    
-	      do {
-	           if(instance.getN()[currentExam][exam]>0 &&  timeslot == childrenSchedule[exam]) {
-	             isFeasible = false;
-	           }
-	           exam++;
-	           if(exam == instance.getE()) exam = 0;
-
-	      } while(exam != startingExam && isFeasible);
-	    
-	    return isFeasible;
-	  }
-
+	/**
+	 * 
+	 * @param childSchedule			currently-generating child's schedule.
+	 * @param firstCuttingPoint		first child's schedule element index to be checked.
+	 * @param childExamToSet		child's element index to be set.
+	 * @param parentValue			the child's element index should be set to this value, according
+	 * 								to the crossover operator.
+	 * @return						whether the temporary child's schedule is feasible
+	 * 								or not.
+	 */
+	private boolean isFeasible(int[] childSchedule, int firstCuttingPoint, int childExamToSet, int parentValue) {
+		int examIndexIterator = firstCuttingPoint;
+		
+		while(examIndexIterator != childExamToSet) {
+			if(	// If the two exams have more than one student enrolled in both of them 
+				instance.getN()[examIndexIterator][childExamToSet] > 0 &&
+				
+				// They will be placed in the same timeslot
+				childSchedule[examIndexIterator] == parentValue
+			) {
+				return false;
+			}
+			
+			examIndexIterator = (examIndexIterator + 1 == childSchedule.length) ? 0 : (examIndexIterator + 1);
+		}
+		
+		return true;
+	}
 	
 	/**
 	 * Returns the Cumulative Reproduction Probability of each element of the population.

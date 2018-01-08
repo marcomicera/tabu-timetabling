@@ -32,18 +32,18 @@ public class Utility {
 		
 		return clone;
 	}
-
+	
 	/**
 	 * General function which prints a matrix in a readable way.
 	 * @param m		matrix to be printed.
 	 * @return		a string showing the matrix in a readable way.
 	 */
-	public static String printMatrix(int[][] m) {
+	public static void printMatrix(int[][] m) {
 		String result = "";
 		for(int[] row: m) {
 			result += Arrays.toString(row) + "\n";
 		}
-		return result + "\n";
+		System.out.println(result + "\n");
 	}
 	
 	/**
