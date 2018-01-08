@@ -195,7 +195,7 @@ public abstract class Solution implements Comparable<Solution>{
 			// First infeasible solution computed randomly
 			if(settings.firstRandomSolution) {
 				// Random timeslot index generation
-				int randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, Tmax);
+				int randomTimeslot = Utility.getRandomInt(0, Tmax);
 				
 				// Exam assignment
 				te[randomTimeslot][exam] = 1;
@@ -484,12 +484,11 @@ public abstract class Solution implements Comparable<Solution>{
 	@Override
 	public boolean equals(Object o) {
 		if(this == o) return true;
-		if(!(o instanceof Neighbor)) return false;
+		if(!(o instanceof Solution)) return false;
 		
 		Solution otherSolution = (Solution)o;
 		
-		return	Arrays.equals(schedule, otherSolution.schedule);
-					
+		return Arrays.equals(schedule, otherSolution.schedule);
 	}
 	
 	public float getFitness() {

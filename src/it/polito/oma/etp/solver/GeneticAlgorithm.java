@@ -20,10 +20,18 @@ public class GeneticAlgorithm {
 	protected int iteration = 0;
 	protected Solution bestSolution;
 	
+	/**
+	 * Children mutation is made following
+	 * a dynamic probability.
+	 */
+	protected double mutationProbability;
+	
 	public GeneticAlgorithm(TsSettings tbSettings, GaSettings gaSettings, InstanceData instance) {
 		this.tbSettings = tbSettings;
 		this.gaSettings = gaSettings;
 		this.instance = instance;
+		
+		mutationProbability = gaSettings.mutationProbabilityInitialValue;
 	}
 
 	public Solution solve() {
@@ -39,6 +47,12 @@ public class GeneticAlgorithm {
 		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getPopulation().toArray()));
 		
 		while(bestSolution.getFitness() > 0 /*TODO timer //&& !TIMER_EXPIRED*/) {
+			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
+			
+			// Mutation probability management
+			if(iteration > gaSettings.mutationProbabilityManagementThreshold)
+				updateMutationProbability();
+			
 			// ***** Parents selection (for children generation) *********
 		
 			/* parents:	array list that contains the parents that will generate children.
@@ -72,31 +86,39 @@ public class GeneticAlgorithm {
 			if(gaSettings.randomCuttingPoint)
 				generateRandomCuttingPoints();
 
-			ArrayList<Solution> childrens = new ArrayList<Solution>();
+			ArrayList<Solution> children = new ArrayList<Solution>();
 			//TODO implement algorithm to generate more then 2 children
-			childrens.add(crossover(parents.get(0), parents.get(1)));
-			childrens.add(crossover(parents.get(1), parents.get(0)));
-			/*TODO debug*/System.out.println("Childrens: " + childrens);
+			children.add(crossover(parents.get(0), parents.get(1)));
+			children.add(crossover(parents.get(1), parents.get(0)));
+			/*TODO debug*/System.out.println("Childrens: " + children);
 			
 			//********************* end crossover *************************************
 
-			// update of population with new children
-			for (Solution children : childrens) {
-				population.add(children);
-			}
+			// Children mutation
+			if(Utility.getRandomDouble(0, 1) < mutationProbability)
+				for(Solution child: children)
+					mutate(child, (int)(gaSettings.mutatingGenesPercentage * instance.getE()));
 			
-			// Chromosomes substitution (which chromosome survives)
-			double[] CKP = generateCKP(population);
-			ArrayList<Solution> chromosomesToKill = selectRandomChromosome(CKP, population, gaSettings.numberOfChildrenToGenerate);
+			// update of population with new children
+			for(Solution child : children)
+				population.add(child);
+			
+			// Chromosomes selection (which chromosome survives)
+			ArrayList<Solution> chromosomesToKill;
+			if(gaSettings.selectChromosomesToKillByRelativeFitness) {
+				double[] CKP = generateCKP(population);
+				chromosomesToKill = selectRandomChromosome(CKP, population, gaSettings.numberOfChildrenToGenerate);
+			}
+			else
+				/*TODO implement*/throw new AssertionError("Random chromosomes to kill selection still to be implemented");
 			/*TODO debug*/System.out.println("Chromosomes killed: " + chromosomesToKill);
 			
-			for (Solution chromosomes : chromosomesToKill) {
+			for(Solution chromosomes : chromosomesToKill)
 				population.delete(chromosomes);
-			}
 			
-			/*TODO debug*/ System.out.println("New population: " + Arrays.toString(population.getPopulation().toArray()) + "\n");
+			/*TODO debug*/System.out.println("New population: " + Arrays.toString(population.getPopulation().toArray()) + "\n");
 			
-			// TODO increase mutation probability
+			
 			
 			// TODO check clones
 			
@@ -107,6 +129,32 @@ public class GeneticAlgorithm {
 		} // while end
 		
 		return bestSolution;
+	}
+	
+	private void updateMutationProbability() {
+		// Checking if its value it's already the maximum one 
+		if(mutationProbability >= gaSettings.mutationProbabilityMaximumValue)
+			return;
+		
+		double deltaFitnessRatio = 
+			(
+				(population.getWorstSolution().getFitness() - population.getBestSolution().getFitness())
+					/ 
+				population.getBestSolution().getFitness()
+			) * gaSettings.mutationProbabilityConvergenceRatio;
+		;
+		
+		// Updating the mutation probability
+		mutationProbability = 
+			((deltaFitnessRatio >= 1) ? 0 : (1 - deltaFitnessRatio))
+				*
+			(gaSettings.mutationProbabilityMaximumValue - gaSettings.mutationProbabilityMinimumValue)
+				+
+			gaSettings.mutationProbabilityMinimumValue
+		;
+		
+		if(mutationProbability > gaSettings.mutationProbabilityMaximumValue)
+			throw new AssertionError("Mutation probability is greater than its maximum value");
 	}
 	
 	/*
@@ -204,7 +252,7 @@ public class GeneticAlgorithm {
 			// Random gene index generator
 			int mutatingGeneIndex;
 			do {
-				mutatingGeneIndex = ThreadLocalRandom.current().nextInt(0, instance.getE() - 1);
+				mutatingGeneIndex = Utility.getRandomInt(0, instance.getE() - 1);
 			} while(mutatedGenesIndexes.contains(mutatingGeneIndex));
 			mutatedGenesIndexes.add(mutatingGeneIndex);
 			
@@ -214,7 +262,7 @@ public class GeneticAlgorithm {
 			boolean newFeasibleGeneValueFound = false;
 			while(!newFeasibleGeneValueFound) {
 				// New gene value generation
-				int newGeneValue = ThreadLocalRandom.current().nextInt(0, instance.getTmax() - 1);
+				int newGeneValue = Utility.getRandomInt(0, instance.getTmax() - 1);
 				
 				try {
 					/**
@@ -250,7 +298,7 @@ public class GeneticAlgorithm {
 	 */
 	
 	private void generateRandomCuttingPoints() {
-		int firstRandomCuttingPoint = ThreadLocalRandom.current().nextInt(1, instance.getE()-1);
+		int firstRandomCuttingPoint = Utility.getRandomInt(1, instance.getE()-1);
 		/*TODO debug*/ System.out.println("first random cutting point " + firstRandomCuttingPoint);
 		int[] cuttingPoints = new int[2];
 		if(gaSettings.cuttingPointsNumber == 1) {
@@ -258,9 +306,9 @@ public class GeneticAlgorithm {
 			cuttingPoints[1] = firstRandomCuttingPoint;
 		}
 		else{
-			int secondRandomCuttingPoint = ThreadLocalRandom.current().nextInt(1, instance.getE()-1);
+			int secondRandomCuttingPoint = Utility.getRandomInt(1, instance.getE()-1);
 			while (secondRandomCuttingPoint == firstRandomCuttingPoint) {
-				secondRandomCuttingPoint = ThreadLocalRandom.current().nextInt(1, instance.getE());
+				secondRandomCuttingPoint = Utility.getRandomInt(1, instance.getE());
 			}
 			/*TODO debug*/ System.out.println("second random cutting point " + secondRandomCuttingPoint);
 

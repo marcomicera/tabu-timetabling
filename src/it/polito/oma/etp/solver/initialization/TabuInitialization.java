@@ -3,6 +3,7 @@ package it.polito.oma.etp.solver.initialization;
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.ExamPair;
 import it.polito.oma.etp.solver.TsSettings;
+import it.polito.oma.etp.solver.Utility;
 import it.polito.oma.etp.solver.Solution;
 import it.polito.oma.etp.solver.TabuSearch;
 
@@ -36,8 +37,8 @@ public class TabuInitialization extends TabuSearch {
 		
 		// Randomly is way more better
 		return currentSolution.getPenalizingPairs().get(
-			java.util.concurrent.ThreadLocalRandom.current().nextInt(0, currentSolution.getPenalizingPairs().size() + 1)
-		);  
+			Utility.getRandomInt(0, currentSolution.getPenalizingPairs().size())
+		); 
 	}
 	
 	@Override

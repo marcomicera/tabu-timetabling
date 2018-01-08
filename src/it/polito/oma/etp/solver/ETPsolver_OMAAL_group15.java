@@ -104,16 +104,23 @@ public class ETPsolver_OMAAL_group15 {
 		int[] cuttingPoints = {3,7};
 		GaSettings gaSettings = new GaSettings(
 			// general GA Setting
-			true, 				// it's an initialization problem?
-			4, 					// PopulationSize
+			true, 				// initializationProblem
+			4, 					// initialPopulationSize
+			true,				// randomParentSelection
 			2, 					// numberOfReproductiveParents
-			true, 				// randomParentSelection
+			true,				// selectChromosomesToKillByRelativeFitness
 			2, 					// cuttingPointsNumber -> NB: if we wont just one cutting point we have to 
-								//							  set whereToCut = {0,x}
+								// set whereToCut = {0,x}
 			true, 				// randomCuttingPoint
 			null,				// whereToCut
-			2,					// number of children to generate
-			200					// cloningManagementThreshold
+			2,					// numberOfChildrenToGenerate
+			20,					// cloningManagementThreshold
+			0.05,				// mutationProbabilityInitialValue
+			0.05,				// mutationProbabilityMinimumValue
+			0.5,				// mutationProbabilityMaximumValue
+			50,					// mutationProbabilityManagementThreshold
+			0.5,				// mutationProbabilityConvergenceRatio
+			0.1					// mutatingGenesPercentage
 		);
 		
 		//TODO debug(GA)

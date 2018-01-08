@@ -246,7 +246,7 @@ public abstract class TabuSearch {
 		
 		do {
 			// Random timeslot index generation
-			randomTimeslot = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, instance.getTmax());
+			randomTimeslot = Utility.getRandomInt(0, instance.getTmax());
 		} while(currentSolution.getTimeslot(exam) == randomTimeslot);
 		
 		if(currentSolution.getTimeslot(exam) == randomTimeslot)

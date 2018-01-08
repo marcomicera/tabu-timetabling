@@ -35,23 +35,6 @@ public class GaSettings {
 	public boolean selectChromosomesToKillByRelativeFitness;
 	
 	/**
-	 * the probability to chose the mutation operand in order to create childrens.
-	 * it should be dynamic (higher at first and lower after).
-	 */
-	public double mutationProbability;
-	
-	/**
-	 * the probability to chose the crossover operand in order to create childrens.
-	 * it should be dynamic (lower at first and higher after).
-	 */
-	public double crossoverProbability;
-	
-	/**
-	 * percentage of population replacement
-	 */
-	public double populationPercentageReplacement;
-	
-	/**
 	 * the number of cutting points we wont to use in order to generate childrens.
 	 * it's useful only for random generation of cutting points, becouse in a  
 	 * deterministic case we always use 2 values, and if we wont to use just 1
@@ -75,6 +58,7 @@ public class GaSettings {
 	
 	/**
 	 * number of children to generate.
+	 * TODO implement
 	 */
 	public int numberOfChildrenToGenerate;
 	
@@ -84,18 +68,65 @@ public class GaSettings {
 	 */
 	public int cloningManagementThreshold;
 	
-	public GaSettings(boolean initializationProblem, int PopulationSize, int numberOfReproductiveParents, boolean selectParentsByRelativeFitness,
-				      int cuttingPointsNumber, boolean randomCuttingPoint, int[] whereToCut, 
-				      int numberOfChildrenToGenerate, int cloningManagementThreshold) {
+	/**
+	 * Mutation probability settings.
+	 */
+	public double mutationProbabilityInitialValue;
+	public double mutationProbabilityMinimumValue;
+	public double mutationProbabilityMaximumValue;
+	
+	/**
+	 * Number of iterations after which the mutation probability
+	 * will be changed according to a given formula.
+	 */
+	public int mutationProbabilityManagementThreshold;
+	
+	/**
+	 * How fast the mutation probability will increase towards
+	 * its maximum value {@code mutationProbabilityMaximumValue}.
+	 */
+	public double mutationProbabilityConvergenceRatio;
+	
+	/**
+	 * How many genes, with respect to the total number of exams,
+	 * are changed during each mutation.
+	 */
+	public double mutatingGenesPercentage;
+
+	public GaSettings(	boolean initializationProblem, 
+						int initialPopulationSize, 
+						boolean randomParentSelection,
+						int numberOfReproductiveParents, 
+						boolean selectChromosomesToKillByRelativeFitness, 
+						int cuttingPointsNumber,
+						boolean randomCuttingPoint, 
+						
+						int[] whereToCut, 
+						int numberOfChildrenToGenerate,
+						int cloningManagementThreshold, 
+						double mutationProbabilityInitialValue,
+						double mutationProbabilityMinimumValue, 
+						double mutationProbabilityMaximumValue,
+						int mutationProbabilityManagementThreshold, 
+						double mutationProbabilityConvergenceRatio,
+						double mutatingGenesPercentage
+	) {
 		this.initializationProblem = initializationProblem;
-		this.initialPopulationSize = PopulationSize;
+		this.initialPopulationSize = initialPopulationSize;
+		this.randomParentSelection = randomParentSelection;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
-		this.randomParentSelection = selectParentsByRelativeFitness;
+		this.selectChromosomesToKillByRelativeFitness = selectChromosomesToKillByRelativeFitness;
 		this.cuttingPointsNumber = cuttingPointsNumber;
 		this.randomCuttingPoint = randomCuttingPoint;
 		this.whereToCut = whereToCut;
 		this.numberOfChildrenToGenerate = numberOfChildrenToGenerate;
 		this.cloningManagementThreshold = cloningManagementThreshold;
+		this.mutationProbabilityInitialValue = mutationProbabilityInitialValue;
+		this.mutationProbabilityMinimumValue = mutationProbabilityMinimumValue;
+		this.mutationProbabilityMaximumValue = mutationProbabilityMaximumValue;
+		this.mutationProbabilityManagementThreshold = mutationProbabilityManagementThreshold;
+		this.mutationProbabilityConvergenceRatio = mutationProbabilityConvergenceRatio;
+		this.mutatingGenesPercentage = mutatingGenesPercentage;
 		
 		//The dimension of the whereToCut array must be equal to the number of cutting points
 		if(!randomCuttingPoint && cuttingPointsNumber == 1 && whereToCut[0]!=0) {
@@ -117,4 +148,6 @@ public class GaSettings {
 			System.exit(0);
 		}
 	}
+	
+		
 }

@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
-import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 public class Population {
 	protected ArrayList<Solution> population = new ArrayList<Solution>();
@@ -76,6 +75,16 @@ public class Population {
 		population.add(newChromosome);
 		totalInverseFitness += 1/newChromosome.getFitness();
 		totalFitness += newChromosome.getFitness();
+		
+		if(newChromosome.getFitness() < bestSolution.getFitness()) {
+			// Updating best solution
+			bestSolution = newChromosome;
+		}
+		
+		else if(newChromosome.getFitness() > worstSolution.getFitness()) {
+			// Updating worst solution
+			worstSolution = newChromosome;
+		}
 	}
 	
 	/**
@@ -85,6 +94,30 @@ public class Population {
 		population.remove(killedChromosome);
 		totalInverseFitness -= 1/killedChromosome.getFitness();
 		totalFitness -= killedChromosome.getFitness();
+		
+		if(	bestSolution == killedChromosome || 
+			worstSolution == killedChromosome
+		)
+			updateWorstAndBestSolution();
+	}
+	
+	private void updateWorstAndBestSolution() {
+		bestSolution = null;
+		worstSolution = null;
+		
+		for(Solution chromosome: population) {
+			// Initializing bestSolution
+			if(bestSolution == null)
+				bestSolution = chromosome;
+			else if(bestSolution.getFitness() > chromosome.getFitness())
+				bestSolution = chromosome;
+			
+			// Initializing worstSolution
+			if(worstSolution == null)
+				worstSolution = chromosome;
+			else if(worstSolution.getFitness() < chromosome.getFitness())
+				worstSolution = chromosome;
+		}
 	}
 
 	public ArrayList<Solution> getPopulation() {

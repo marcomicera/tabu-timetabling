@@ -45,4 +45,18 @@ public class Utility {
 		}
 		return result + "\n";
 	}
+	
+	/**
+	 * Generates a random number between the specified range
+	 * @param from	
+	 * @param to
+	 * @return
+	 */
+	public static int getRandomInt(int from, int to) {
+		return java.util.concurrent.ThreadLocalRandom.current().nextInt(from, to);
+	}
+	
+	public static double getRandomDouble(int from, int to) {
+		return from + Math.random() * (to - from);
+	}
 }
