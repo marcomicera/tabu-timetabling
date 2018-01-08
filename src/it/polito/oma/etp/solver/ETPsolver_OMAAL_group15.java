@@ -115,6 +115,7 @@ public class ETPsolver_OMAAL_group15 {
 			null,				// whereToCut
 			2,					// numberOfChildrenToGenerate
 			20,					// cloningManagementThreshold
+			10,					// genesToMutateIfClones
 			0.05,				// mutationProbabilityInitialValue
 			0.05,				// mutationProbabilityMinimumValue
 			0.5,				// mutationProbabilityMaximumValue

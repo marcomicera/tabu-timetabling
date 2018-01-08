@@ -69,6 +69,11 @@ public class GaSettings {
 	public int cloningManagementThreshold;
 	
 	/**
+	 * number of genes to mutate in the clone chromosomes.
+	 */
+	public int genesToMutateIfClones;
+	
+	/**
 	 * Mutation probability settings.
 	 */
 	public double mutationProbabilityInitialValue;
@@ -100,10 +105,10 @@ public class GaSettings {
 						boolean selectChromosomesToKillByRelativeFitness, 
 						int cuttingPointsNumber,
 						boolean randomCuttingPoint, 
-						
 						int[] whereToCut, 
 						int numberOfChildrenToGenerate,
 						int cloningManagementThreshold, 
+						int genesToMutateIfClones,
 						double mutationProbabilityInitialValue,
 						double mutationProbabilityMinimumValue, 
 						double mutationProbabilityMaximumValue,
@@ -121,6 +126,7 @@ public class GaSettings {
 		this.whereToCut = whereToCut;
 		this.numberOfChildrenToGenerate = numberOfChildrenToGenerate;
 		this.cloningManagementThreshold = cloningManagementThreshold;
+		this.genesToMutateIfClones = genesToMutateIfClones;
 		this.mutationProbabilityInitialValue = mutationProbabilityInitialValue;
 		this.mutationProbabilityMinimumValue = mutationProbabilityMinimumValue;
 		this.mutationProbabilityMaximumValue = mutationProbabilityMaximumValue;
