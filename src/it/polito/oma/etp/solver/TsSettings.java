@@ -82,11 +82,30 @@ public class TsSettings {
 	 */
 	public double tabuListIncrementTimeInterval;
 	
+	/**
+	 * Number of chromosome to start from for the genetic algorithm.
+	 */
+	protected int initialPopulationSize;
 	
-	public TsSettings(boolean firstRandomSolution, double neighborhoodGeneratingPairsPercentage,
-			boolean considerAllTimeslots, int tabuListInitialSize, boolean dynamicTabuList, int worseningCriterion,
-			int tabuListMaxSize, int maxNonImprovingIterationsAllowed, int tabuListIncrementSize,
-			int deltaFitnessThreshold, double tabuListIncrementTimeInterval) {
+	/**
+	 * Number of threads that will be used to populate the solution space.
+	 */
+	protected int numberOfThreads;
+	
+	public TsSettings(	boolean firstRandomSolution, 
+						double neighborhoodGeneratingPairsPercentage,
+						boolean considerAllTimeslots, 
+						int tabuListInitialSize, 
+						boolean dynamicTabuList, 
+						int worseningCriterion,
+						int tabuListMaxSize, 
+						int maxNonImprovingIterationsAllowed, 
+						int tabuListIncrementSize,
+						int deltaFitnessThreshold, 
+						double tabuListIncrementTimeInterval,
+						int initialPopulationSize, 
+						int numberOfThreads
+	) {
 		this.firstRandomSolution = firstRandomSolution;
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
@@ -98,5 +117,7 @@ public class TsSettings {
 		this.tabuListIncrementSize = tabuListIncrementSize;
 		this.movingAveragePeriod = deltaFitnessThreshold;
 		this.tabuListIncrementTimeInterval = tabuListIncrementTimeInterval;
+		this.initialPopulationSize = initialPopulationSize;
+		this.numberOfThreads = numberOfThreads;
 	}
 }

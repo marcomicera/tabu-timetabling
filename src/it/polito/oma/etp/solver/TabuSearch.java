@@ -61,8 +61,8 @@ public abstract class TabuSearch {
 		    );
 		}
 		
-		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED) {
-			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
+		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED && !Thread.interrupted()) {
+			/*TODO debug (iteration)*///System.out.println(Thread.currentThread().getName() + "\n***** Iteration " + iteration + " *****");
 			
 			Neighbor validNeighbor = null;
 			
@@ -72,7 +72,7 @@ public abstract class TabuSearch {
 				
 				/*TODO debug*/ //System.out.println("Penalizing pairs: " + currentSolution.getPenalizingPairs());
 				/*TODO debug (neighborhood)*/ //System.out.println("Neighborhood: " + neighborhood);
-				/*TODO debug (neighborhood size)*/System.out.println("Neighborhood size: " + neighborhood.size());
+				/*TODO debug (neighborhood size)*///System.out.println("Neighborhood size: " + neighborhood.size());
 				
 				validNeighbor = selectBestValidNeighbor(neighborhood);
 			}
@@ -97,21 +97,21 @@ public abstract class TabuSearch {
 							// Valid neighbor's fitness
 							float newFitness = validNeighbor.getFitness();
 							
-							/*TODO debug (currentFitness)*/System.out.println("\ncurrentFitness: " + currentFitness + " (movingAverage: " + fitnessMovingAverage.getAvg() + ")");
-							/*TODO debug (newFitness)*/System.out.println("newFitness: " + newFitness);
-							/*TODO debug (delta/2)*/System.out.println("delta/2: " + (delta/2));
-							/*TODO debug (Not improving)*/System.out.println("Not improving: " + (newFitness <= currentFitness + delta/2 && newFitness >= currentFitness - delta/2) + ". Window goes from " + (currentFitness - delta/2) + " to " + (currentFitness + delta/2));
+							/*TODO debug (currentFitness)*///System.out.println("\ncurrentFitness: " + currentFitness + " (movingAverage: " + fitnessMovingAverage.getAvg() + ")");
+							/*TODO debug (newFitness)*///System.out.println("newFitness: " + newFitness);
+							/*TODO debug (delta/2)*///System.out.println("delta/2: " + (delta/2));
+							/*TODO debug (Not improving)*///System.out.println("Not improving: " + (newFitness <= currentFitness + delta/2 && newFitness >= currentFitness - delta/2) + ". Window goes from " + (currentFitness - delta/2) + " to " + (currentFitness + delta/2));
 							
 							// This iteration did not bring any significant advantage in terms of fitness
 							if(	newFitness <= currentFitness + delta/2 &&
 								newFitness >= currentFitness - delta/2
 							) {
 								++nonImprovingIterations;
-								/*TODO debug (nonImprovingIterations)*/System.out.println("nonImprovingIterations gets incremented: " + nonImprovingIterations);
+								/*TODO debug (nonImprovingIterations)*///System.out.println("nonImprovingIterations gets incremented: " + nonImprovingIterations);
 								
 								// The maximum number of allowed consecutive non-improving iterations has been reached
 								if(nonImprovingIterations == settings.maxNonImprovingIterationsAllowed) {
-									/*TODO debug*/System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " iterations");
+									/*TODO debug*///System.err.println("The algorithm has not improved significantly over " + nonImprovingIterations + " iterations");
 									
 									// Increasing Tabu List size
 									tabuList.increaseSize(settings.tabuListIncrementSize);
@@ -143,7 +143,7 @@ public abstract class TabuSearch {
 					
 				move(validNeighbor);
 			}
-			/*TODO debug*/System.out.println("\n");
+			/*TODO debug*///System.out.println("\n");
 			
 			++iteration;
 		}
@@ -300,19 +300,19 @@ public abstract class TabuSearch {
 			return null;
 		
 		/*TODO debug (tabu list)*/ //System.out.println("Tabu List: " + tabuList);
-		/*TODO debug*/System.out.println("Tabu List size: " + tabuList.getSize());
+		/*TODO debug*///System.out.println("Tabu List size: " + tabuList.getSize());
 		
 		Neighbor validNeighbor = null;
 		for(Neighbor neighbor: neighborhood) {
 			
 			// This move is in the Tabu List
 			if(tabuList.find(neighbor) != -1) {
-				/*TODO debug*/ System.out.print("Neighbor " + neighbor + " has been found in the Tabu List. ");
-				/*TODO debug*/ System.out.println("Best solution's fitness is " + bestSolution.getFitness());
+				/*TODO debug*/ //System.out.print("Neighbor " + neighbor + " has been found in the Tabu List. ");
+				/*TODO debug*/ //System.out.println("Best solution's fitness is " + bestSolution.getFitness());
 				
 				// Aspiration criterion satisfied
 				if(neighbor.getFitness() < bestSolution.getFitness()) {
-					/*TODO debug*/ System.out.println("Aspiration criterion satisfied by " + neighbor);
+					/*TODO debug*/ //System.out.println("Aspiration criterion satisfied by " + neighbor);
 					validNeighbor = neighbor;
 					break;
 				}
@@ -357,6 +357,25 @@ public abstract class TabuSearch {
 		tabuList.add(new Neighbor(movingExam, oldTimeslot));
 		
 		/*TODO debug (tabu list)*/ //System.out.print("Tabu list: "+ tabuList);
+		
+		updateSolution(movingExam, oldTimeslot, neighbor);
+	}
+	
+	/**
+	 * update the current solution with the chosen move
+	 * @param int						the exam to be moved
+	 * @param oldTimeSlod				the time-slot where the exam is moved
+	 * @param neighbor					the neighbor chosen by the algorithm
+	 */
+	private void updateSolution(int movingExam, int oldTimeslot, Neighbor neighbor) {		
+		// Updating the current solution
+		currentSolution.updateTe(movingExam, oldTimeslot, neighbor.getNewTimeslot());
+		currentSolution.updateSchedule(neighbor); 
+		currentSolution.setFitness(neighbor.getFitness());
+		currentSolution.updatePenalizingPairs(neighbor);
+		
+		if(currentSolution instanceof OptimizationSolution)
+			((OptimizationSolution)currentSolution).initializeDistanceMatrix();
 		
 		// Updating bestSolution if necessary
 		updateBestSolution();
@@ -406,6 +425,10 @@ public abstract class TabuSearch {
 	 */
 	public static void stopExecution() {
 		TIMER_EXPIRED = true;
+	}
+	
+	public static boolean getTimerExpired() {
+		return TIMER_EXPIRED;
 	}
 	
 	class MovingAverage {

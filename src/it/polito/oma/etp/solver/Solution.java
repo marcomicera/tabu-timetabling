@@ -35,7 +35,7 @@ public abstract class Solution implements Comparable<Solution>{
 	/**
 	 * Objective function value.
 	 */
-	protected float fitness;
+	protected Float fitness;
 	
 	/**
 	 * Exam pairs causing a penalty or an infeasibility,
@@ -89,76 +89,8 @@ public abstract class Solution implements Comparable<Solution>{
 		this.penalizingPairs = penalizingPairs;
 	}
 	
-	/**
-	 * Computes the schedule data structure from scratch, containing, 
-	 * for each exam, the timeslot number in which it has been assigned to.
-	 */
-	public void initializeSchedule() {
-		int E = instance.getE();
-		int tmax = instance.getTmax();
-		
-		// For each exam, the timeslot number is stored
-		schedule = new int[E];
-		
-		for(int j = 0; j < E; ++j) // for each exam
-			for(int i = 0; i < tmax; ++i) 
-				if(te[i][j] == 1) {
-					schedule[j] = i;
-					continue;
-				}
-	}
-	
-	/**
-	 * Computes the data structure containing exam pairs from 
-	 * scratch causing a penalty or an infeasibility depending 
-	 * on the Solution implementation.
-	 */
-	protected abstract void initializePenalizingPairs();
-	
-	/**
-	 * Updates the the data structure containing exam pairs starting
-	 * from the modifications brought by the neighbor passed
-	 * as argument, causing a penalty or an infeasibility depending 
-	 * on the Solution implementation.
-	 * @param neighbor
-	 */
-	protected abstract void updatePenalizingPairs(Neighbor neighbor);
-	
-	/**
-	 * Updates the schedule according to the move corresponding
-	 * to the neighbor specified as the first argument.
-	 * @param neighbor	move according to which the schedule
-	 * 					will be updated.
-	 */
-	public void updateSchedule(Neighbor neighbor) {
-		schedule[neighbor.getMovingExam()] = neighbor.getNewTimeslot();
-	}
-	
-	/**
-	 * Computes the current solution objective function value
-	 * from scratch.
-	 */
-	protected abstract void initializeFitness();
-	
-	/**
-	 * Updates the te table according to a move.
-	 * @param movingExam	exam to be rescheduled
-	 * @param oldTimeslot	timeslot in which the exam was
-	 * @param newTimeslot	timeslot in which the exam will be
-	 */
-	public void updateTe(int movingExam, int oldTimeslot, int newTimeslot) {
-		te[oldTimeslot][movingExam] = 0;
-		te[newTimeslot][movingExam] = 1;
-	}
-	
-	/**
-	 * TODO JavaDoc
-	 * @param instance
-	 * @param settings
-	 * @return
-	 */
 	public static InitializationSolution generateUnfeasibleSolution(InstanceData instance, TsSettings settings) {
-		/*TODO debug*/ //System.out.println("Generating infeasible solution...");
+		/*TODO debug*///System.out.println("Generating infeasible solution...");
 		
 		// Instance data
 		int E = instance.getE();
@@ -188,39 +120,17 @@ public abstract class Solution implements Comparable<Solution>{
 			assignedExams[0] = 1;
 			texamsCounter[0]++;
 		}
-		
+		else {
+			timeslotOrder = getTimeslotOrderRandomly(instance);
+		}
 		// cycling through all exams
 		for(int exam = (settings.firstRandomSolution) ? 0 : 1; exam < E; exam++) {
 			
-			// First infeasible solution computed randomly
-			if(settings.firstRandomSolution) {
-				// Random timeslot index generation
-				int randomTimeslot = Utility.getRandomInt(0, Tmax);
-				
-				// Exam assignment
-				te[randomTimeslot][exam] = 1;
-				schedule[exam] = randomTimeslot;
-				
-				// Fitness value calculation
-				assignedExams[exam] = 1;
-				texamsCounter[randomTimeslot]++;
-				for(int e = 0; e < E; e++) {
-					// looks only allocated exams
-					if(te[randomTimeslot][e] == 1) {
-						// and check if they are conflictual with exam
-						if(N[exam][e] != 0) {
-							penalizingPairs.add(new ExamPair(e, exam));
-							++fitness;
-						}
-					}
-				}
-			}
-			// Ad-hoc deterministic algorithm
-			else {
 				/* IN: texamsCounter, OUT: timeslotOrder*
 				 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
-				timeslotOrder = getTimeslotOrder(instance, texamsCounter);
-				
+				if(!settings.firstRandomSolution) {
+					timeslotOrder = getTimeslotOrderByExamsCount(instance, texamsCounter);
+				}
 				// cycling through all timeslots
 				for(int t = 0; t < Tmax; t++) {
 					
@@ -309,17 +219,9 @@ public abstract class Solution implements Comparable<Solution>{
 					}
 					
 				}// end IF exam cannot be placed
-			}
 			
 		} // END FOR exam
-		
-		/*TODO debug*/
-		/*System.out.println(
-				"Returning infeasible solution\npenalizingPairs" + Arrays.toString(penalizingPairs.toArray()) + 
-				"\nIncremental fitness: " + fitness
-		);*/
-		
-		
+
 		return new InitializationSolution(
 			instance, 
 			te,
@@ -330,15 +232,16 @@ public abstract class Solution implements Comparable<Solution>{
 	}
 	
 	/**
-	 * Given an array containing the occurrences of exams for every timeslot (index) it calculates 
-	 * the timeslot with most exams. Then it returns an array with an increasing number of exams in the
+	 * Given an array containing the occurrencies of exams for every timeslot (index) it calculates 
+	 * the timeslot with most exams. Then returns an array with an increasing number of exams in the
 	 * following format:
 	 * 3, 6, 12, 5, 1, 0 ...
 	 * This means the algorithm will visit in order t3, t6, t12, --- 
 	 * @param TEcounter
 	 * @return
 	 */
-	private static int[] getTimeslotOrder(InstanceData instance, int[] TEcounter) {
+	private static int[] getTimeslotOrderByExamsCount(InstanceData instance, int[] TEcounter) {
+		
 		int tec[] = new int[TEcounter.length];
 		int orderTec[] = new int[instance.getTmax()];
 		int max = -1;
@@ -362,6 +265,91 @@ public abstract class Solution implements Comparable<Solution>{
 			
 		}
 		return orderTec;
+	}
+	
+	/**
+	 * @return an array containing for every element a random timeslot.
+	 * This array will be used as a sequence of timeslot where to put 
+	 * the examined exam.
+	 */
+	private static int[] getTimeslotOrderRandomly(InstanceData instance) {
+		int tmax = instance.getTmax();
+		int[] orderTec = new int[tmax];
+		ArrayList<Integer> timeslotPool = new ArrayList<Integer>();
+		// Filling the timeslot pool.
+		for(int i = 0; i < tmax; i++) {
+			timeslotPool.add(i);
+		}
+		// Filling orderTec with random timeslots from the pool.
+		int randomPoolIndex;
+		for(int i = 0; i < tmax; i++) {
+			randomPoolIndex = java.util.concurrent.ThreadLocalRandom.current().nextInt(0, timeslotPool.size());
+			orderTec[i] = timeslotPool.get(randomPoolIndex);
+			timeslotPool.remove(randomPoolIndex);
+		}
+		return orderTec;
+	}
+	
+	/**
+	 * Computes the schedule data structure from scratch, containing, 
+	 * for each exam, the timeslot number in which it has been assigned to.
+	 */
+	public void initializeSchedule() {
+		int E = instance.getE();
+		int tmax = instance.getTmax();
+		
+		// For each exam, the timeslot number is stored
+		schedule = new int[E];
+		
+		for(int j = 0; j < E; ++j) // for each exam
+			for(int i = 0; i < tmax; ++i) 
+				if(te[i][j] == 1) {
+					schedule[j] = i;
+					continue;
+				}
+	}
+	
+	/**
+	 * Computes the data structure containing exam pairs from 
+	 * scratch causing a penalty or an infeasibility depending 
+	 * on the Solution implementation.
+	 */
+	protected abstract void initializePenalizingPairs();
+	
+	/**
+	 * Updates the the data structure containing exam pairs starting
+	 * from the modifications brought by the neighbor passed
+	 * as argument, causing a penalty or an infeasibility depending 
+	 * on the Solution implementation.
+	 * @param neighbor
+	 */
+	protected abstract void updatePenalizingPairs(Neighbor neighbor);
+	
+	/**
+	 * Updates the schedule according to the move corresponding
+	 * to the neighbor specified as the first argument.
+	 * @param neighbor	move according to which the schedule
+	 * 					will be updated.
+	 */
+	public void updateSchedule(Neighbor neighbor) {
+		schedule[neighbor.getMovingExam()] = neighbor.getNewTimeslot();
+	}
+	
+	/**
+	 * Computes the current solution objective function value
+	 * from scratch.
+	 */
+	protected abstract void initializeFitness();
+	
+	/**
+	 * Updates the te table according to a move.
+	 * @param movingExam	exam to be rescheduled
+	 * @param oldTimeslot	timeslot in which the exam was
+	 * @param newTimeslot	timeslot in which the exam will be
+	 */
+	public void updateTe(int movingExam, int oldTimeslot, int newTimeslot) {
+		te[oldTimeslot][movingExam] = 0;
+		te[newTimeslot][movingExam] = 1;
 	}
 	
 	/**

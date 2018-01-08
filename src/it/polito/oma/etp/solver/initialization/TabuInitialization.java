@@ -2,10 +2,9 @@ package it.polito.oma.etp.solver.initialization;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.ExamPair;
-import it.polito.oma.etp.solver.TsSettings;
-import it.polito.oma.etp.solver.Utility;
 import it.polito.oma.etp.solver.Solution;
 import it.polito.oma.etp.solver.TabuSearch;
+import it.polito.oma.etp.solver.TsSettings;
 
 public class TabuInitialization extends TabuSearch {
 	/**
@@ -28,7 +27,7 @@ public class TabuInitialization extends TabuSearch {
 		// By now this is our best solution
 		bestSolution = new InitializationSolution(currentSolution);
 	}
-	
+
 	
 	
 	@Override
@@ -37,8 +36,8 @@ public class TabuInitialization extends TabuSearch {
 		
 		// Randomly is way more better
 		return currentSolution.getPenalizingPairs().get(
-			Utility.getRandomInt(0, currentSolution.getPenalizingPairs().size())
-		); 
+			java.util.concurrent.ThreadLocalRandom.current().nextInt(0, currentSolution.getPenalizingPairs().size() + 1)
+		);  
 	}
 	
 	@Override

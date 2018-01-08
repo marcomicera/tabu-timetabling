@@ -128,12 +128,12 @@ public class OptimizationSolution extends Solution {
 		int K = instance.getK();
 		int[][] N = instance.getN();
 		 
-		fitness = 0;
+		fitness = Float.valueOf(0);
 		
 		for(int i = 0; i < E; ++i)
 			for(int j = i + 1; j < E; ++j)
 				if(i != j && distanceMatrix[i][j] > 0 && distanceMatrix[i][j] <= K)
-					fitness += Math.pow(2, K - distanceMatrix[i][j]) * N[i][j] / S;
+					fitness += (float)(Math.pow(2, K - distanceMatrix[i][j]) * N[i][j] / S);
 	}
 	
 	@Override

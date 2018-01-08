@@ -33,7 +33,7 @@ public class InitializationSolution extends Solution {
 
 	@Override
 	/*TODO has to be private*/public void initializeFitness() {
-		fitness = penalizingPairs.size();
+		fitness = Float.valueOf(penalizingPairs.size());
 	}
 	
 	/**
