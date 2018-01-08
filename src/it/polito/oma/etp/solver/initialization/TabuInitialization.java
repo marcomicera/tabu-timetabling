@@ -4,7 +4,7 @@ import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.ExamPair;
 import it.polito.oma.etp.solver.Solution;
 import it.polito.oma.etp.solver.TabuSearch;
-import it.polito.oma.etp.solver.TsSettings;
+import it.polito.oma.etp.solver.TabuSettings;
 
 public class TabuInitialization extends TabuSearch {
 	/**
@@ -18,17 +18,15 @@ public class TabuInitialization extends TabuSearch {
 	 * 								initial solution with the minimum number of
 	 * 								conflicts.
 	 */
-	public TabuInitialization(InstanceData instance, TsSettings settings) {
+	public TabuInitialization(InstanceData instance, TabuSettings settings) {
 		super(instance, settings);
 		
 		// Initially, the current solution is the initial one
-		currentSolution = Solution.generateUnfeasibleSolution(instance, settings);
+		currentSolution = Solution.generateInfeasibleSolution(instance, settings.firstRandomSolution);
 		
 		// By now this is our best solution
 		bestSolution = new InitializationSolution(currentSolution);
-	}
-
-	
+	}	
 	
 	@Override
 	protected ExamPair getNextPair(int nextPairIndex) throws IndexOutOfBoundsException {

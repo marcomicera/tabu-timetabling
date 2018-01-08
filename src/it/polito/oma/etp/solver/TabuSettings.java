@@ -3,14 +3,7 @@ package it.polito.oma.etp.solver;
 /**
  * Tabu Search settings used for tuning
  */
-public class TsSettings {
-	/**
-	 * If true, the first infeasible solution is computed randomly; 
-	 * otherwise, our ad-hoc deterministic algorithm tries to obtain 
-	 * an initial solution with the minimum number of conflicts.
-	 */
-	public boolean firstRandomSolution;
-	
+public class TabuSettings extends Settings {
 	/**
 	 * Percentage of exam pairs to be used for the neighborhood generation.
 	 * Admitted values: from 0 to 1.
@@ -83,16 +76,11 @@ public class TsSettings {
 	public double tabuListIncrementTimeInterval;
 	
 	/**
-	 * Number of chromosome to start from for the genetic algorithm.
-	 */
-	protected int initialPopulationSize;
-	
-	/**
 	 * Number of threads that will be used to populate the solution space.
 	 */
 	protected int numberOfThreads;
 	
-	public TsSettings(	boolean firstRandomSolution, 
+	public TabuSettings(Settings commonSettings,
 						double neighborhoodGeneratingPairsPercentage,
 						boolean considerAllTimeslots, 
 						int tabuListInitialSize, 
@@ -102,11 +90,12 @@ public class TsSettings {
 						int maxNonImprovingIterationsAllowed, 
 						int tabuListIncrementSize,
 						int deltaFitnessThreshold, 
-						double tabuListIncrementTimeInterval,
-						int initialPopulationSize, 
+						double tabuListIncrementTimeInterval,						 
 						int numberOfThreads
 	) {
-		this.firstRandomSolution = firstRandomSolution;
+		// Common settings
+		super(commonSettings);
+				
 		this.neighborhoodGeneratingPairsPercentage = neighborhoodGeneratingPairsPercentage;
 		this.considerAllTimeslots = considerAllTimeslots;
 		this.tabuListInitialSize = tabuListInitialSize;
@@ -117,7 +106,6 @@ public class TsSettings {
 		this.tabuListIncrementSize = tabuListIncrementSize;
 		this.movingAveragePeriod = deltaFitnessThreshold;
 		this.tabuListIncrementTimeInterval = tabuListIncrementTimeInterval;
-		this.initialPopulationSize = initialPopulationSize;
 		this.numberOfThreads = numberOfThreads;
 	}
 }

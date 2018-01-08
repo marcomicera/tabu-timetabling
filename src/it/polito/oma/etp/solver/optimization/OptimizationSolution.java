@@ -8,7 +8,6 @@ import it.polito.oma.etp.solver.ExamPair;
 import it.polito.oma.etp.solver.InvalidMoveException;
 import it.polito.oma.etp.solver.Neighbor;
 import it.polito.oma.etp.solver.Solution;
-import it.polito.oma.etp.solver.Utility;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
 
 public class OptimizationSolution extends Solution {
@@ -27,9 +26,6 @@ public class OptimizationSolution extends Solution {
 	
 	public OptimizationSolution(InstanceData instance, int[][] te) {
 		super(instance, te);
-		
-		int E = instance.getE();
-				
 	}
 	
 	public OptimizationSolution(OptimizationSolution s) {
@@ -195,7 +191,7 @@ public class OptimizationSolution extends Solution {
 				distanceMatrix[movingExam][otherExam] <= K
 			) {
 				if(distanceMatrix[movingExam][otherExam] == 0)
-					throw new AssertionError("Previous solution is unfeasible");
+					throw new AssertionError("Previous solution is infeasible");
 				
 				neighborFitnessValue -= Math.pow(2, K - distanceMatrix[movingExam][otherExam]) * N[movingExam][otherExam] / S;
 			}

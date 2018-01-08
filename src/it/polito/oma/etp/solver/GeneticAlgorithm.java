@@ -11,10 +11,9 @@ import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
 import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
-public class GeneticAlgorithm {
-	protected TsSettings tbSettings;
-	protected GaSettings gaSettings;
+public abstract class GeneticAlgorithm {
 	protected InstanceData instance;
+	protected GeneticSettings settings;
 	protected Population population;
 	protected int iteration = 0;
 	protected Solution bestSolution;
@@ -25,25 +24,21 @@ public class GeneticAlgorithm {
 	 */
 	protected double mutationProbability;
 	
-	public GeneticAlgorithm(TsSettings tbSettings, GaSettings gaSettings, InstanceData instance) {
-		this.tbSettings = tbSettings;
-		this.gaSettings = gaSettings;
+	/**
+	 * Genetic Algorithm abstract class constructor, initializing
+	 * properties common to all Genetic Algorithms specific
+	 * implementations.
+	 * @param instance		the only common data available from the
+	 * 						beginning is the one describing the instance.
+	 * @param settings		Genetic Algorithm settings, used for tuning.
+	 */
+	public GeneticAlgorithm(InstanceData instance, GeneticSettings settings) {
 		this.instance = instance;
+		this.settings = settings;
 		
-		mutationProbability = gaSettings.mutationProbabilityInitialValue;
-		population = new Population(instance, gaSettings, tbSettings);
-
+		// Initializing the mutation probability to its initial value
+		mutationProbability = settings.mutationProbabilityInitialValue;
 	}
-	
-	public GeneticAlgorithm(ArrayList<InitializationSolution> initialPopulation, GaSettings gaSettings, InstanceData instance) {
-		this.gaSettings = gaSettings;
-		this.instance = instance;
-		
-		mutationProbability = gaSettings.mutationProbabilityInitialValue;
-		population = new Population(initialPopulation);
-	}
-	
-	
 
 	public Solution solve() {
 		// Population generation
@@ -52,15 +47,15 @@ public class GeneticAlgorithm {
 		/*	it's very important that the population is orderd in order to 
 		 * 	select the correct parents that will generate childrens.
 		 */
-		Collections.sort(population.getPopulation());
+		Collections.sort(population.getChromosomes());
 		
-		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getPopulation().toArray()));
+		/*TODO debug*/ System.out.println("Population: " +Arrays.toString(population.getChromosomes().toArray()));
 				
 		while(bestSolution.getFitness() > 0 /*TODO timer //&& !TIMER_EXPIRED*/) {
 			/*TODO debug (iteration)*/System.out.println("\n***** Iteration " + iteration + " *****");
 			
 			// Mutation probability management
-			if(iteration > gaSettings.mutationProbabilityManagementThreshold)
+			if(iteration > settings.mutationProbabilityManagementThreshold)
 				updateMutationProbability();
 			
 			// ***** Parents selection (for children generation) *********
@@ -72,19 +67,19 @@ public class GeneticAlgorithm {
 			ArrayList<Solution> parents = new ArrayList<Solution>();
 			
 			// Random parent selection using the Cumulative Reproduction Probability
-			if(gaSettings.randomParentSelection) {				
+			if(settings.randomParentSelection) {				
 				double[] CRP = generateCRP(population);
 				//for(int i = 0; i < gaSettings.numberOfReproductiveParents; i++)
 				//	parents.add(selectRandomParent(CRP, population));
-				parents = selectRandomChromosome(CRP, population, gaSettings.numberOfReproductiveParents);
+				parents = selectRandomChromosome(CRP, population, settings.numberOfReproductiveParents);
 						
 				/*TODO debug*/ System.out.println("Parents: "+parents);
 			}
 			// Deterministic parent selection using their fitness
 			else {
 				// Best parents (having a low fitness value) are selected for reproduction 
-				for(int i = 0; i < gaSettings.numberOfReproductiveParents; ++i)
-					parents.add(population.getPopulation().get(i));
+				for(int i = 0; i < settings.numberOfReproductiveParents; ++i)
+					parents.add(population.getChromosomes().get(i));
 			}
 			
 			// ***************** Crossover (generating new children) ******************
@@ -93,7 +88,7 @@ public class GeneticAlgorithm {
 			
 			// in this case we have to generate random cutting points and so setting the value
 			// whereToCut of GaSettings.
-			if(gaSettings.randomCuttingPoint)
+			if(settings.randomCuttingPoint)
 				generateRandomCuttingPoints();
 
 			ArrayList<Solution> children = new ArrayList<Solution>();
@@ -107,7 +102,7 @@ public class GeneticAlgorithm {
 			// Children mutation
 			if(Utility.getRandomDouble(0, 1) < mutationProbability)
 				for(Solution child: children)
-					mutate(child, (int)(gaSettings.mutatingGenesPercentage * instance.getE()));
+					mutate(child, (int)(settings.mutatingGenesPercentage * instance.getE()));
 			
 			// update of population with new children
 			for(Solution child : children)
@@ -115,9 +110,9 @@ public class GeneticAlgorithm {
 			
 			// Chromosomes selection (which chromosome survives)
 			ArrayList<Solution> chromosomesToKill;
-			if(gaSettings.selectChromosomesToKillByRelativeFitness) {
+			if(settings.selectChromosomesToKillByRelativeFitness) {
 				double[] CKP = generateCKP(population);
-				chromosomesToKill = selectRandomChromosome(CKP, population, gaSettings.numberOfChildrenToGenerate);
+				chromosomesToKill = selectRandomChromosome(CKP, population, settings.numberOfChildrenToGenerate);
 			}
 			else
 				/*TODO implement*/throw new AssertionError("Random chromosomes to kill selection still to be implemented");
@@ -126,11 +121,11 @@ public class GeneticAlgorithm {
 			for(Solution chromosomes : chromosomesToKill)
 				population.delete(chromosomes);
 			
-			/*TODO debug*/System.out.println("New population: " + Arrays.toString(population.getPopulation().toArray()) + "\n");
+			/*TODO debug*/System.out.println("New population: " + Arrays.toString(population.getChromosomes().toArray()) + "\n");
 			
 			
 			
-			if(iteration % gaSettings.cloningManagementThreshold == 0) {
+			if(iteration % settings.cloningManagementThreshold == 0) {
 				checkClones();
 			}
 			
@@ -145,7 +140,7 @@ public class GeneticAlgorithm {
 	
 	private void updateMutationProbability() {
 		// Checking if its value it's already the maximum one 
-		if(mutationProbability >= gaSettings.mutationProbabilityMaximumValue)
+		if(mutationProbability >= settings.mutationProbabilityMaximumValue)
 			return;
 		
 		double deltaFitnessRatio = 
@@ -153,19 +148,19 @@ public class GeneticAlgorithm {
 				(population.getWorstSolution().getFitness() - population.getBestSolution().getFitness())
 					/ 
 				population.getBestSolution().getFitness()
-			) * gaSettings.mutationProbabilityConvergenceRatio;
+			) * settings.mutationProbabilityConvergenceRatio;
 		;
 		
 		// Updating the mutation probability
 		mutationProbability = 
 			((deltaFitnessRatio >= 1) ? 0 : (1 - deltaFitnessRatio))
 				*
-			(gaSettings.mutationProbabilityMaximumValue - gaSettings.mutationProbabilityMinimumValue)
+			(settings.mutationProbabilityMaximumValue - settings.mutationProbabilityMinimumValue)
 				+
-			gaSettings.mutationProbabilityMinimumValue
+			settings.mutationProbabilityMinimumValue
 		;
 		
-		if(mutationProbability > gaSettings.mutationProbabilityMaximumValue)
+		if(mutationProbability > settings.mutationProbabilityMaximumValue)
 			throw new AssertionError("Mutation probability is greater than its maximum value");
 	}
 	
@@ -180,32 +175,32 @@ public class GeneticAlgorithm {
 	 * @return children the children generated by the algorithm.
 	 */
 	public Solution crossover(Solution parent1, Solution parent2) {
-		// initialization of the children and it's schedule
+		// Child object initialization
 		Solution child = null;
-		int[] childSchedule = new int[instance.getE()];
-			
-		int[] parentSchedule1 = parent1.schedule;
-		/*TODO debug*/System.out.println("Schedule 1:\t\t" + Arrays.toString(parentSchedule1));
-		int[] parentSchedule2 = parent2.schedule;
-		/*TODO debug*/System.out.println("Schedule 2:\t\t" + Arrays.toString(parentSchedule2));
 		
-		//setting the part of the children schedule that is equal to the parent schedule part
-		for(int i = gaSettings.whereToCut[0]; i <= gaSettings.whereToCut[1]; i++)
+		// Child schedule initialization
+		int[] childSchedule = new int[instance.getE()];
+		
+		// Retrieving parent schedules
+		int[] parentSchedule1 = parent1.schedule;
+		int[] parentSchedule2 = parent2.schedule;
+		
+		// Copying the cutting section from parent1 to the child
+		for(int i = settings.whereToCut[0]; i <= settings.whereToCut[1]; ++i)
 			childSchedule[i] = parentSchedule1[i];
-		/*TODO debug*/System.out.println("Initial child schedule:\t" + Arrays.toString(childSchedule));
 		
 		// the starting point is the first exam after the biggest cutting point.
 		// the wheretoCut array must be ordered.
 		
 		//children 1 generation -> we use parent 2!
-		int parentExam = gaSettings.whereToCut[1] + 1; 
+		int parentExam = settings.whereToCut[1] + 1; 
 		int parentExamIterator = parentExam;
 			do {
 				int parentTimeslot = parentSchedule2[parentExamIterator];
 				
 				   //if it isn't an initialization problem we have to check the 
 				   //feasibility of the move
-				   if(!gaSettings.initializationProblem) {
+				   if(!settings.initializationProblem) {
 					  if(isFeasible(childSchedule, parentExam, parentExamIterator, parentTimeslot)) {
 						  //we update the children schedule only if it is feasible
 						  //considering the current exam already set.
@@ -230,7 +225,7 @@ public class GeneticAlgorithm {
 				   if(parentExamIterator == instance.getE()) parentExamIterator = 0;
 				   
 		    // continue until all exams are scheduled in the children schedule
-			} while(parentExam != gaSettings.whereToCut[0]);
+			} while(parentExam != settings.whereToCut[0]);
 		
 		/*TODO debug*/ //System.out.println("children schedule= "+Arrays.toString(childrenSchedule));
 		/*TODO debug 
@@ -242,7 +237,7 @@ public class GeneticAlgorithm {
 		}*/
 	
 		int[][] te = generateTe(childSchedule);
-		   if(!gaSettings.initializationProblem)
+		   if(!settings.initializationProblem)
 			   child = new OptimizationSolution(instance, te);
 		   else
 			   child = new InitializationSolution(instance, te);
@@ -313,7 +308,7 @@ public class GeneticAlgorithm {
 		int firstRandomCuttingPoint = Utility.getRandomInt(1, instance.getE()-1);
 		/*TODO debug*/ System.out.println("first random cutting point " + firstRandomCuttingPoint);
 		int[] cuttingPoints = new int[2];
-		if(gaSettings.cuttingPointsNumber == 1) {
+		if(settings.cuttingPointsNumber == 1) {
 			cuttingPoints[0] = 0;
 			cuttingPoints[1] = firstRandomCuttingPoint;
 		}
@@ -331,8 +326,8 @@ public class GeneticAlgorithm {
 					cuttingPoints[0] = secondRandomCuttingPoint; cuttingPoints[1]=firstRandomCuttingPoint;}
 
 		}
-		gaSettings.whereToCut = cuttingPoints;
-		/*TODO debug*/System.out.println("random cutting points: "+Arrays.toString(gaSettings.whereToCut));
+		settings.whereToCut = cuttingPoints;
+		/*TODO debug*/System.out.println("random cutting points: "+Arrays.toString(settings.whereToCut));
 
 	}
 	/**
@@ -343,7 +338,7 @@ public class GeneticAlgorithm {
 	//TODO we change all n clones or n-1 clones?
 	private void checkClones() {
 		ArrayList<Integer> cloneIndexes = new ArrayList<Integer>();
-		ArrayList<Solution> p = population.getPopulation();
+		ArrayList<Solution> p = population.getChromosomes();
 		
 		// Populate the list of indexes of clones.
 		for(int i = 0; i < p.size(); i++) {
@@ -364,7 +359,7 @@ public class GeneticAlgorithm {
 		if(!cloneIndexes.isEmpty()) {
 			int i = (cloneIndexes.size() == p.size()) ? 1 : 0;
 			for(; i < cloneIndexes.size(); i++) {
-				mutate(p.get(cloneIndexes.get(i)), gaSettings.genesToMutateIfClones);
+				mutate(p.get(cloneIndexes.get(i)), settings.genesToMutateIfClones);
 			}
 		}
 	}
@@ -426,14 +421,14 @@ public class GeneticAlgorithm {
 	 * @return		Cumulative Reproduction Probability of each element of the population.
 	 */
 	private double[] generateCRP(Population population) {
-		double[] CRP = new double[gaSettings.initialPopulationSize];
+		double[] CRP = new double[settings.initialPopulationSize];
 		
 		double cumulativeInverseSum = 0;
-		for(int i = 0; i < population.getPopulation().size() - 1; ++i) {
-			cumulativeInverseSum += 1 / population.getPopulation().get(i).getFitness();
+		for(int i = 0; i < population.getChromosomes().size() - 1; ++i) {
+			cumulativeInverseSum += 1 / population.getChromosomes().get(i).getFitness();
 			CRP[i] = cumulativeInverseSum / population.getTotalInverseFitness();
 		}
-		CRP[population.getPopulation().size() - 1] = 1;
+		CRP[population.getChromosomes().size() - 1] = 1;
 		
 		/*TODO debug*/System.out.println("CRP: "+Arrays.toString(CRP));
 		
@@ -446,14 +441,14 @@ public class GeneticAlgorithm {
 	 * @return
 	 */
 	private double[] generateCKP(Population population) {
-		double[] CKP = new double[gaSettings.initialPopulationSize+gaSettings.numberOfChildrenToGenerate];
+		double[] CKP = new double[settings.initialPopulationSize+settings.numberOfChildrenToGenerate];
 		
 		double cumulativeSum = 0;
-		for(int i = 0; i < population.getPopulation().size() - 1; ++i) {
-			cumulativeSum += population.getPopulation().get(i).getFitness();
+		for(int i = 0; i < population.getChromosomes().size() - 1; ++i) {
+			cumulativeSum += population.getChromosomes().get(i).getFitness();
 			CKP[i] = cumulativeSum / population.getTotalFitness();
 		}
-		CKP[population.getPopulation().size() - 1] = 1;
+		CKP[population.getChromosomes().size() - 1] = 1;
 		
 		/*TODO debug*/System.out.println("CKP: "+Arrays.toString(CKP));
 		
@@ -488,7 +483,7 @@ public class GeneticAlgorithm {
 			 */
 			if(randomNum <= relativeFitness[0] &&
 					!Arrays.asList(selectedNum).contains(1)) {
-						chromosomes.add(population.getPopulation().get(0));
+						chromosomes.add(population.getChromosomes().get(0));
 						//update the selected numbers in order to avoid to select same parents
 						selectedNum[numberOfSelectedParents] = 1;
 						numberOfSelectedParents++;
@@ -498,7 +493,7 @@ public class GeneticAlgorithm {
 					if(randomNum <= relativeFitness[i] 
 							&& randomNum>relativeFitness[i-1] 
 									&& !Arrays.asList(selectedNum).contains(i+1)) {						
-											chromosomes.add(population.getPopulation().get(i));	
+											chromosomes.add(population.getChromosomes().get(i));	
 											//update the selected numbers in order to avoid to select same parents
 											selectedNum[numberOfSelectedParents] = i+1;
 											numberOfSelectedParents++;
@@ -509,27 +504,3 @@ public class GeneticAlgorithm {
 		return chromosomes;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

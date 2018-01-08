@@ -2,11 +2,15 @@ package it.polito.oma.etp.reader;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
+
+import it.polito.oma.etp.solver.Solution;
+
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 
 public class InputReader {
-	
 	private static FileReader fr;
 	private static BufferedReader br;
 
@@ -196,5 +200,39 @@ public class InputReader {
 		}
 		// Prepare the list for the next student.
 		examList.clear();
+	}
+	
+	/**
+	 * Prints the specified solution into a file.
+	 * @param solution	solution to be printed.
+	 */
+	public static void printSolution(Solution solution) {
+		try {
+			FileOutputStream bestSolution = new FileOutputStream(
+				solution.getInstance().getInstanceName() + "_OMAAL_group15.sol"
+			);
+
+			PrintStream write = new PrintStream(bestSolution);
+			
+			for(int j = 0; j < solution.getInstance().getE()+1; ++j) {
+				if(j == 0)
+					write.print("\t");
+				write.print("E" + j + "\t");
+			}
+			
+			write.println();
+
+			for(int i = 0; i < solution.getInstance().getTmax(); ++i) {
+				write.print("T" + (i + 1) + "\t");
+				for(int j = 0; j < solution.getInstance().getE(); ++j)
+					write.print(solution.getTe()[i][j] + "\t");
+				write.println();
+			}
+
+			write.close();
+		} catch (IOException e) {
+			System.out.println("Errore: " + e);
+			System.exit(1);
+		}
 	}
 }

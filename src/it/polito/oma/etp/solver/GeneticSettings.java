@@ -3,18 +3,12 @@ package it.polito.oma.etp.solver;
 /**
  * Genetic Algorithm settings used for tuning
  */
-public class GaSettings {
+public class GeneticSettings extends Settings {
 	/*
 	 * to know if it's an initialization problem or not (in this case 
 	 * we have an optimization problem)
 	 */
 	public boolean initializationProblem;
-	
-	/**
-	 * How many chromosomes belong to the initial population used by
-	 * the Genetic Algorithm.
-	 */
-	public int initialPopulationSize;
 	
 	/**
 	 * if true we select a parent that will generate children by using it's fitness
@@ -98,26 +92,28 @@ public class GaSettings {
 	 */
 	public double mutatingGenesPercentage;
 
-	public GaSettings(	boolean initializationProblem, 
-						int initialPopulationSize, 
-						boolean randomParentSelection,
-						int numberOfReproductiveParents, 
-						boolean selectChromosomesToKillByRelativeFitness, 
-						int cuttingPointsNumber,
-						boolean randomCuttingPoint, 
-						int[] whereToCut, 
-						int numberOfChildrenToGenerate,
-						int cloningManagementThreshold, 
-						int genesToMutateIfClones,
-						double mutationProbabilityInitialValue,
-						double mutationProbabilityMinimumValue, 
-						double mutationProbabilityMaximumValue,
-						int mutationProbabilityManagementThreshold, 
-						double mutationProbabilityConvergenceRatio,
-						double mutatingGenesPercentage
+	public GeneticSettings(	Settings commonSettings,
+							boolean initializationProblem,
+							boolean randomParentSelection,
+							int numberOfReproductiveParents, 
+							boolean selectChromosomesToKillByRelativeFitness, 
+							int cuttingPointsNumber,
+							boolean randomCuttingPoint, 
+							int[] whereToCut, 
+							int numberOfChildrenToGenerate,
+							int cloningManagementThreshold, 
+							int genesToMutateIfClones,
+							double mutationProbabilityInitialValue,
+							double mutationProbabilityMinimumValue, 
+							double mutationProbabilityMaximumValue,
+							int mutationProbabilityManagementThreshold, 
+							double mutationProbabilityConvergenceRatio,
+							double mutatingGenesPercentage
 	) {
+		// Common settings
+		super(commonSettings);
+		
 		this.initializationProblem = initializationProblem;
-		this.initialPopulationSize = initialPopulationSize;
 		this.randomParentSelection = randomParentSelection;
 		this.numberOfReproductiveParents = numberOfReproductiveParents;
 		this.selectChromosomesToKillByRelativeFitness = selectChromosomesToKillByRelativeFitness;

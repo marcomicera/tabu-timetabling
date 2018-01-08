@@ -1,8 +1,5 @@
 package it.polito.oma.etp.solver;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,7 +12,7 @@ import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.optimization.OptimizationSolution;
 
 public abstract class TabuSearch {
-	protected TsSettings settings;
+	protected TabuSettings settings;
 	protected InstanceData instance;	
 	protected Solution currentSolution;
 	protected Solution bestSolution;
@@ -25,7 +22,7 @@ public abstract class TabuSearch {
 	protected int bestSolutionIteration = 0;
 	protected MovingAverage fitnessMovingAverage;
 	
-	public TabuSearch(InstanceData instanceData, TsSettings settings) {
+	public TabuSearch(InstanceData instanceData, TabuSettings settings) {
 		this.instance = instanceData;
 		this.settings = settings;
 		tabuList = new TabuList(settings.tabuListInitialSize, settings.tabuListMaxSize);
@@ -386,38 +383,6 @@ public abstract class TabuSearch {
 	 * if necessary
 	 */
 	protected abstract void updateBestSolution();
-	
-	/**
-	 * Prints the solution into a file.
-	 */
-	private void printSolution(int te[][]) {
-		try
-	     {
-	          FileOutputStream bestSolution = new FileOutputStream("bestSolution.txt");
-	          PrintStream write = new PrintStream(bestSolution);
-	          
-	          for(int j = 0; j < instance.getE()+1; ++j) {
-	        	  if(j == 0)
-	        		  write.print("\t");
-	  			  write.print("E" + j + "\t"); 
-	  		  }
-	          
-	          write.println();
-	          
-	          for(int i = 0; i < instance.getTmax(); ++i) {
-	        	  	write.print("T" + (i+1) + "\t");
-					for(int j = 0; j < instance.getE(); ++j) {
-						write.print(te[i][j] + "\t"); 
-					}
-					write.println();
-	          }
-	      }
-	      catch (IOException e)
-	      {
-	          System.out.println("Errore: " + e);
-	          System.exit(1);
-	      }
-	}
 
 	/**
 	 * Stopping condition used in the optimization

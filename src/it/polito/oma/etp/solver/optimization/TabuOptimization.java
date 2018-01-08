@@ -4,13 +4,16 @@ import java.util.Collections;
 
 import it.polito.oma.etp.reader.InstanceData;
 import it.polito.oma.etp.solver.ExamPair;
-import it.polito.oma.etp.solver.TsSettings;
+import it.polito.oma.etp.solver.TabuSettings;
 import it.polito.oma.etp.solver.TabuSearch;
 import it.polito.oma.etp.solver.initialization.InitializationSolution;
 
 public class TabuOptimization extends TabuSearch {
-	public TabuOptimization(InstanceData instanceData, InitializationSolution initialSolution, TsSettings settings) {
-		super(instanceData, settings);
+	public TabuOptimization(InstanceData instance, 
+							InitializationSolution initialSolution, 
+							TabuSettings settings
+	) {
+		super(instance, settings);
 		
 		// Initially, the current solution is the initial one
 		currentSolution = new OptimizationSolution(initialSolution);

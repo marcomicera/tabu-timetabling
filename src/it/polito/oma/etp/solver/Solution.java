@@ -92,8 +92,11 @@ public abstract class Solution implements Comparable<Solution>{
 	
 	protected abstract void initializeDistanceMatrix();
 	
-	
-	public static InitializationSolution generateUnfeasibleSolution(InstanceData instance, TsSettings settings) {
+	// TODO JavaDoc
+	// TODO change name to generateInfeasibleSolution
+	public static InitializationSolution generateInfeasibleSolution(InstanceData instance, 
+																	boolean firstRandomSolution
+	) {
 		/*TODO debug*///System.out.println("Generating infeasible solution...");
 		
 		// Instance data
@@ -117,7 +120,7 @@ public abstract class Solution implements Comparable<Solution>{
 		int assignedExams[] = new int[E];
 
 		// First exam e0
-		if(!settings.firstRandomSolution) {
+		if(!firstRandomSolution) {
 			// first step: put e0 in t0
 			te[0][0] = 1;
 			schedule[0] = 0;
@@ -128,11 +131,11 @@ public abstract class Solution implements Comparable<Solution>{
 			timeslotOrder = getTimeslotOrderRandomly(instance);
 		}
 		// cycling through all exams
-		for(int exam = (settings.firstRandomSolution) ? 0 : 1; exam < E; exam++) {
+		for(int exam = (firstRandomSolution) ? 0 : 1; exam < E; exam++) {
 			
 				/* IN: texamsCounter, OUT: timeslotOrder*
 				 * Given in input the number of exams in every timeslot, it generates the timeslot ordering. */
-				if(!settings.firstRandomSolution) {
+				if(!firstRandomSolution) {
 					timeslotOrder = getTimeslotOrderByExamsCount(instance, texamsCounter);
 				}
 				// cycling through all timeslots
@@ -205,7 +208,7 @@ public abstract class Solution implements Comparable<Solution>{
 					}
 					
 					/* Now the exam is placed in the timeslot myTimeslot and the relative U elements are set at 1,
-					 * remembering it is introducing an unfeasibility in the solution.*/
+					 * remembering it is introducing an infeasibility in the solution.*/
 					te[myTimeslot][exam] = 1;
 					schedule[exam] = myTimeslot;
 					assignedExams[exam] = 1;
@@ -382,12 +385,13 @@ public abstract class Solution implements Comparable<Solution>{
 	    
 	    for(int t = 0; t < instance.getTmax(); ++t)
 	    	for(int exam1 = 0; exam1 < E; ++exam1)
-	    		for(int exam2 = exam1+1; exam2 < E; ++exam2)
-	    			if(N[exam1][exam2]>0 && te[t][exam1]==1 && te[t][exam2]==1) {
-	    				isFeasible = false;
-	    				/*TODO debug*/ //System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
+	    		for(int exam2 = 0; exam2 < E; ++exam2)
+	    			if(exam1 != exam2) {
+		    			if(N[exam1][exam2] > 0 && schedule[exam1] == schedule[exam2]) {
+		    				isFeasible = false;
+		    				/*TODO debug*/ //System.out.println("Conflictual exams " + exam1 + " and e"+exam2+" are in the same TM");
+		    			}
 	    			}
-	    
 	    return isFeasible;
 	}
 
