@@ -466,7 +466,7 @@ public abstract class Solution implements Comparable<Solution>{
 			((OptimizationSolution)this).initializeDistanceMatrix();
 				
 //		/*TODO debug*/float testIncrementalFitness = getFitness();
-		/*TODO debug (fitness)*/ System.out.println("\nFitness: " + getFitness());
+//		/*TODO debug (fitness)*/ System.out.println("\nFitness: " + getFitness());
 //		/*TODO debug*/ initializeFitness();
 //		/*TODO debug*/float testFitnessFromScratch = getFitness();
 //		/*TODO debug*/if(testIncrementalFitness != testFitnessFromScratch) {

@@ -130,11 +130,8 @@ public class OptimizationSolution extends Solution {
 			for(int j = i + 1; j < E; ++j)
 				if(i != j && distanceMatrix[i][j] > 0 && distanceMatrix[i][j] <= K) {
 					fitness += (float)(Math.pow(2, K - distanceMatrix[i][j]) * N[i][j] / S);
-					//TODO debug
-						System.out.print("fitness incremental" + fitness);
+					/*TODO debug*/ //System.out.print("fitness incremental" + fitness);
 				}
-		//TODO debug
-		System.out.println("total fitness "+fitness);
 	}
 	
 	@Override

@@ -59,7 +59,7 @@ public abstract class TabuSearch {
 		}
 		
 		while(bestSolution.getFitness() > 0 && !TIMER_EXPIRED && !Thread.interrupted()) {
-			/*TODO debug (iteration)*/System.out.println(Thread.currentThread().getName() + "\n***** Iteration " + iteration + " *****");
+			/*TODO debug (iteration)*/ //System.out.println(Thread.currentThread().getName() + "\n***** Iteration " + iteration + " *****");
 						
 			Neighbor validNeighbor = null;
 			
@@ -140,7 +140,7 @@ public abstract class TabuSearch {
 					
 				move(validNeighbor);
 			}
-			/*TODO debug*/System.out.println("\n");
+			/*TODO debug*/ //System.out.println("\n");
 			
 			++iteration;
 		}

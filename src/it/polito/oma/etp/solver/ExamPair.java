@@ -56,6 +56,7 @@ public class ExamPair implements Comparable<ExamPair> {
 	@Override
 	public int compareTo(ExamPair otherExamPair) {
 		return Float.valueOf(otherExamPair.conflictCoefficient).compareTo(conflictCoefficient);
+		//return Float.valueOf(conflictCoefficient).compareTo(otherExamPair.conflictCoefficient);
 	}
 
 //	/**

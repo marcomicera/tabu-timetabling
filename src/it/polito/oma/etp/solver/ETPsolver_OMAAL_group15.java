@@ -61,8 +61,8 @@ public class ETPsolver_OMAAL_group15 {
 	 */
 	private void setCommonSettings() {
 		commonSettings = new Settings(
-			true,	// firstRandomSolution
-			8,		// initialPopulationSize
+			false,	// firstRandomSolution
+			1,		// initialPopulationSize
 					/**
 					 * It will be overwritten to 1 if
 					 * the optimization problem will be solved
@@ -71,7 +71,7 @@ public class ETPsolver_OMAAL_group15 {
 					 */
 			
 			false,	// geneticInitialization
-			true	// geneticOptimization
+			false	// geneticOptimization
 		);
 	}
 	
@@ -85,8 +85,8 @@ public class ETPsolver_OMAAL_group15 {
 	private InitializationPopulation tabuInitialization() {
 		// Tabu List dynamic size: time worsening criterion
 	    int tabuListInitialSize = 20;
-	    int tabuListMaxSize = 40;
-	    int tabuListIntervalAdd = 5;
+	    int tabuListMaxSize = 45;
+	    int tabuListIntervalAdd = 4;
 	    double tabuListIncrementTimeInterval = ((float)timeout / 3) / ((tabuListMaxSize - tabuListInitialSize) / tabuListIntervalAdd);
 	  
 	    // Tabu Search initialization tuning
@@ -95,7 +95,7 @@ public class ETPsolver_OMAAL_group15 {
 	    	commonSettings,
 	    		
 	    	// General Tabu List settings
-			1.0,	// neighborhoodGeneratingPairsPercentage
+			1,	// neighborhoodGeneratingPairsPercentage
 			false,	// considerAllTimeslots
 			20,		// tabuListInitialSize
 			
@@ -103,15 +103,15 @@ public class ETPsolver_OMAAL_group15 {
 			true,	// dynamicTabuList
 			2,		// worseningCriterion (1: deltaFitness, 2: iterations, 3: time)
 			45,		// tabuListMaxSize
-			5000,	// maxNonImprovingIterationsAllowed
-			4,		// tabuListIncrementSize
+			9000,	// maxNonImprovingIterationsAllowed
+			3,		// tabuListIncrementSize
 			
 			// deltaFitness worsening criterion
 			50,		// movingAveragePeriod
 			
 			// time worsening criterion
 			tabuListIncrementTimeInterval, 		// tabuListIncrementTimeInterval
-			8									// numberOfThreads
+			1									// numberOfThreads
 		);
 		
 		// Starting a stopwatch
@@ -125,14 +125,14 @@ public class ETPsolver_OMAAL_group15 {
 			tabuInitializationThreads.add(
 				new Thread() {
 					public void run() {
-						/*TODO debug*/System.out.println(this.getName() + " started looking for an infeasible solution.");
+						/*TODO debug*/ //System.out.println(this.getName() + " started looking for an infeasible solution.");
 						
 						// Feasible solution generation.
 						TabuSearch feasibleSolutionGenerator = new TabuInitialization(instance, initializationSettings);
 						InitializationSolution initialFeasibleSolution = (InitializationSolution)feasibleSolutionGenerator.solve();
 						
 						synchronized(initialPopulation) {
-							/*TODO debug*/System.out.println(this.getName() + " has found a solution. It's " + (!initialFeasibleSolution.isFeasible() ? "not" : "") + "feasible: " + initialFeasibleSolution);
+							/*TODO debug*/ //System.out.println(this.getName() + " has found a solution. It's " + (!initialFeasibleSolution.isFeasible() ? "not" : "") + "feasible: " + initialFeasibleSolution);
 							
 							initialPopulation.updateWorstAndBestSolution();
 							/**
@@ -201,11 +201,11 @@ public class ETPsolver_OMAAL_group15 {
 		// Computing the elapsed time since starting searching for feasible solutions
 		double finishTime = System.nanoTime();
 		double elapsedTime = (finishTime - startTime) / 1000000000;
-		System.out.println(
+		/*TODO debug*//*System.out.println(
 			"Time to generate " + initializationSettings.initialPopulationSize + 
 			" feasible solutions for " + instance.getInstanceName() + ": " +
 			elapsedTime + " seconds"
-		);
+		);*/
 
 		// TODO (debug) Printing initial feasible population
 //		System.out.println("initialPopulation found:");
